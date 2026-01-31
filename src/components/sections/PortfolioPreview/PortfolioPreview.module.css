@@ -1,0 +1,52 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.projectCard {
+    overflow: hidden;
+    padding: 0;
+    border: none;
+    background: var(--color-surface);
+}
+
+.projectImage {
+    aspect-ratio: 16/9;
+    width: 100%;
+    transition: transform 0.5s ease;
+}
+
+.projectCard:hover .projectImage {
+    transform: scale(1.05);
+}
+
+.projectInfo {
+    padding: 1.5rem;
+    background: var(--color-surface);
+    position: relative;
+    z-index: 1;
+}
+
+.projectInfo h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.projectInfo p {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}

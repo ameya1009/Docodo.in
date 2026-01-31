@@ -1,0 +1,32 @@
+.container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+}
+
+.circle1 {
+    top: 10%;
+    left: 10%;
+    width: 400px;
+    height: 400px;
+    background: rgba(124, 58, 237, 0.2);
+}
+
+.circle2 {
+    bottom: 20%;
+    right: 15%;
+    width: 500px;
+    height: 500px;
+    background: rgba(0, 229, 255, 0.15);
+}
