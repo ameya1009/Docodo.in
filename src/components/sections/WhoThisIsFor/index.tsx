@@ -26,8 +26,8 @@ export function WhoThisIsFor() {
                 <div className={styles.header}>
                     <h2 className="text-gradient">Is Docodo Right for You?</h2>
                     <p className={styles.subtitle}>
-                        We build trust through clarity. We're not the right fit for everyone,
-                        and we're okay with that.
+                        We build trust through clarity. We&apos;re not the right fit for everyone,
+                        and we&apos;re okay with that.
                     </p>
                 </div>
 

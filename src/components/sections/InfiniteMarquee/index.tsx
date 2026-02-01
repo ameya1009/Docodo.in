@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import styles from './InfiniteMarquee.module.css';
 
 const items = [

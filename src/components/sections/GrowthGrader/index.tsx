@@ -1,3 +1,5 @@
+'use client';
+
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Target, Zap, TrendingUp, BarChart3 } from 'lucide-react';

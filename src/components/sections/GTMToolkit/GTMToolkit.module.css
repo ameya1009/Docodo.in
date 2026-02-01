@@ -39,43 +39,52 @@
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-lg);
     padding: 2.5rem;
-    transition: all 0.3s ease;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    height: 100%;
+    backdrop-filter: blur(10px);
 }
 
 .card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(0, 229, 255, 0.3);
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 229, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--color-primary-glow);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .cardIcon {
-    width: 3rem;
-    height: 3rem;
-    background: rgba(0, 229, 255, 0.1);
-    border-radius: var(--radius-md);
+    width: 3.5rem;
+    height: 3.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
     color: var(--color-primary);
-    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.card:hover .cardIcon {
+    background: var(--color-primary-glow);
+    border-color: var(--color-primary);
+    transform: scale(1.1) rotate(-5deg);
 }
 
 .cardTag {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
+    font-size: 0.625rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+    display: block;
 }
 
 .cardTitle {
@@ -107,14 +116,14 @@
 }
 
 .ctaBox {
-    background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.1), transparent),
-        radial-gradient(circle at bottom left, rgba(0, 229, 255, 0.1), transparent),
-        rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.05), transparent),
+        radial-gradient(circle at bottom left, rgba(0, 229, 255, 0.05), transparent),
+        rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-lg);
     padding: 3rem;
     text-align: center;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(20px);
 }
 
 .ctaBox h3 {

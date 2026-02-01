@@ -1,3 +1,5 @@
+'use client';
+
 import { motion } from 'framer-motion';
 import { BookOpen, ArrowRight, Download, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -53,7 +55,7 @@ export function GTMToolkit() {
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
                     >
-                        We don't just build websites. We engineer growth systems. Access our proprietary frameworks.
+                        We don&apos;t just build websites. We engineer growth systems. Access our proprietary frameworks.
                     </motion.p>
                 </div>
 
@@ -89,7 +91,7 @@ export function GTMToolkit() {
                 >
                     <div className={styles.ctaBox}>
                         <h3>Want a custom GTM strategy?</h3>
-                        <p>Let's map out your path to market leadership.</p>
+                        <p>Let&apos;s map out your path to market leadership.</p>
                         <Button variant="primary" size="lg" onClick={() => window.location.href = '/contact'}>
                             Book Strategy Call
                         </Button>

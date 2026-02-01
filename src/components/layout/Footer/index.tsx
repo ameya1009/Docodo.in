@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Linkedin, Youtube, Newspaper, Headphones } from 'lucide-react';
+import { Linkedin, Newspaper, Headphones } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export function Footer() {

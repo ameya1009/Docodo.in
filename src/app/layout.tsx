@@ -13,8 +13,26 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Docodo | AI-Powered Digital Growth",
-  description: "Marketing-as-a-Service Platform. Automated, Intelligent, Scalable.",
+  title: "Docodo | AI-Powered Digital Growth Studio",
+  description: "Marketing-as-a-Service Platform engineered for founders. Automated, Intelligent, Scalable GTM systems.",
+  keywords: ["AI Marketing", "Digital Growth", "Founder-Led Studio", "GTM Automation", "SaaS Scaling"],
+  openGraph: {
+    title: "Docodo | AI-Powered Digital Growth Studio",
+    description: "Marketing-as-a-Service Platform engineered for founders.",
+    url: "https://docodo.in",
+    siteName: "Docodo",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Docodo | AI-Powered Digital Growth Studio",
+    description: "Marketing-as-a-Service Platform engineered for founders.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  }
 };
 
 export default function RootLayout({

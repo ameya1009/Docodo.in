@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { FloatingShapes } from '@/components/ui/FloatingShapes';
 import styles from './Hero.module.css';
 
 export function Hero() {
+    const router = useRouter();
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -94,10 +96,10 @@ export function Hero() {
                             visible: { opacity: 1, y: 0 }
                         }}
                     >
-                        <Button size="lg" className={styles.mainBtn} onClick={() => window.location.href = '/contact'}>
+                        <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/contact')}>
                             Get a Free Growth Audit
                         </Button>
-                        <Button variant="outline" size="lg" className={styles.secBtn} onClick={() => window.location.href = '/about#how-we-work'}>
+                        <Button variant="outline" size="lg" className={styles.secBtn} onClick={() => router.push('/about#how-we-work')}>
                             See Our Playbook
                         </Button>
                     </motion.div>

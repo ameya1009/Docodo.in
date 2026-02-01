@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import styles from './PortfolioSlider.module.css';
 
@@ -64,7 +65,13 @@ export function PortfolioSlider() {
                                 transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
                             >
                                 <div className={styles.imageWrapper}>
-                                    <img src={project.image} alt={project.title} className={styles.image} />
+                                    <Image
+                                        src={project.image}
+                                        alt={project.title}
+                                        className={styles.image}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    />
                                     <div className={styles.overlay} style={{ backgroundColor: `${project.color}30` }} />
                                     <div className={styles.cardContent}>
                                         <span className={styles.projectCategory}>{project.category}</span>

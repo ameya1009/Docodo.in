@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/Card';
 import { ArrowUpRight, Clock, CheckCircle } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -7,7 +6,7 @@ export default function DashboardPage() {
             <div className="flex items-end justify-between">
                 <div>
                     <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500 mb-2">Welcome back, Ameya</h1>
-                    <p className="text-zinc-400">Here's what's happening with your projects today.</p>
+                    <p className="text-zinc-400">Here&apos;s what&apos;s happening with your projects today.</p>
                 </div>
                 <div className="text-right hidden sm:block">
                     <p className="text-sm text-zinc-500 uppercase tracking-widest font-semibold">Current Cycle</p>

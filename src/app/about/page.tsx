@@ -1,12 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Linkedin, Newspaper, Headphones, ChevronRight, Award, Shield, Zap, Target, Rocket, Users } from 'lucide-react';
 import styles from './About.module.css';
 
 export default function AboutPage() {
+    const router = useRouter();
     return (
         <main className={styles.aboutPage}>
             <Navbar />
@@ -164,7 +166,7 @@ export default function AboutPage() {
                             <span className="text-gradient">start engineering?</span>
                         </h2>
                         <div className={styles.ctaButtons}>
-                            <button className="btn btn-primary" onClick={() => window.location.href = '/contact'}>
+                            <button className="btn btn-primary" onClick={() => router.push('/contact')}>
                                 Book a Growth Audit
                             </button>
                         </div>
