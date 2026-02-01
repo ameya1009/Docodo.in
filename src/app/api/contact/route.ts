@@ -1,37 +1,51 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
     try {
-        const data = await request.json();
-        const { name, business, email, budget, goal, message } = data;
+        const body = await request.json();
+        const { name, business, email, budget, goal, message } = body;
 
-        // Path to leads.csv in the project root
-        const filePath = path.join(process.cwd(), 'leads.csv');
-
-        // CSV Header if file doesn't exist
-        const header = 'Timestamp,Name,Business,Email,Budget,Goal,Message\n';
-
-        // Escape commas in message and other fields for CSV safety
-        const clean = (text: string) => `"${(text || '').replace(/"/g, '""')}"`;
-
-        const timestamp = new Date().toISOString();
-        const row = `${timestamp},${clean(name)},${clean(business)},${clean(email)},${clean(budget)},${clean(goal)},${clean(message)}\n`;
-
-        // Create file with header if it doesn't exist, otherwise append
-        if (!fs.existsSync(filePath)) {
-            fs.writeFileSync(filePath, header + row);
-        } else {
-            fs.appendFileSync(filePath, row);
+        // Basic Server-side Validation
+        if (!name || !email || !business || !budget) {
+            return NextResponse.json(
+                { success: false, message: 'Missing required fields' },
+                { status: 400 }
+            );
         }
 
-        return NextResponse.json({ success: true, message: 'Lead saved successfully' });
+        // Email Format Validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return NextResponse.json(
+                { success: false, message: 'Invalid email format' },
+                { status: 400 }
+            );
+        }
+
+        // Save Lead to Database via Prisma
+        const lead = await prisma.lead.create({
+            data: {
+                name,
+                business,
+                email,
+                budget,
+                goal,
+                message: message || '',
+            },
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: 'Growth audit requested successfully',
+            leadId: lead.id
+        });
     } catch (error) {
-        console.error('Lead submission error:', error);
+        console.error('Database submission error:', error);
         return NextResponse.json(
-            { success: false, message: 'Failed to save lead' },
+            { success: false, message: 'We encountered an error securing your request. Please try again or email us directly.' },
             { status: 500 }
         );
     }
 }
+
