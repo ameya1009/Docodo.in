@@ -6,18 +6,18 @@ import styles from './PortfolioPreview.module.css';
 
 const projects = [
     {
-        title: 'Neon Fintech Portal',
-        category: 'SaaS Design',
+        title: 'Scaling Neon Fintech (+40% CAC Efficiency)',
+        category: 'High-Velocity GTM System',
         color: '#00E5FF',
     },
     {
-        title: 'Aura Wellness',
-        category: 'Brand Identity',
+        title: '3x Direct Revenue for Aura Wellness',
+        category: 'Authority & Brand Transformation',
         color: '#7C3AED',
     },
     {
-        title: 'Nexus AI Dashboard',
-        category: 'Product Design',
+        title: 'Nexus AI: Engineered for Product-Led Growth',
+        category: 'Full-Stack Performance Architecture',
         color: '#F59E0B',
     },
 ];
@@ -27,8 +27,8 @@ export function PortfolioPreview() {
         <section className="section">
             <div className="container">
                 <div className={styles.header}>
-                    <h2 className="text-gradient">Recent Work</h2>
-                    <Button variant="outline">View All Work</Button>
+                    <h2 className="text-gradient">Strategic Impact</h2>
+                    <Button variant="outline">Browse Case Studies</Button>
                 </div>
 
                 <div className={styles.grid}>

@@ -1,0 +1,182 @@
+.grader {
+    padding: var(--section-padding) 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.containerInner {
+    border-radius: var(--radius-lg);
+    padding: 4rem;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 4rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.content {
+    position: relative;
+    z-index: 2;
+}
+
+.badges {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.content h2 {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    margin-bottom: 1.5rem;
+}
+
+.content p {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-bottom: 3rem;
+    line-height: 1.6;
+    max-width: 500px;
+}
+
+.stats {
+    display: flex;
+    gap: 3rem;
+    margin-bottom: 3.5rem;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.statIcon {
+    width: 3rem;
+    height: 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.statValue {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    line-height: 1.2;
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+.ctaButton {
+    background: var(--color-primary);
+    color: black;
+    font-weight: 700;
+    font-size: 1.125rem;
+    padding: 1rem 2.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+}
+
+.visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.2), transparent);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(60px);
+}
+
+.glowSecondary {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.2), transparent);
+    bottom: -50px;
+    right: -50px;
+    filter: blur(50px);
+}
+
+.chartMockup {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    height: 150px;
+    position: relative;
+    z-index: 2;
+}
+
+.bar {
+    width: 3rem;
+    background: linear-gradient(to top, var(--color-primary), transparent);
+    border-radius: 4px 4px 0 0;
+    opacity: 0.6;
+}
+
+.bar1 {
+    height: 60px;
+    animation: grow 3s infinite alternate;
+}
+
+.bar2 {
+    height: 120px;
+    animation: grow 3s infinite alternate 0.5s;
+}
+
+.bar3 {
+    height: 90px;
+    animation: grow 3s infinite alternate 1s;
+}
+
+@keyframes grow {
+    from {
+        transform: scaleY(0.8);
+    }
+
+    to {
+        transform: scaleY(1.2);
+    }
+}
+
+@media (max-width: 1024px) {
+    .containerInner {
+        grid-template-columns: 1fr;
+        padding: 3rem;
+        gap: 2rem;
+    }
+
+    .visual {
+        display: none;
+    }
+}

@@ -8,29 +8,29 @@ import styles from './Services.module.css';
 const services = [
     {
         icon: <LineChart className="w-8 h-8 text-primary" />,
-        title: 'Get More Qualified Leads',
-        description: 'SEO-optimized Next.js websites + automated lead capture forms. Built to turn search intent into real business.',
+        title: 'Full-Funnel Demand Generation',
+        description: 'Next-gen SEO systems + multi-channel lead capture. We move beyond "traffic" to build scalable pipeline engines.',
         pricing: 'Starting from ₹45,000',
         timeline: '3-4 Weeks'
     },
     {
         icon: <Palette className="w-8 h-8 text-secondary" />,
-        title: 'Convert Visitors to Customers',
-        description: 'High-converting landing pages + automated email sequences. Perfect for SaaS and digital product launches.',
+        title: 'High-Velocity GTM Systems',
+        description: 'Rapid-deployment landing pages + high-intent conversion architecture. Perfect for scaling SaaS and premium services.',
         pricing: 'Starting from ₹35,000',
         timeline: '2-3 Weeks'
     },
     {
         icon: <Bot className="w-8 h-8 text-accent" />,
-        title: 'Save 10+ Hours Per Week',
-        description: 'WhatsApp Business automation + custom lead routing workflows. Stop doing the repetitive tasks.',
+        title: 'Revenue Operations Automation',
+        description: 'WhatsApp CRM integration + intelligent lead routing. We remove friction from your sales process through AI.',
         pricing: 'Starting from ₹25,000',
         timeline: '1-2 Weeks'
     },
     {
         icon: <Rocket className="w-8 h-8 text-primary" />,
-        title: 'Build Authority in Your Niche',
-        description: 'LinkedIn & Blog content strategy + execution. Thought leadership that builds trust while you sleep.',
+        title: 'Authority & Category Leadership',
+        description: 'Strategic content engines + ecosystem positioning. We turn your expertise into a measurable competitive advantage.',
         pricing: 'Starting from ₹20,000/mo',
         timeline: 'Ongoing'
     }
@@ -41,10 +41,10 @@ export function Services() {
         <section className="section bg-zinc-950/50">
             <div className="container">
                 <div className={styles.header}>
-                    <h2 className="text-gradient">Why Docodo?</h2>
+                    <h2 className="text-gradient">Core Growth Systems</h2>
                     <p className={styles.subtitle}>
-                        We combine human creativity with AI efficiency to deliver
-                        unmatched growth at scale.
+                        We engineer the infrastructure your business needs to scale,
+                        combining strategic depth with technical precision.
                     </p>
                 </div>
 
