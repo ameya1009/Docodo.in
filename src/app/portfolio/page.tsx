@@ -2,43 +2,142 @@
 
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { Card } from '@/components/ui/Card';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Button } from '@/components/ui/Button';
+import { ArrowRight } from 'lucide-react';
+import styles from './Portfolio.module.css';
 
 const works = [
-    { title: 'Neon Fintech', cat: 'SaaS', color: '#00E5FF' },
-    { title: 'Aura Wellness', cat: 'Brand', color: '#7C3AED' },
-    { title: 'Nexus AI', cat: 'Product', color: '#F59E0B' },
-    { title: 'Urban Estate', cat: 'Web', color: '#10B981' },
-    { title: 'Flow Automate', cat: 'SaaS', color: '#3B82F6' },
-    { title: 'Zenith', cat: 'Brand', color: '#EC4899' },
+    {
+        title: 'Neon Fintech Portal',
+        category: 'FINTECH & SAAS',
+        description: 'Engineered a conversion-focused dashboard that increased user retention by 35% through intuitive IA.',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200',
+        color: 'var(--color-primary)'
+    },
+    {
+        title: 'Aura Wellness',
+        category: 'D2C E-COMMERCE',
+        description: 'Complete brand transformation and headless commerce implementation resulting in 3x revenue growth.',
+        image: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&q=80&w=1200',
+        color: 'var(--color-secondary)'
+    },
+    {
+        title: 'Nexus AI Dashboard',
+        category: 'AI ARCHITECTURE',
+        description: 'Next-gen analytics platform for enterprise AI teams, focusing on complex data visualization.',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200',
+        color: 'var(--color-accent)'
+    },
+    {
+        title: 'Urban Estate',
+        category: 'PROPTECH',
+        description: 'Immersive real-estate discovery engine with AR integration and intelligent lead capture.',
+        image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1200',
+        color: 'var(--color-primary)'
+    },
+    {
+        title: 'Flow Automate',
+        category: 'REV-OPS',
+        description: 'Strategic B2B automation systems that removed procurement friction for scaling startups.',
+        image: 'https://images.unsplash.com/photo-1518186239767-28a249a2cb58?auto=format&fit=crop&q=80&w=1200',
+        color: 'var(--color-secondary)'
+    },
+    {
+        title: 'Zenith Brand',
+        category: 'ID & SYSTEMS',
+        description: 'Modular design system and category-defining identity for a category-leading digital studio.',
+        image: 'https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?auto=format&fit=crop&q=80&w=1200',
+        color: 'var(--color-accent)'
+    }
 ];
 
 export default function PortfolioPage() {
     return (
-        <main>
+        <main className="min-h-screen bg-black">
             <Navbar />
-            <div className="pt-32 pb-20 container">
-                <h1 className="text-center mb-12">Our Work</h1>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <section className={styles.hero}>
+                <div className="container">
+                    <motion.span
+                        className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        Success Stories
+                    </motion.span>
+                    <motion.h1
+                        className={styles.title}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        Our <span className="text-gradient">Portfolio.</span>
+                    </motion.h1>
+                    <motion.p
+                        className={styles.subtitle}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        We don&apos;t just build websites; we engineer demand-generation engines
+                        and brand ecosystems that drive measurable growth.
+                    </motion.p>
+                </div>
+            </section>
+
+            <div className="container">
+                <motion.div
+                    className={styles.grid}
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                            opacity: 1,
+                            transition: {
+                                staggerChildren: 0.1
+                            }
+                        }
+                    }}
+                >
                     {works.map((work, i) => (
-                        <Card key={i} className="group cursor-pointer border-0 p-0 bg-transparent">
-                            <div className="aspect-video rounded-xl overflow-hidden relative mb-4">
-                                <div
-                                    className="absolute inset-0 transition-transform duration-500 group-hover:scale-105"
-                                    style={{ background: `linear-gradient(45deg, ${work.color}40, ${work.color}90)` }}
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-                                    <span className="text-white font-medium border border-white/30 px-4 py-2 rounded-full">View Case Study</span>
+                        <motion.div
+                            key={i}
+                            variants={{
+                                hidden: { opacity: 0, y: 30 },
+                                visible: { opacity: 1, y: 0 }
+                            }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                            <div className={styles.card}>
+                                <div className={styles.imageWrapper}>
+                                    <Image
+                                        src={work.image}
+                                        alt={work.title}
+                                        fill
+                                        className={styles.image}
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    />
+                                    <div className={styles.overlay} />
+                                    <div className={styles.content}>
+                                        <span className={styles.tag}>{work.category}</span>
+                                        <h3 className={styles.cardTitle}>{work.title}</h3>
+                                        <p className={styles.description}>{work.description}</p>
+                                        <Button variant="outline" size="sm" className="mt-4 border-white/20 hover:bg-white hover:text-black">
+                                            View Outcome <ArrowRight className="ml-2 w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                            <h3 className="text-xl font-bold">{work.title}</h3>
-                            <p className="text-zinc-500">{work.cat}</p>
-                        </Card>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             </div>
+
             <Footer />
         </main>
     );
 }
+
