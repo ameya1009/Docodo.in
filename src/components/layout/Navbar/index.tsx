@@ -58,7 +58,7 @@ export function Navbar() {
 
                 <div className={styles.actions}>
                     <Link href="/contact" className={styles.hideMobile}>
-                        <Button variant="ghost" size="sm">Contact</Button>
+                        <Button variant="primary" size="sm">Get Free Audit</Button>
                     </Link>
 
                     <button
@@ -92,8 +92,8 @@ export function Navbar() {
                             ))}
                             <div className={styles.mobileActions}>
                                 <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-                                    <Button variant="outline" className="w-full">
-                                        Contact Sales
+                                    <Button variant="primary" className="w-full">
+                                        Talk to the Founder
                                     </Button>
                                 </Link>
                             </div>

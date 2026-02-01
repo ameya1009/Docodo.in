@@ -66,12 +66,73 @@ export default function AboutPage() {
                     </div>
                 </div>
 
+                {/* How We Work Section */}
+                <div id="how-we-work" className="space-y-16 mb-20 scroll-mt-32">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold text-white mb-4">How We Work</h2>
+                        <p className="text-zinc-400 max-w-2xl mx-auto">
+                            No black boxes. Here&apos;s exactly how we operate.
+                            We move fast because there&apos;s no bureaucracy.
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-4 gap-8">
+                        {[
+                            { step: "01", title: "Discovery", desc: "30-min audit call to identify 2-3 high-impact growth opportunities." },
+                            { step: "02", title: "Strategy", desc: "Custom proposal within 48 hours with clear scope and pricing." },
+                            { step: "03", title: "Build", desc: "Weekly Loom video updates so you see progress in real-time." },
+                            { step: "04", title: "Optimize", desc: "Launch and continuous refinement based on real data." }
+                        ].map((item, i) => (
+                            <div key={i} className="relative p-8 rounded-3xl bg-white/5 border border-white/5">
+                                <span className="text-4xl font-bold text-cyan-500/20 absolute top-4 right-6">{item.step}</span>
+                                <h3 className="text-xl font-bold text-white mb-4">{item.title}</h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <div className="p-8 rounded-3xl bg-cyan-500/5 border border-cyan-500/10">
+                            <h3 className="text-xl font-bold text-white mb-6">What You Own</h3>
+                            <ul className="space-y-4">
+                                {[
+                                    "100% of the Source Code",
+                                    "All Design Files (Figma)",
+                                    "Your Data & Integrations",
+                                    "Complete Documentation"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="p-8 rounded-3xl bg-red-500/5 border border-red-500/10">
+                            <h3 className="text-xl font-bold text-white mb-6">What We Don&apos;t Do</h3>
+                            <ul className="space-y-4">
+                                {[
+                                    "We don't outsource to junior interns",
+                                    "We don't lock you into proprietary tools",
+                                    "We don't take on 10+ clients at once",
+                                    "We don't promise overnight results"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Mission Section */}
                 <div className="space-y-12">
                     <div className="text-center">
                         <h2 className="text-2xl font-bold text-white mb-4">Our Mission</h2>
                         <p className="text-xl text-zinc-300 font-light max-w-2xl mx-auto">
-                            "To help small businesses adopt simple, practical AI and automation without complexity."
+                            &quot;To help small businesses adopt simple, practical AI and automation without complexity.&quot;
                         </p>
                     </div>
 

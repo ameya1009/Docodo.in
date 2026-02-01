@@ -6,24 +6,32 @@ import styles from './Services.module.css';
 
 const services = [
     {
-        icon: <Palette className="w-8 h-8 text-primary" />,
-        title: 'Modern Websites',
-        description: 'Fast, SEO-ready websites built on Next.js. Designed to convert visitors into customers, not just look pretty.'
+        icon: <LineChart className="w-8 h-8 text-primary" />,
+        title: 'Get More Qualified Leads',
+        description: 'SEO-optimized Next.js websites + automated lead capture forms. Built to turn search intent into real business.',
+        pricing: 'Starting from ₹45,000',
+        timeline: '3-4 Weeks'
     },
     {
-        icon: <Rocket className="w-8 h-8 text-secondary" />,
-        title: 'Social Growth',
-        description: 'Instagram & LinkedIn strategies that actually work. Content creation, reel editing, and consistent posting schedules.'
+        icon: <Palette className="w-8 h-8 text-secondary" />,
+        title: 'Convert Visitors to Customers',
+        description: 'High-converting landing pages + automated email sequences. Perfect for SaaS and digital product launches.',
+        pricing: 'Starting from ₹35,000',
+        timeline: '2-3 Weeks'
     },
     {
         icon: <Bot className="w-8 h-8 text-accent" />,
-        title: 'Automation',
-        description: 'WhatsApp business automation, lead capture forms, and email sequences to save you 10+ hours a week.'
+        title: 'Save 10+ Hours Per Week',
+        description: 'WhatsApp Business automation + custom lead routing workflows. Stop doing the repetitive tasks.',
+        pricing: 'Starting from ₹25,000',
+        timeline: '1-2 Weeks'
     },
     {
-        icon: <LineChart className="w-8 h-8 text-primary" />,
-        title: 'Google Business',
-        description: 'Complete GMB profile optimization to help local customers find you first. Reviews management included.'
+        icon: <Rocket className="w-8 h-8 text-primary" />,
+        title: 'Build Authority in Your Niche',
+        description: 'LinkedIn & Blog content strategy + execution. Thought leadership that builds trust while you sleep.',
+        pricing: 'Starting from ₹20,000/mo',
+        timeline: 'Ongoing'
     }
 ];
 
@@ -48,8 +56,20 @@ export function Services() {
                             <CardHeader>
                                 <CardTitle>{service.title}</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                {service.description}
+                            <CardContent className="space-y-4">
+                                <p className="text-zinc-400 leading-relaxed">
+                                    {service.description}
+                                </p>
+                                <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-zinc-500">Pricing</span>
+                                        <span className="text-primary font-medium">{service.pricing}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-zinc-500">Timeline</span>
+                                        <span className="text-zinc-300">{service.timeline}</span>
+                                    </div>
+                                </div>
                             </CardContent>
                         </Card>
                     ))}

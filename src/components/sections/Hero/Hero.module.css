@@ -16,7 +16,20 @@
 }
 
 .headline {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.trustBadge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: rgba(34, 211, 238, 0.1);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: 99px;
+    color: var(--color-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(4px);
 }
 
 .subheadline {
