@@ -1,135 +1,175 @@
+'use client';
+
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Check } from 'lucide-react';
+import { Check, ArrowRight, Zap, Palette, Rocket, Bot } from 'lucide-react';
+import styles from './Services.module.css';
 
-const plans = [
+const servicePackages = [
     {
-        name: 'Growth',
-        price: '$2,999',
-        period: '/month',
+        title: 'Modern Growth Website',
+        price: 'From ₹25,000',
+        description: 'Engineered for conversion and speed. We don\'t just build sites; we build high-performance business assets.',
+        icon: <Rocket />,
+        color: 'var(--color-primary)',
         features: [
-            'Social Media Management (4 Platforms)',
-            '8 SEO-Optimized Blog Posts',
-            'Weekly Strategy Calls',
-            'Basic Analytics Reporting'
-        ],
-        cta: 'Start Growing'
+            'Next.js 15 Performance Architecture',
+            'Full Responsive Design Systems',
+            'Conversion Rate Optimization (CRO)',
+            'SEO Data-Layer Integration',
+            'Scalable CMS Architecture'
+        ]
     },
     {
-        name: 'AI Autopilot',
-        price: '$5,999',
-        period: '/month',
-        popular: true,
+        title: 'Social Growth Authority',
+        price: 'From ₹15,000/mo',
+        description: 'Elite content strategy and execution that turns your presence into a measurable trust-building machine.',
+        icon: <Palette />,
+        color: 'var(--color-secondary)',
         features: [
-            'Fully Automated Social Posting (Daily)',
-            'AI Email Marketing Agents (Nurture & Sales)',
-            '24/7 AI Chatbot for Lead Capture',
-            'Content Engine (Unlimited Short-form)',
-            'Real-time ROI Dashboard'
-        ],
-        cta: 'Deploy Agents'
+            'Authority-Driven Content Engine',
+            'Premium Reel & Short-form Editing',
+            'Strategic Hashtag & Keyword Ops',
+            'Profile Optimization & UI Audit',
+            'Bi-Weekly Performance Insights'
+        ]
     },
     {
-        name: 'Domination',
-        price: '$9,999',
-        period: '/month',
+        title: 'AI Automation Systems',
+        price: 'Custom Quote',
+        description: 'Intelligent lead capture and process automation that removes human friction from your sales cycle.',
+        icon: <Bot />,
+        color: 'var(--color-accent)',
         features: [
-            'Everything in AI Autopilot',
-            'Dedicated Growth Engineer',
-            'Custom LLM Model Training',
-            'Multi-channel Ad Automation',
-            'White-glove Onboarding'
-        ],
-        cta: 'Contact Sales'
+            'WhatsApp CRM & Bot Integration',
+            'Autonomous Lead Nurture Funnels',
+            'Revenue Operations Automation',
+            'Intelligent Lead Scoring Systems',
+            '24/7 AI Engagement Agents'
+        ]
+    },
+    {
+        title: 'Full GTM Orchestration',
+        price: 'Tailored Strategy',
+        description: 'The "Top 1%" treatment. We act as your fractional growth engineering team, scaling everything.',
+        icon: <Zap />,
+        color: 'var(--color-primary)',
+        features: [
+            'Full-Funnel Growth Engineering',
+            'Custom AI Model Implementation',
+            'Omnichannel Scale Strategy',
+            'Founder-Led Marketing Systems',
+            'Dedicated Growth Ops Engineer'
+        ]
     }
 ];
 
 export default function ServicesPage() {
     return (
-        <main className="bg-[#050510] min-h-screen">
+        <main className="min-h-screen bg-black">
             <Navbar />
-            <div className="pt-32 pb-20 container">
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-                        Clear, Transparent Services
-                    </h1>
-                    <p className="text-zinc-400 max-w-2xl mx-auto">
-                        We don&apos;t hide behind complex enterprise tiers. Choose exactly what you need to grow your business.
+
+            <section className={styles.hero}>
+                <div className="container">
+                    <motion.span
+                        className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        Growth Solutions
+                    </motion.span>
+                    <motion.h1
+                        className={styles.title}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        Clear, Transparent <span className="text-gradient">Systems.</span>
+                    </motion.h1>
+                    <motion.p
+                        className={styles.subtitle}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        We strip away enterprise complexity and replace it with engineering precision.
+                        Choose the infrastructure your growth demands.
+                    </motion.p>
+                </div>
+            </section>
+
+            <div className="container">
+                <motion.div
+                    className={styles.grid}
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                            opacity: 1,
+                            transition: {
+                                staggerChildren: 0.1
+                            }
+                        }
+                    }}
+                >
+                    {servicePackages.map((pkg, i) => (
+                        <motion.div
+                            key={i}
+                            variants={{
+                                hidden: { opacity: 0, y: 30 },
+                                visible: { opacity: 1, y: 0 }
+                            }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                            <div className={styles.card}>
+                                <div className={styles.cardGlow} />
+                                <div className={styles.iconWrapper}>
+                                    {pkg.icon}
+                                </div>
+                                <h3 className="text-2xl font-bold text-white mb-2">{pkg.title}</h3>
+                                <div className={styles.price}>{pkg.price}</div>
+                                <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+                                    {pkg.description}
+                                </p>
+                                <ul className={styles.features}>
+                                    {pkg.features.map((feature, idx) => (
+                                        <li key={idx} className={styles.feature}>
+                                            <Check className="w-5 h-5 text-primary shrink-0" />
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <Button className="w-full mt-4 group">
+                                    Deploy System <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    ))}
+                </motion.div>
+
+                <motion.section
+                    className={styles.ctaSection}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                >
+                    <h2 className="mb-4">Not sure what you need?</h2>
+                    <p className="text-zinc-400 max-w-xl mx-auto mb-8 text-lg">
+                        Every business is at a different stage. Let&apos;s architect a
+                        custom roadmap specific to your current constraints and goals.
                     </p>
-                </div>
-
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {/* Website Package */}
-                    <Card className="flex flex-col border-white/10 bg-white/5 hover:border-cyan-500/30 transition-all">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-2xl text-white">Modern Website</CardTitle>
-                            <div className="text-xl font-bold text-cyan-400 mt-2">
-                                From ₹25,000
-                            </div>
-                        </CardHeader>
-                        <CardContent className="flex-1 mt-4">
-                            <p className="text-sm text-zinc-400 mb-6">Perfect for businesses needing a professional digital storefront.</p>
-                            <ul className="space-y-3">
-                                {['5-Page Responsive Design', 'Next.js Performance (Super Fast)', 'SEO Basics Included', 'Contact Form Integration', 'Hosting Setup'].map((f, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
-                                        <Check className="w-5 h-5 text-cyan-500 shrink-0" /> {f}
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
-
-                    {/* Content Package */}
-                    <Card className="flex flex-col border-white/10 bg-white/5 hover:border-purple-500/30 transition-all">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-2xl text-white">Social Growth</CardTitle>
-                            <div className="text-xl font-bold text-purple-400 mt-2">
-                                From ₹15,000<span className="text-sm font-normal text-zinc-500">/mo</span>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="flex-1 mt-4">
-                            <p className="text-sm text-zinc-400 mb-6">Consistent content to build trust and authority.</p>
-                            <ul className="space-y-3">
-                                {['12 Instagram Posts/Month', '4 Reels (Edited & Captioned)', 'Hashtag Strategy', 'Bio Optimization', 'Monthly Performance Report'].map((f, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
-                                        <Check className="w-5 h-5 text-purple-500 shrink-0" /> {f}
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
-
-                    {/* Automation Package */}
-                    <Card className="flex flex-col border-white/10 bg-white/5 hover:border-emerald-500/30 transition-all">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-2xl text-white">Automation System</CardTitle>
-                            <div className="text-xl font-bold text-emerald-400 mt-2">
-                                Custom Quote
-                            </div>
-                        </CardHeader>
-                        <CardContent className="flex-1 mt-4">
-                            <p className="text-sm text-zinc-400 mb-6">Remove manual tasks and lead leakage forever.</p>
-                            <ul className="space-y-3">
-                                {['WhatsApp Business API', 'Lead Capture Funnels', 'Auto-Reply Systems', 'CRM Integration', 'Email Nurture Sequences'].map((f, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
-                                        <Check className="w-5 h-5 text-emerald-500 shrink-0" /> {f}
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div className="mt-20 text-center">
-                    <h3 className="text-2xl font-bold text-white mb-6">Not sure what you need?</h3>
-                    <Button size="lg" className="bg-white text-black hover:bg-zinc-200">
-                        Talk to the Founder
-                    </Button>
-                </div>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Button size="lg" className="px-10">Talk to the Founder</Button>
+                        <Button variant="outline" size="lg" className="px-10">Get a Free Audit</Button>
+                    </div>
+                </motion.section>
             </div>
+
             <Footer />
         </main>
     );
 }
+

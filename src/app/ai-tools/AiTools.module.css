@@ -1,0 +1,97 @@
+.hero {
+    padding: calc(var(--section-padding) + 2rem) 0 6rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at top, rgba(0, 229, 255, 0.05), transparent 70%);
+}
+
+.title {
+    margin-bottom: 2rem;
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.demoSection {
+    margin-bottom: var(--section-padding);
+}
+
+.featureGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    margin-top: var(--section-padding);
+}
+
+.featureCard {
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.featureCard:hover {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: var(--color-primary-glow);
+    transform: translateY(-8px);
+}
+
+.icon {
+    width: 3rem;
+    height: 3rem;
+    color: var(--color-primary);
+    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visualWrapper {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: radial-gradient(circle at center, rgba(124, 58, 237, 0.1), transparent 70%),
+        rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.visualGlow {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, var(--color-primary-glow), transparent 70%);
+    filter: blur(60px);
+    opacity: 0.3;
+    animation: pulse 4s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        opacity: 0.2;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 0.4;
+        transform: scale(1.1);
+    }
+}
+
+@media (max-width: 768px) {
+    .featureGrid {
+        grid-template-columns: 1fr;
+    }
+}
