@@ -21,14 +21,32 @@
   --font-sans: var(--font-inter);
   --font-heading: var(--font-outfit);
 
-  /* Spacing & Layout */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
+  /* Spacing & Layout (Modular Scale) */
+  --space-unit: 1rem;
+  --space-xs: calc(var(--space-unit) * 0.5);
+  /* 8px */
+  --space-sm: calc(var(--space-unit) * 0.75);
+  /* 12px */
+  --space-md: var(--space-unit);
+  /* 16px */
+  --space-lg: calc(var(--space-unit) * 1.5);
+  /* 24px */
+  --space-xl: calc(var(--space-unit) * 2);
+  /* 32px */
+  --space-2xl: calc(var(--space-unit) * 4);
+  /* 64px */
+  --space-3xl: calc(var(--space-unit) * 6);
+  /* 96px */
+
+  --section-padding: clamp(5rem, 10vw, 10rem);
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 32px;
   --radius-full: 9999px;
 
-  --container-width: 1280px;
-  --header-height: 90px;
+  --container-width: 1200px;
+  --header-height: 80px;
 }
 
 * {
@@ -64,15 +82,17 @@ h6 {
 }
 
 h1 {
-  font-size: 4.5rem;
+  font-size: clamp(3rem, 8vw, 5rem);
+  letter-spacing: -0.04em;
 }
 
 h2 {
-  font-size: 3rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.03em;
 }
 
 h3 {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
 }
 
 @media (max-width: 768px) {
@@ -103,13 +123,7 @@ a {
 }
 
 .section {
-  padding: 8rem 0;
-}
-
-@media (max-width: 768px) {
-  .section {
-    padding: 5rem 0;
-  }
+  padding: var(--section-padding) 0;
 }
 
 .text-gradient {
@@ -170,4 +184,39 @@ a {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border);
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.glow-on-hover {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.glow-on-hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.glow-on-hover:hover::after {
+  opacity: 1;
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Bot, LineChart, Palette, Rocket } from 'lucide-react';
 import styles from './Services.module.css';
@@ -47,33 +48,56 @@ export function Services() {
                     </p>
                 </div>
 
-                <div className={styles.grid}>
+                <motion.div
+                    className={styles.grid}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                            opacity: 1,
+                            transition: {
+                                staggerChildren: 0.1
+                            }
+                        }
+                    }}
+                >
                     {services.map((service, index) => (
-                        <Card key={index} className={styles.card}>
-                            <div className={styles.iconWrapper}>
-                                {service.icon}
-                            </div>
-                            <CardHeader>
-                                <CardTitle>{service.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <p className="text-zinc-400 leading-relaxed">
-                                    {service.description}
-                                </p>
-                                <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-zinc-500">Pricing</span>
-                                        <span className="text-primary font-medium">{service.pricing}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-zinc-500">Timeline</span>
-                                        <span className="text-zinc-300">{service.timeline}</span>
-                                    </div>
+                        <motion.div
+                            key={index}
+                            variants={{
+                                hidden: { opacity: 0, y: 20 },
+                                visible: { opacity: 1, y: 0 }
+                            }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Card className={`${styles.card} glass glass-hover`}>
+                                <div className={styles.iconWrapper}>
+                                    {service.icon}
                                 </div>
-                            </CardContent>
-                        </Card>
+                                <CardHeader>
+                                    <CardTitle className="text-white">{service.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <p className="text-zinc-400 leading-relaxed text-sm">
+                                        {service.description}
+                                    </p>
+                                    <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-zinc-500">Pricing</span>
+                                            <span className="text-primary font-medium">{service.pricing}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-zinc-500">Timeline</span>
+                                            <span className="text-zinc-300">{service.timeline}</span>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             </div>
         </section>
     );

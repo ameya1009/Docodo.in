@@ -60,6 +60,17 @@
     animation: pulse 4s ease-in-out infinite alternate;
 }
 
+.mouseFollower {
+    position: fixed;
+    pointer-events: none;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, rgba(34, 211, 238, 0) 70%);
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    transition: opacity 0.5s ease;
+}
+
 @keyframes pulse {
     0% {
         opacity: 0.5;
