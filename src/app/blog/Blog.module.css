@@ -1,187 +1,252 @@
-.blogMain {
+.blogPage {
     background-color: var(--color-bg);
     min-height: 100vh;
 }
 
 .header {
-    padding: 8rem 0 5rem;
+    padding: 12rem 0 6rem;
     text-align: center;
     max-width: 800px;
     margin: 0 auto;
 }
 
-.label {
-    display: inline-block;
-    color: var(--color-primary);
+.kicker {
+    display: block;
     font-size: 0.8125rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 1.5rem;
-}
-
-.title {
-    font-size: clamp(3rem, 6vw, 4rem);
+    letter-spacing: 0.3em;
+    color: var(--color-primary);
     margin-bottom: 2rem;
 }
 
-.subtitle {
-    font-size: 1.125rem;
+.pageTitle {
+    font-size: clamp(3.5rem, 8vw, 5rem);
+    line-height: 1.1;
+    margin-bottom: 2.5rem;
+}
+
+.pageSubtitle {
+    font-size: 1.25rem;
     color: var(--color-text-muted);
-    line-height: 1.7;
     font-weight: 300;
+    line-height: 1.8;
 }
 
-/* Posts Grid */
-.postsSection {
-    margin-bottom: 10rem;
+/* Feed Layout */
+.feedWrapper {
+    padding-bottom: 15rem;
 }
 
-.grid {
+.featuredEntry {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 2.5rem;
-}
-
-.blogCard {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 0 !important;
-    overflow: hidden;
+    grid-template-columns: 1.2fr 0.8fr;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 8rem;
+    min-height: 600px;
 }
 
-.imageWrapper {
-    height: 240px;
+.featuredImage {
     position: relative;
     overflow: hidden;
 }
 
-.thumb {
+.featuredImage img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-.blogCard:hover .thumb {
-    transform: scale(1.05);
+.featuredContent {
+    padding: 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.metadataOverlay {
-    position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
-    z-index: 2;
+.featuredLabel {
+    color: var(--color-primary);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 2rem;
+}
+
+.featuredTitle {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    line-height: 1.2;
+}
+
+.featuredDesc {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    max-width: 500px;
+}
+
+.metaLine {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 4rem;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
 }
 
 .metaItem {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    border-radius: 99px;
-    font-size: 0.75rem;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.cardContent {
-    padding: 2.5rem !important;
+/* Masonry-Style Grid */
+.masonryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 4rem;
+}
+
+.blogCard {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.4s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.blogCard:hover {
+    transform: translateY(-10px);
+    border-color: var(--color-primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.blogCard.wide {
+    grid-column: span 2;
+}
+
+.cardThumb {
+    height: 300px;
+    overflow: hidden;
+}
+
+.cardThumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cardBody {
+    padding: 3rem;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
 
-.authorLine {
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.tag {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-primary);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 1.25rem;
-}
-
-.postTitle {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    line-height: 1.2;
-    transition: color 0.3s ease;
-}
-
-.blogCard:hover .postTitle {
     color: var(--color-primary);
 }
 
-.postDesc {
-    font-size: 0.9375rem;
+.date {
+    font-size: 0.75rem;
     color: var(--color-text-muted);
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    flex-grow: 1;
 }
 
-.readBtn {
-    padding: 0;
-    justify-content: flex-start;
+.cardTitle {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+}
+
+.cardDesc {
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    flex: 1;
+}
+
+.ghostLink {
+    background: none;
+    border: none;
     color: var(--color-primary);
-    font-weight: 600;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0;
 }
 
-.readBtn:hover {
-    background: transparent;
-    color: white;
+/* Skeleton */
+.skeletonContainer {
+    padding-bottom: 10rem;
 }
 
-/* Loading & Empty States */
-.skeleton {
-    height: 450px;
+.featuredSkeleton {
+    height: 600px;
+    background: rgba(255, 255, 255, 0.03);
     border-radius: var(--radius-lg);
-    animation: pulse 2s infinite ease-in-out;
+    margin-bottom: 8rem;
+    animation: pulse 2s infinite;
+}
+
+.cardSkeleton {
+    height: 500px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-lg);
+    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
     0% {
-        opacity: 0.3;
+        opacity: 0.5;
     }
 
     50% {
-        opacity: 0.1;
+        opacity: 0.2;
     }
 
     100% {
-        opacity: 0.3;
+        opacity: 0.5;
     }
 }
 
-.emptyState {
-    text-align: center;
-    padding: 6rem 2rem;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-lg);
-}
-
-.emptyState h3 {
-    margin-bottom: 1rem;
-}
-
-.emptyState p {
-    color: var(--color-text-muted);
-    margin-bottom: 2rem;
-}
-
-@media (max-width: 768px) {
-    .grid {
+@media (max-width: 1024px) {
+    .featuredEntry {
         grid-template-columns: 1fr;
     }
 
-    .header {
-        padding: 4rem 0 3rem;
+    .blogCard.wide {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .featuredContent {
+        padding: 3rem;
+    }
+
+    .masonryGrid {
+        grid-template-columns: 1fr;
     }
 }

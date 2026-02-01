@@ -1,306 +1,328 @@
-.aboutMain {
+.aboutPage {
     background-color: var(--color-bg);
-    min-height: 100vh;
+    color: var(--color-text-main);
 }
 
-.hero {
-    padding: 8rem 0 4rem;
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
+/* Elite Spacing: 15rem Sections */
+.heroSection,
+.founderSection,
+.timelineSection,
+.ctaSection {
+    padding: 15rem 0;
 }
 
-.label {
-    display: inline-block;
-    color: var(--color-primary);
+@media (max-width: 768px) {
+
+    .heroSection,
+    .founderSection,
+    .timelineSection,
+    .ctaSection {
+        padding: 8rem 0;
+    }
+}
+
+/* Hero Section: Asymmetric Layout */
+.heroLayout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.kicker {
+    display: block;
     font-size: 0.8125rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 1.5rem;
-}
-
-.title {
-    font-size: clamp(3rem, 7vw, 4.5rem);
-    line-height: 1.1;
+    letter-spacing: 0.3em;
+    color: var(--color-primary);
     margin-bottom: 2rem;
 }
 
-.subtitle {
+.headline {
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 3rem;
+}
+
+.introPara {
     font-size: 1.25rem;
+    line-height: 1.8;
     color: var(--color-text-muted);
-    line-height: 1.6;
+    max-width: 600px;
     font-weight: 300;
 }
 
-/* Manifesto Card */
-.manifestoSection {
-    margin-bottom: 8rem;
+.heroVisualSpace {
+    position: relative;
+    height: 100%;
 }
 
-.manifestoCard {
-    padding: 0 !important;
-    overflow: hidden;
+.watermarkText {
+    position: absolute;
+    top: 50%;
+    right: -20%;
+    transform: rotate(90deg) translate(-50%, 0);
+    font-size: 15rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.02);
+    pointer-events: none;
+    letter-spacing: 0.1em;
 }
 
-.manifestoLayout {
+/* Founder Section: Bio + Scrollable Manifesto */
+.manifestoGrid {
     display: grid;
     grid-template-columns: 350px 1fr;
-    padding: 0 !important;
+    gap: 8rem;
 }
 
-.founderSidebar {
-    padding: 4rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+.stickyBio {
+    position: sticky;
+    top: 150px;
 }
 
-.avatarWrapper {
-    width: 140px;
-    height: 140px;
+.headshotContainer {
+    width: 200px;
+    height: 200px;
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     padding: 2px;
-    border-radius: 50%;
+    border-radius: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
 }
 
-.avatarInner {
+.headshotInner {
     width: 100%;
     height: 100%;
     background: var(--color-bg);
-    border-radius: 50%;
+    border-radius: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.avatarText {
-    font-size: 2.5rem;
+.initials {
+    font-size: 3rem;
     font-weight: 800;
     letter-spacing: -0.05em;
 }
 
-.founderName {
-    font-size: 1.5rem;
+.bioName {
+    font-size: 2rem;
     margin-bottom: 0.5rem;
 }
 
-.founderTitle {
-    color: var(--color-primary);
-    font-size: 0.75rem;
+.bioTitle {
+    font-size: 0.875rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    color: var(--color-primary);
     margin-bottom: 2rem;
 }
 
-.credentials {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-}
-
-.credentialItem {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
-    text-align: left;
-}
-
-.socialLinks {
+.bioSocial {
     display: flex;
     gap: 1.5rem;
-}
-
-.socialLink {
     color: var(--color-text-muted);
-    transition: color 0.3s ease;
 }
 
-.socialLink:hover {
+.bioSocial a:hover {
     color: var(--color-primary);
 }
 
-.manifestoBody {
-    padding: 4rem 5rem;
+.manifestoContent {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 10rem;
 }
 
-.bodyTitle {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-
-.paragraph {
-    font-size: 1.125rem;
+.blockLabel {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
     color: var(--color-text-muted);
-    line-height: 1.7;
-    font-weight: 300;
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
 }
 
-.advantageBox {
-    margin-top: 2rem;
-    background: rgba(0, 229, 255, 0.05);
-    border: 1px solid rgba(0, 229, 255, 0.1);
-    padding: 2rem;
-    border-radius: var(--radius-md);
-    display: flex;
+.blockTitle {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+}
+
+.manifestoContent p {
+    font-size: 1.5rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    font-weight: 300;
+    margin-bottom: 2rem;
+}
+
+.credGrid {
+    display: grid;
     gap: 1.5rem;
 }
 
-.advantageIcon {
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    background: var(--color-primary);
-    color: black;
-    border-radius: 50%;
+.credItem {
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.advantageTitle {
+    gap: 1.5rem;
     font-size: 1.125rem;
-    margin-bottom: 0.5rem;
 }
 
-.advantageDesc {
-    font-size: 0.9375rem;
-    color: var(--color-text-muted);
-    line-height: 1.5;
+.quoteBox {
+    font-size: 2.25rem;
+    font-weight: 200;
+    font-style: italic;
+    line-height: 1.4;
+    border-left: 4px solid var(--color-primary);
+    padding-left: 3rem;
+    color: var(--color-text-main);
 }
 
-/* Workflow Section */
-.workflowSection {
-    margin-bottom: 8rem;
-}
-
-.sectionHeader {
+/* Timeline: Smarketers Style */
+.sectionHeading {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 10rem;
 }
 
-.sectionSubtitle {
+.headingSubtitle {
+    font-size: 1.25rem;
     color: var(--color-text-muted);
     margin-top: 1rem;
 }
 
-.workflowGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 2rem;
+.timelineWrapper {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
-.workflowCard {
+.timelineLine {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1) 10%, rgba(255, 255, 255, 0.1) 90%, transparent);
+    transform: translateX(-50%);
+}
+
+.timelineItem {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8rem;
+    position: relative;
+}
+
+.timelinePoint {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+}
+
+.pointInner {
+    width: 60px;
+    height: 60px;
+    background: var(--color-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.timelineCard {
+    width: 42%;
+    padding: 3rem;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 3rem 2rem;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     position: relative;
-    overflow: hidden;
 }
 
-.stepNum {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    font-size: 3rem;
+.timelineCard:hover {
+    border-color: var(--color-primary);
+    background: rgba(0, 229, 255, 0.02);
+}
+
+.itemLeft .timelineCard {
+    margin-right: auto;
+}
+
+.itemRight .timelineCard {
+    margin-left: auto;
+}
+
+.stepId {
+    font-size: 0.75rem;
     font-weight: 900;
-    color: rgba(0, 229, 255, 0.05);
+    color: var(--color-primary);
+    opacity: 0.4;
+    display: block;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.2em;
 }
 
-.workflowCard h3 {
-    font-size: 1.25rem;
+.timelineCard h4 {
+    font-size: 1.5rem;
     margin-bottom: 1rem;
 }
 
-.workflowCard p {
-    font-size: 0.9375rem;
+.timelineCard p {
     color: var(--color-text-muted);
     line-height: 1.6;
 }
 
-/* Trust Section */
-.trustSection {
-    margin-bottom: 10rem;
-}
-
-.trustGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
-.trustBox {
-    padding: 3rem;
+/* CTA Section */
+.ctaWrapper {
+    text-align: center;
+    background: radial-gradient(circle at center, rgba(0, 229, 255, 0.03), transparent);
+    padding: 10rem 0;
     border-radius: var(--radius-lg);
-    background: rgba(255, 255, 255, 0.02);
 }
 
-.trustBoxPositive {
-    border: 1px solid rgba(0, 229, 255, 0.1);
-    background: radial-gradient(circle at top right, rgba(0, 229, 255, 0.05), transparent);
-}
-
-.trustBoxNegative {
-    border: 1px solid rgba(239, 68, 68, 0.1);
-    background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.05), transparent);
-}
-
-.boxTitle {
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.checkList {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.checkList li {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 1.125rem;
-    color: var(--color-text-muted);
+.ctaHeadline {
+    font-size: 4rem;
+    margin-bottom: 3rem;
+    line-height: 1.1;
 }
 
 @media (max-width: 1024px) {
-    .manifestoLayout {
+    .manifestoGrid {
+        grid-template-columns: 1fr;
+        gap: 5rem;
+    }
+
+    .heroLayout {
         grid-template-columns: 1fr;
     }
 
-    .founderSidebar {
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 4rem 2rem;
+    .watermarkText {
+        display: none;
     }
 
-    .manifestoBody {
-        padding: 4rem 2rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .trustGrid {
-        grid-template-columns: 1fr;
+    .stickyBio {
+        position: relative;
+        top: 0;
     }
 
-    .hero {
-        padding: 4rem 0 2rem;
+    .timelineLine {
+        left: 30px;
+    }
+
+    .timelinePoint {
+        left: 30px;
+    }
+
+    .timelineCard {
+        width: calc(100% - 80px);
+        margin-left: 80px !important;
     }
 }

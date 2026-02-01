@@ -6,7 +6,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ExternalLink, Calendar, User, ArrowRight, Rss } from 'lucide-react';
+import { Calendar, User, ArrowRight, Rss, Clock, Tag } from 'lucide-react';
 import styles from './Blog.module.css';
 
 interface BlogPost {
@@ -17,6 +17,7 @@ interface BlogPost {
     author: string;
     thumbnail: string;
     description: string;
+    categories?: string[];
 }
 
 export default function BlogPage() {
@@ -26,7 +27,6 @@ export default function BlogPage() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                // Using RSS2JSON to fetch Medium feed
                 const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@ameyakshirsagar02');
                 const data = await res.json();
                 if (data.status === 'ok') {
@@ -42,102 +42,111 @@ export default function BlogPage() {
         fetchPosts();
     }, []);
 
-    // Improved HTML stripping to preserve spacing between elements
     const formatPreview = (html: string) => {
         const tmp = document.createElement("DIV");
-        // Replace block elements with spaces to prevent word mashing
         const spacedHtml = html.replace(/<\/p>|<\/h\d>|<br\s*\/?>/gi, ' ');
         tmp.innerHTML = spacedHtml;
         const text = tmp.textContent || tmp.innerText || "";
         const cleanText = text.replace(/\s+/g, ' ').trim();
-        return cleanText.length > 160 ? cleanText.substring(0, 160) + "..." : cleanText;
+        return cleanText.length > 200 ? cleanText.substring(0, 200) + "..." : cleanText;
     };
 
+    const firstPost = posts[0];
+    const remainingPosts = posts.slice(1);
+
     return (
-        <main className={styles.blogMain}>
+        <main className={styles.blogPage}>
             <Navbar />
 
             <div className="container">
+                {/* Editorial Header */}
                 <header className={styles.header}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
+                    <motion.span
+                        className={styles.kicker}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                     >
-                        <span className={styles.label}>Growth Intelligence</span>
-                        <h1 className={styles.title}>Insights & <span className="text-gradient">Systems.</span></h1>
-                        <p className={styles.subtitle}>
-                            Deep dives into the intersection of AI, automation, and strategic growth.
-                            We share our playbooks, not just our opinions.
-                        </p>
-                    </motion.div>
+                        Growth Broadcaster
+                    </motion.span>
+                    <h1 className={styles.pageTitle}>Engineering <span className="text-gradient">Insights.</span></h1>
+                    <p className={styles.pageSubtitle}>
+                        Direct reports from the frontlines of AI, SaaS GTM, and technical growth architecture.
+                    </p>
                 </header>
 
-                <section className={styles.postsSection}>
-                    {loading ? (
-                        <div className={styles.grid}>
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className={`${styles.skeleton} glass`} />
-                            ))}
+                {loading ? (
+                    <div className={styles.skeletonContainer}>
+                        <div className={styles.featuredSkeleton} />
+                        <div className={styles.masonryGrid}>
+                            {[1, 2, 3, 4].map(i => <div key={i} className={styles.cardSkeleton} />)}
                         </div>
-                    ) : (
-                        <div className={styles.grid}>
-                            {posts.map((post, index) => (
+                    </div>
+                ) : (
+                    <section className={styles.feedWrapper}>
+                        {/* Featured High-End Header */}
+                        {firstPost && (
+                            <motion.div
+                                className={styles.featuredEntry}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                            >
+                                <div className={styles.featuredImage}>
+                                    <img src={firstPost.thumbnail} alt={firstPost.title} />
+                                    <div className={styles.imageOverlay} />
+                                </div>
+                                <div className={styles.featuredContent}>
+                                    <span className={styles.featuredLabel}>Featured Report</span>
+                                    <h2 className={styles.featuredTitle}>{firstPost.title}</h2>
+                                    <p className={styles.featuredDesc}>{formatPreview(firstPost.description)}</p>
+                                    <div className={styles.metaLine}>
+                                        <span className={styles.metaItem}><Clock size={14} /> 8 min read</span>
+                                        <span className={styles.metaItem}><Calendar size={14} /> {new Date(firstPost.pubDate).toLocaleDateString()}</span>
+                                    </div>
+                                    <Button
+                                        size="lg"
+                                        className={styles.primaryReadBtn}
+                                        onClick={() => window.open(firstPost.link, '_blank')}
+                                    >
+                                        Read Full Insight <ArrowRight className="ml-2" />
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Masonry-inspired Grid */}
+                        <div className={styles.masonryGrid}>
+                            {remainingPosts.map((post, idx) => (
                                 <motion.div
                                     key={post.guid}
-                                    initial={{ opacity: 0, y: 20 }}
+                                    className={`${styles.blogCard} ${idx % 3 === 0 ? styles.wide : ''}`}
+                                    initial={{ opacity: 0, y: 30 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ delay: index * 0.1 }}
                                 >
-                                    <Card className={`${styles.blogCard} glass glass-hover`}>
-                                        <div className={styles.imageWrapper}>
-                                            {post.thumbnail ? (
-                                                <img src={post.thumbnail} alt={post.title} className={styles.thumb} />
-                                            ) : (
-                                                <div className={styles.placeholderThumb}>
-                                                    <Rss className="w-8 h-8 opacity-20" />
-                                                </div>
-                                            )}
-                                            <div className={styles.metadataOverlay}>
-                                                <span className={styles.metaItem}><Calendar size={12} /> {new Date(post.pubDate).toLocaleDateString()}</span>
-                                            </div>
+                                    {post.thumbnail && (
+                                        <div className={styles.cardThumb}>
+                                            <img src={post.thumbnail} alt={post.title} />
                                         </div>
-
-                                        <CardContent className={styles.cardContent}>
-                                            <div className={styles.authorLine}>
-                                                <User size={12} className="text-primary" />
-                                                <span>{post.author}</span>
-                                            </div>
-                                            <h3 className={styles.postTitle}>{post.title}</h3>
-                                            <p className={styles.postDesc}>
-                                                {formatPreview(post.description)}
-                                            </p>
-
-                                            <Button
-                                                variant="ghost"
-                                                className={styles.readBtn}
-                                                onClick={() => window.open(post.link, '_blank')}
-                                            >
-                                                Read Entry <ArrowRight size={16} className="ml-2" />
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
+                                    )}
+                                    <div className={styles.cardBody}>
+                                        <div className={styles.cardHeader}>
+                                            <span className={styles.tag}><Tag size={12} /> Systems</span>
+                                            <span className={styles.date}>{new Date(post.pubDate).toLocaleDateString()}</span>
+                                        </div>
+                                        <h3 className={styles.cardTitle}>{post.title}</h3>
+                                        <p className={styles.cardDesc}>{formatPreview(post.description)}</p>
+                                        <button
+                                            className={styles.ghostLink}
+                                            onClick={() => window.open(post.link, '_blank')}
+                                        >
+                                            View Report <ArrowRight size={14} />
+                                        </button>
+                                    </div>
                                 </motion.div>
                             ))}
                         </div>
-                    )}
-
-                    {!loading && posts.length === 0 && (
-                        <div className={styles.emptyState}>
-                            <Rss className="w-12 h-12 text-zinc-700 mb-4" />
-                            <h3>No broadcasts yet.</h3>
-                            <p>Our feed is currently being refreshed. Check back shortly.</p>
-                            <Button variant="outline" onClick={() => window.open('https://medium.com/@ameyakshirsagar02', '_blank')}>
-                                Visit Medium Directly
-                            </Button>
-                        </div>
-                    )}
-                </section>
+                    </section>
+                )}
             </div>
 
             <Footer />
