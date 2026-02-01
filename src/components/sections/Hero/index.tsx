@@ -26,7 +26,17 @@ export function Hero() {
                     top: `${mousePosition.y}px`
                 }}
             />
+
+            {/* Immersive Background Layer */}
+            <div className={styles.bgLayers}>
+                <div className={styles.videoMask}>
+                    <div className={styles.abstractBlob} />
+                </div>
+                <div className={styles.lensFlare} />
+            </div>
+
             <FloatingShapes />
+
             <div className="container">
                 <motion.div
                     className={styles.content}
@@ -37,7 +47,7 @@ export function Hero() {
                         visible: {
                             opacity: 1,
                             transition: {
-                                staggerChildren: 0.15
+                                staggerChildren: 0.2
                             }
                         }
                     }}
@@ -45,24 +55,25 @@ export function Hero() {
                     <motion.div
                         className={styles.trustBadge}
                         variants={{
-                            hidden: { opacity: 0, y: 15 },
-                            visible: { opacity: 1, y: 0 }
+                            hidden: { opacity: 0, scale: 0.9 },
+                            visible: { opacity: 1, scale: 1 }
                         }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
                     >
-                        Built by Ameya Kshirsagar, Electronics Engineer
+                        <span>Founder-Led Growth Studio</span>
+                        <div className={styles.badgeDot} />
+                        <span>Built by Engineers</span>
                     </motion.div>
 
                     <motion.h1
                         className={styles.headline}
                         variants={{
-                            hidden: { opacity: 0, y: 30 },
+                            hidden: { opacity: 0, y: 40 },
                             visible: { opacity: 1, y: 0 }
                         }}
-                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        Digital growth for founders<br />
-                        <span className="text-gradient">who move fast.</span>
+                        We build systems for founders <br />
+                        <span className={styles.glitchText}>who move fast.</span>
                     </motion.h1>
 
                     <motion.p
@@ -71,10 +82,9 @@ export function Hero() {
                             hidden: { opacity: 0, y: 20 },
                             visible: { opacity: 1, y: 0 }
                         }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
                     >
-                        Strategy + execution. No fluff, just systems that work.
-                        We build websites, automate marketing, and simplify operations.
+                        Docodo engineers conversion-first websites and automated GTM systems
+                        that allow you to focus on the product, not the pipeline.
                     </motion.p>
 
                     <motion.div
@@ -83,19 +93,18 @@ export function Hero() {
                             hidden: { opacity: 0, y: 10 },
                             visible: { opacity: 1, y: 0 }
                         }}
-                        transition={{ duration: 0.6 }}
                     >
-                        <Button size="lg" onClick={() => window.location.href = '/contact'}>
-                            Get a Free Audit
+                        <Button size="lg" className={styles.mainBtn} onClick={() => window.location.href = '/contact'}>
+                            Get a Free Growth Audit
                         </Button>
-                        <Button variant="outline" size="lg" onClick={() => window.location.href = '/about#how-we-work'}>
-                            See How We Work
+                        <Button variant="outline" size="lg" className={styles.secBtn} onClick={() => window.location.href = '/about#how-we-work'}>
+                            See Our Playbook
                         </Button>
                     </motion.div>
                 </motion.div>
             </div>
 
-            <div className={styles.glow} />
+            <div className={styles.gradientOverlay} />
         </section>
     );
 }

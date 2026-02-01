@@ -4,7 +4,8 @@ import { Hero } from '@/components/sections/Hero';
 import { Services } from '@/components/sections/Services';
 import { GTMToolkit } from '@/components/sections/GTMToolkit';
 import { WhoThisIsFor } from '@/components/sections/WhoThisIsFor';
-import { PortfolioPreview } from '@/components/sections/PortfolioPreview';
+import { PortfolioSlider } from '@/components/sections/PortfolioSlider';
+import { InfiniteMarquee } from '@/components/sections/InfiniteMarquee';
 import { GrowthGrader } from '@/components/sections/GrowthGrader';
 import { Starfield } from '@/components/ui/Starfield';
 
@@ -14,10 +15,11 @@ export default function Home() {
       <Starfield />
       <Navbar />
       <Hero />
+      <InfiniteMarquee />
       <Services />
       <GTMToolkit />
+      <PortfolioSlider />
       <WhoThisIsFor />
-      <PortfolioPreview />
       <GrowthGrader />
       <Footer />
     </main>

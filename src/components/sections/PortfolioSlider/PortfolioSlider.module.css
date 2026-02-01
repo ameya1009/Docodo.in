@@ -1,0 +1,159 @@
+.section {
+    height: 300vh;
+    /* Controlled by scroll for horizontal feel */
+    position: relative;
+    background: var(--color-bg);
+}
+
+.sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    padding: var(--section-padding) 0;
+}
+
+.header {
+    margin-bottom: 4rem;
+}
+
+.label {
+    display: inline-block;
+    color: var(--color-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.125rem;
+    max-width: 600px;
+    margin-top: 1rem;
+}
+
+.sliderContainer {
+    width: 100%;
+    padding-left: calc((100vw - var(--container-width)) / 2);
+}
+
+.slider {
+    display: flex;
+    gap: 3rem;
+    padding: 2rem 0;
+}
+
+.projectCard {
+    flex: 0 0 600px;
+    height: 400px;
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.imageWrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.projectCard:hover .image {
+    transform: scale(1.05);
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    opacity: 0.6;
+    transition: opacity 0.4s ease;
+}
+
+.projectCard:hover .overlay {
+    opacity: 0.8;
+}
+
+.cardContent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 3rem;
+    z-index: 10;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+}
+
+.projectCategory {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+}
+
+.projectTitle {
+    font-size: 1.75rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.viewBtn {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+}
+
+.viewBtn:hover {
+    background: white;
+    color: black;
+    border-color: white;
+}
+
+@media (max-width: 768px) {
+    .section {
+        height: auto;
+    }
+
+    .sticky {
+        position: relative;
+        height: auto;
+        padding-bottom: 2rem;
+    }
+
+    .sliderContainer {
+        padding: 0 1.5rem;
+        overflow-x: auto;
+    }
+
+    .slider {
+        position: relative !important;
+        transform: none !important;
+        flex-direction: column;
+    }
+
+    .projectCard {
+        flex: 1 0 auto;
+        width: 100%;
+        height: 350px;
+    }
+
+    .projectTitle {
+        font-size: 1.25rem;
+    }
+}
