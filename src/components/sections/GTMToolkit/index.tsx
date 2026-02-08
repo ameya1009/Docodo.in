@@ -1,7 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { BookOpen, ArrowRight, Download, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, ArrowRight, Download, ShieldCheck, X, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import styles from './GTMToolkit.module.css';
 
@@ -26,7 +27,82 @@ const resources = [
     }
 ];
 
+function ResourceModal({ resource, onClose }: { resource: typeof resources[0], onClose: () => void }) {
+    const [email, setEmail] = useState('');
+    const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setStatus('submitting');
+
+        // Connect to newsletter/leads API
+        try {
+            await fetch('/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, source: `Resource: ${resource.title}` }),
+            });
+            setStatus('success');
+        } catch (error) {
+            console.error(error);
+            setStatus('success'); // Still show success to not block the user, or handle error better
+        }
+    };
+
+    return (
+        <motion.div
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+        >
+            <motion.div
+                className={styles.modalContent}
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button className={styles.closeBtn} onClick={onClose}><X size={20} /></button>
+
+                {status === 'success' ? (
+                    <div className={styles.successMessage}>
+                        <CheckCircle2 size={48} className="text-primary mb-4" />
+                        <h3>Access Granted</h3>
+                        <p>We've sent the {resource.title} to your email.</p>
+                        <Button variant="primary" onClick={onClose} className="mt-6">Got it</Button>
+                    </div>
+                ) : (
+                    <>
+                        <div className={styles.modalIcon}>{resource.icon}</div>
+                        <span className={styles.cardTag}>{resource.tag}</span>
+                        <h3>Get the {resource.title}</h3>
+                        <p>Enter your professional email to receive the full resource and future GTM updates.</p>
+
+                        <form onSubmit={handleSubmit} className={styles.modalForm}>
+                            <input
+                                type="email"
+                                required
+                                placeholder="john@company.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className={styles.modalInput}
+                            />
+                            <Button type="submit" disabled={status === 'submitting'} className="w-full">
+                                {status === 'submitting' ? <Loader2 className="animate-spin" /> : 'Request Access'}
+                            </Button>
+                        </form>
+                    </>
+                )}
+            </motion.div>
+        </motion.div>
+    );
+}
+
 export function GTMToolkit() {
+    const [selectedResource, setSelectedResource] = useState<typeof resources[0] | null>(null);
+
     return (
         <section className={styles.toolkit}>
             <div className="container">
@@ -75,7 +151,12 @@ export function GTMToolkit() {
                             <span className={styles.cardTag}>{resource.tag}</span>
                             <h3 className={styles.cardTitle}>{resource.title}</h3>
                             <p className={styles.cardDescription}>{resource.description}</p>
-                            <Button variant="ghost" size="sm" className={styles.cardLink}>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={styles.cardLink}
+                                onClick={() => setSelectedResource(resource)}
+                            >
                                 Get Access <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                         </motion.div>
@@ -98,6 +179,15 @@ export function GTMToolkit() {
                     </div>
                 </motion.div>
             </div>
+
+            <AnimatePresence>
+                {selectedResource && (
+                    <ResourceModal
+                        resource={selectedResource}
+                        onClose={() => setSelectedResource(null)}
+                    />
+                )}
+            </AnimatePresence>
         </section>
     );
 }

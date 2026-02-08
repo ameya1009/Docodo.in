@@ -1,9 +1,43 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Linkedin, Newspaper, Headphones } from 'lucide-react';
+import { Linkedin, Newspaper, Headphones, Loader2 } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export function Footer() {
+    const [email, setEmail] = useState('');
+    const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+    const [message, setMessage] = useState('');
+
+    const handleSubscribe = async () => {
+        if (!email || status === 'submitting') return;
+
+        setStatus('submitting');
+        try {
+            const response = await fetch('/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setStatus('success');
+                setMessage(data.message);
+                setEmail('');
+            } else {
+                setStatus('error');
+                setMessage(data.message || 'Something went wrong.');
+            }
+        } catch (error) {
+            setStatus('error');
+            setMessage('Failed to subscribe. Please try again.');
+        }
+    };
+
     return (
         <footer className={styles.footer}>
             <div className={styles.container}>
@@ -39,9 +73,23 @@ export function Footer() {
                                 type="email"
                                 placeholder="Enter your email"
                                 className={styles.input}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={status === 'submitting' || status === 'success'}
                             />
-                            <Button size="sm">Subscribe</Button>
+                            <Button
+                                size="sm"
+                                onClick={handleSubscribe}
+                                disabled={status === 'submitting' || status === 'success'}
+                            >
+                                {status === 'submitting' ? <Loader2 className="animate-spin w-4 h-4" /> : 'Subscribe'}
+                            </Button>
                         </div>
+                        {message && (
+                            <p className={`${styles.statusMessage} ${status === 'error' ? styles.error : styles.success}`}>
+                                {message}
+                            </p>
+                        )}
                     </div>
                 </div>
 

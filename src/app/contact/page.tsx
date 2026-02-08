@@ -19,10 +19,12 @@ export default function ContactPage() {
     });
 
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus('submitting');
+        setErrorMessage('');
 
         try {
             const response = await fetch('/api/contact', {
@@ -32,6 +34,7 @@ export default function ContactPage() {
             });
 
             if (response.ok) {
+                const data = await response.json();
                 setStatus('success');
                 setFormData({
                     name: '',
@@ -42,11 +45,24 @@ export default function ContactPage() {
                     message: ''
                 });
             } else {
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    const rawText = await response.text();
+                    console.error('Non-JSON error response:', rawText);
+                    setErrorMessage(`Server Error (${response.status}): ${rawText.slice(0, 50)}...`);
+                    setStatus('error');
+                    return;
+                }
+
                 setStatus('error');
+                setErrorMessage(errorData.message || `Error ${response.status}: ${response.statusText}`);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Submission error:', error);
             setStatus('error');
+            setErrorMessage(`Network error: ${error.message || 'Unknown error'}`);
         }
     };
 
@@ -217,7 +233,7 @@ export default function ContactPage() {
 
                                             {status === 'error' && (
                                                 <p className="text-red-400 text-sm text-center mt-4">
-                                                    An unexpected error occurred. Please try again.
+                                                    {errorMessage}
                                                 </p>
                                             )}
 
