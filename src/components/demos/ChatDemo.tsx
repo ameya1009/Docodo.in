@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Sparkles, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -23,6 +24,15 @@ export function ChatDemo() {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading]);
 
     const handleSend = async (text: string = input) => {
         const messageToSend = text.trim();
@@ -68,67 +78,120 @@ export function ChatDemo() {
     };
 
     return (
-        <Card className="max-w-xl mx-auto h-[550px] flex flex-col p-0 overflow-hidden border-zinc-800 shadow-2xl">
-            <div className="bg-zinc-900 p-4 border-b border-zinc-800 flex items-center justify-between">
+        <Card className="max-w-2xl mx-auto h-[650px] flex flex-col p-0 overflow-hidden border-zinc-800/80 shadow-2xl bg-black/80 backdrop-blur-md">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-zinc-900 via-zinc-900 to-black p-5 border-b border-zinc-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${isLoading ? 'bg-yellow-500' : 'bg-green-500'} animate-pulse`} />
-                    <span className="font-medium text-zinc-200">{isLoading ? 'Docodo AI Agent (thinking...)' : 'Docodo AI Assistant'}</span>
+                    <div className="relative">
+                        <div className={`w-3 h-3 rounded-full ${isLoading ? 'bg-amber-400' : 'bg-emerald-500'} animate-pulse`} />
+                        <div className={`absolute inset-0 w-3 h-3 rounded-full ${isLoading ? 'bg-amber-400' : 'bg-emerald-500'} animate-ping opacity-20`} />
+                    </div>
+                    <div>
+                        <span className="font-bold text-zinc-100 block text-sm tracking-wide">DOCODO INTELLIGENCE</span>
+                        <span className="text-[10px] text-zinc-400 uppercase tracking-widest">{isLoading ? 'Processing Context...' : 'System Online'}</span>
+                    </div>
                 </div>
-                <Sparkles size={16} className="text-primary opacity-50" />
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setMessages([{ role: 'assistant', content: 'Hello! I am your Docodo AI assistant. How can I help grow your business today?' }])}
+                        className="p-2 hover:bg-zinc-800 rounded-full text-zinc-500 hover:text-white transition-colors"
+                        title="Reset Chat"
+                    >
+                        <RefreshCw size={16} />
+                    </button>
+                    <Sparkles size={18} className="text-primary opacity-60" />
+                </div>
             </div>
 
-            <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-black/60">
+            {/* Messages Area */}
+            <div className="flex-1 p-6 overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
                 {messages.length === 1 && (
-                    <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
                         {EXAMPLE_PROMPTS.map((prompt, i) => (
-                            <button
+                            <motion.button
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
                                 key={i}
                                 onClick={() => handleSend(prompt)}
-                                className="text-left p-3 rounded-lg border border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400 hover:border-primary hover:text-primary transition-all"
+                                className="text-left p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-xs text-zinc-400 hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-300 group"
                             >
-                                {prompt}
-                            </button>
+                                <span className="block mb-1 group-hover:translate-x-1 transition-transform">{prompt}</span>
+                            </motion.button>
                         ))}
                     </div>
                 )}
 
-                {messages.map((msg, i) => (
-                    <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'assistant' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'}`}>
-                            {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
-                        </div>
-                        <div className={`p-4 rounded-2xl max-w-[85%] text-sm leading-relaxed ${msg.role === 'assistant' ? 'bg-zinc-900 border border-zinc-800 text-zinc-100' : 'bg-primary text-black font-medium'}`}>
-                            {msg.content}
-                        </div>
-                    </div>
-                ))}
+                <AnimatePresence mode="popLayout">
+                    {messages.map((msg, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                        >
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${msg.role === 'assistant'
+                                    ? 'bg-gradient-to-br from-primary/20 to-primary/5 text-primary border border-primary/20'
+                                    : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                }`}>
+                                {msg.role === 'assistant' ? <Bot size={20} /> : <User size={20} />}
+                            </div>
+
+                            <div className={`p-5 rounded-2xl max-w-[85%] text-sm leading-relaxed shadow-md ${msg.role === 'assistant'
+                                    ? 'bg-zinc-900/80 border border-zinc-800 text-zinc-100 rounded-tl-none'
+                                    : 'bg-zinc-100 text-black font-medium rounded-tr-none'
+                                }`}>
+                                {msg.content}
+                            </div>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+
                 {isLoading && (
-                    <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 text-primary border border-primary/30">
-                            <Bot size={16} />
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex gap-4"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 text-primary border border-primary/20">
+                            <Bot size={20} />
                         </div>
-                        <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-500 text-sm flex gap-1">
-                            <span className="animate-bounce">.</span>
-                            <span className="animate-bounce delay-100">.</span>
-                            <span className="animate-bounce delay-200">.</span>
+                        <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-zinc-500 text-sm flex gap-1 rounded-tl-none items-center">
+                            <span className="w-2 h-2 rounded-full bg-zinc-500 animate-bounce" />
+                            <span className="w-2 h-2 rounded-full bg-zinc-500 animate-bounce delay-100" />
+                            <span className="w-2 h-2 rounded-full bg-zinc-500 animate-bounce delay-200" />
                         </div>
-                    </div>
+                    </motion.div>
                 )}
+                <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 border-t border-zinc-800 bg-zinc-900 flex gap-2">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary transition-colors"
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    disabled={isLoading}
-                />
-                <Button size="md" onClick={() => handleSend()} disabled={isLoading || !input.trim()} className="rounded-xl">
-                    <Send size={18} />
-                </Button>
+            {/* Input Area */}
+            <div className="p-5 bg-black/60 backdrop-blur-xl border-t border-zinc-800">
+                <div className="relative flex items-center gap-3">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Ask about Docodo or your growth strategy..."
+                        className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-5 pr-14 py-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:bg-zinc-900 transition-all placeholder:text-zinc-600 shadow-inner"
+                        onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                        disabled={isLoading}
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <Button
+                            size="icon"
+                            onClick={() => handleSend()}
+                            disabled={isLoading || !input.trim()}
+                            className={`rounded-lg w-10 h-10 transition-all ${!input.trim() ? 'opacity-50' : 'hover:scale-105'}`}
+                        >
+                            <Send size={18} />
+                        </Button>
+                    </div>
+                </div>
+                <div className="text-center mt-3">
+                    <p className="text-[10px] text-zinc-600">AI can make mistakes. Verify critical growth data.</p>
+                </div>
             </div>
         </Card>
     );

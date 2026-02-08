@@ -4,7 +4,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ChatDemo } from '@/components/demos/ChatDemo';
 import { motion } from 'framer-motion';
-import { Brain, Cpu, Shield, Workflow } from 'lucide-react';
+import { Brain, Cpu, Shield, Workflow, Sparkles } from 'lucide-react';
 import styles from './AiTools.module.css';
 
 const agents = [
@@ -71,6 +71,61 @@ export default function AIToolsPage() {
                         <ChatDemo />
                     </div>
                 </motion.section>
+
+                <div className="grid md:grid-cols-3 gap-6 mb-20">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        <a href="/ai-tools/email-automation" className="block group">
+                            <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-primary/50 transition-all h-full">
+                                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+                                    <Sparkles size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Email Automation</h3>
+                                <p className="text-zinc-400 text-sm">Instantly draft professional emails with tone control and key point expansion.</p>
+                            </div>
+                        </a>
+                    </motion.div>
+
+                    {/* Placeholder for Patients List */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <a href="/ai-tools/patients-list" className="block group">
+                            <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-primary/50 transition-all h-full">
+                                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform">
+                                    <Shield size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">Patient Management</h3>
+                                <p className="text-zinc-400 text-sm">Securely manage patient records, history, and prescriptions with AI assistance.</p>
+                            </div>
+                        </a>
+                    </motion.div>
+
+                    {/* Placeholder for Gym Management */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        <a href="/ai-tools/gym-management" className="block group">
+                            <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-primary/50 transition-all h-full">
+                                <div className="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 mb-4 group-hover:scale-110 transition-transform">
+                                    <Cpu size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 group-hover:text-orange-500 transition-colors">FitFlow Manager</h3>
+                                <p className="text-zinc-400 text-sm">Automate gym memberships, track attendance, and manage growth.</p>
+                            </div>
+                        </a>
+                    </motion.div>
+                </div>
 
                 <div className="grid md:grid-cols-2 gap-16 items-center py-20">
                     <motion.div
