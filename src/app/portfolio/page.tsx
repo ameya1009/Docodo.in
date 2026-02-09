@@ -41,14 +41,14 @@ const works = [
         title: 'Flow Automate',
         category: 'REV-OPS',
         description: 'Strategic B2B automation systems that removed procurement friction for scaling startups.',
-        image: 'https://images.unsplash.com/photo-1518186239767-28a249a2cb58?auto=format&fit=crop&q=80&w=1200',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200',
         color: 'var(--color-secondary)'
     },
     {
         title: 'Zenith Brand',
         category: 'ID & SYSTEMS',
         description: 'Modular design system and category-defining identity for a category-leading digital studio.',
-        image: 'https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?auto=format&fit=crop&q=80&w=1200',
+        image: 'https://images.unsplash.com/photo-1634942537034-2531766767d7?auto=format&fit=crop&q=80&w=1200',
         color: 'var(--color-accent)'
     }
 ];
