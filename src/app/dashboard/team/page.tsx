@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/Button';
-import { Mail, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export default function TeamPage() {
     const team = [
@@ -47,8 +47,8 @@ export default function TeamPage() {
                                 <td className="p-4 text-zinc-300">{member.role}</td>
                                 <td className="p-4">
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium border ${member.status === 'Active'
-                                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                            : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                        : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
                                         }`}>
                                         {member.status}
                                     </span>

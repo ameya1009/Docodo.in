@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { X, ArrowRight, ExternalLink } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import styles from './PortfolioSlider.module.css';
 

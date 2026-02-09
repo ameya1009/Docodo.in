@@ -68,6 +68,7 @@ export function ChatDemo() {
                 }]);
             }
         } catch (error) {
+            console.error('Chat Error:', error);
             setMessages(prev => [...prev, {
                 role: 'assistant',
                 content: "I'm having a hard time connecting to my brain right now. Please check your internet or try again."
@@ -131,15 +132,15 @@ export function ChatDemo() {
                             className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                         >
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${msg.role === 'assistant'
-                                    ? 'bg-gradient-to-br from-primary/20 to-primary/5 text-primary border border-primary/20'
-                                    : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                ? 'bg-gradient-to-br from-primary/20 to-primary/5 text-primary border border-primary/20'
+                                : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
                                 }`}>
                                 {msg.role === 'assistant' ? <Bot size={20} /> : <User size={20} />}
                             </div>
 
                             <div className={`p-5 rounded-2xl max-w-[85%] text-sm leading-relaxed shadow-md ${msg.role === 'assistant'
-                                    ? 'bg-zinc-900/80 border border-zinc-800 text-zinc-100 rounded-tl-none'
-                                    : 'bg-zinc-100 text-black font-medium rounded-tr-none'
+                                ? 'bg-zinc-900/80 border border-zinc-800 text-zinc-100 rounded-tl-none'
+                                : 'bg-zinc-100 text-black font-medium rounded-tr-none'
                                 }`}>
                                 {msg.content}
                             </div>
@@ -180,7 +181,7 @@ export function ChatDemo() {
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
                         <Button
-                            size="icon"
+                            size="sm"
                             onClick={() => handleSend()}
                             disabled={isLoading || !input.trim()}
                             className={`rounded-lg w-10 h-10 transition-all ${!input.trim() ? 'opacity-50' : 'hover:scale-105'}`}

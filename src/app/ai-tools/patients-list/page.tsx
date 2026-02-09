@@ -6,8 +6,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
-import { motion } from 'framer-motion';
-import { Search, Plus, FileText, Pill, User, Calendar, Trash2 } from 'lucide-react';
+import { Search, Plus, FileText, Pill, User } from 'lucide-react';
 
 interface Prescription {
     id: string;
@@ -88,7 +87,7 @@ export default function PatientsListPage() {
             age: parseInt(newPatient.age) || 0,
             condition: newPatient.condition || 'General Checkup',
             lastVisit: new Date().toISOString().split('T')[0],
-            status: newPatient.status as any,
+            status: newPatient.status as Patient['status'],
             prescriptions: []
         };
 
@@ -180,8 +179,8 @@ export default function PatientsListPage() {
                                 </div>
 
                                 <div className={`px-3 py-1 rounded-full text-xs font-bold border ${patient.status === 'Critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                                        patient.status === 'Recovering' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                            'bg-green-500/10 text-green-500 border-green-500/20'
+                                    patient.status === 'Recovering' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                        'bg-green-500/10 text-green-500 border-green-500/20'
                                     }`}>
                                     {patient.status}
                                 </div>

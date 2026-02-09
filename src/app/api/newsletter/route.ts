@@ -27,9 +27,9 @@ export async function POST(request: Request) {
             await prisma.newsletter.create({
                 data: { email },
             });
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
             // Check if it's a unique constraint violation (P2002)
-            if (dbError.code === 'P2002') {
+            if (typeof dbError === 'object' && dbError !== null && 'code' in dbError && (dbError as { code: string }).code === 'P2002') {
                 return NextResponse.json({
                     success: true,
                     message: 'You are already subscribed!',
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
             success: true,
             message: 'Successfully subscribed to the newsletter!',
         });
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Newsletter subscription error:', error);
         return NextResponse.json(
             { success: false, message: 'We encountered an error. Please try again later.' },

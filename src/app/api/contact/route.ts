@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        console.log('Incoming body:', JSON.stringify(body, null, 2));
+        // Removed PII logging
         const { name, business, email, budget, goal, message } = body;
 
         // Basic Server-side Validation
@@ -55,17 +55,19 @@ export async function POST(request: Request) {
                     'Content-Type': 'application/json',
                 }
             });
-        } catch (dbError: any) {
+        } catch (dbError: unknown) {
             console.error('Prisma Create Error:', dbError);
+            const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown database error';
             return NextResponse.json(
-                { success: false, message: `Database error: ${dbError.message}` },
+                { success: false, message: `Database error: ${errorMessage}` },
                 { status: 500 }
             );
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Global API Error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
-            { success: false, message: `Server error: ${error.message}` },
+            { success: false, message: `Server error: ${errorMessage}` },
             { status: 500 }
         );
     }

@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
-import { DOCODO_KNOWLEDGE, SYSTEM_PROMPT } from '@/lib/knowledge';
+import { SYSTEM_PROMPT } from '@/lib/knowledge';
 
 // Initialize the Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY || '');
@@ -95,18 +95,20 @@ RESPOND AS THE DOCODO AI ASSISTANT (2-3 sentences max):`;
 
             console.log('Gemini response received');
             return NextResponse.json({ message: text });
-        } catch (apiError: any) {
-            console.error('Gemini API error, using fallback:', apiError.message);
+        } catch (apiError: unknown) {
+            const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown Gemini API error';
+            console.error('Gemini API error, using fallback:', errorMessage);
             return NextResponse.json({
                 message: "I can help you with questions about Docodo's services. We offer website development, AI marketing automation, SEO, and more. What would you like to know about our services or pricing?"
             });
         }
-    } catch (error: any) {
-        console.error('Chat API Error:', error?.message);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Chat API Error:', errorMessage);
         return NextResponse.json(
             {
                 error: 'Failed to generate response. Please try again.',
-                details: error?.message || 'Unknown error'
+                details: errorMessage
             },
             { status: 500 }
         );

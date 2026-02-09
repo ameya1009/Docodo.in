@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Calendar, User, ArrowRight, Rss, Clock, Tag } from 'lucide-react';
+import { Calendar, ArrowRight, Clock, Tag } from 'lucide-react';
 import styles from './Blog.module.css';
 
 interface BlogPost {

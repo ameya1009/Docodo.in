@@ -22,11 +22,12 @@ async function testApi() {
         try {
             const json = JSON.parse(text);
             console.log('Parsed JSON:', json);
-        } catch (e) {
+        } catch (_e) {
+            console.error('JSON Parse Error:', _e);
             console.log('Response is not valid JSON');
         }
     } catch (error) {
-        console.error('Fetch failed (is the dev server running?):', error.message);
+        console.error('Fetch failed (is the dev server running?):', error instanceof Error ? error.message : String(error));
     }
 }
 

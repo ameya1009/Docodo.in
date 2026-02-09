@@ -34,7 +34,7 @@ export default function ContactPage() {
             });
 
             if (response.ok) {
-                const data = await response.json();
+                await response.json();
                 setStatus('success');
                 setFormData({
                     name: '',
@@ -48,7 +48,7 @@ export default function ContactPage() {
                 let errorData;
                 try {
                     errorData = await response.json();
-                } catch (e) {
+                } catch {
                     const rawText = await response.text();
                     console.error('Non-JSON error response:', rawText);
                     setErrorMessage(`Server Error (${response.status}): ${rawText.slice(0, 50)}...`);
@@ -59,10 +59,11 @@ export default function ContactPage() {
                 setStatus('error');
                 setErrorMessage(errorData.message || `Error ${response.status}: ${response.statusText}`);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Submission error:', error);
             setStatus('error');
-            setErrorMessage(`Network error: ${error.message || 'Unknown error'}`);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setErrorMessage(`Network error: ${errorMessage}`);
         }
     };
 

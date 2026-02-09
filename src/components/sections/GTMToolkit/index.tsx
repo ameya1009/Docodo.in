@@ -70,7 +70,7 @@ function ResourceModal({ resource, onClose }: { resource: typeof resources[0], o
                     <div className={styles.successMessage}>
                         <CheckCircle2 size={48} className="text-primary mb-4" />
                         <h3>Access Granted</h3>
-                        <p>We've sent the {resource.title} to your email.</p>
+                        <p>We&apos;ve sent the {resource.title} to your email.</p>
                         <Button variant="primary" onClick={onClose} className="mt-6">Got it</Button>
                     </div>
                 ) : (

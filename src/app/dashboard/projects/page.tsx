@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Plus, Search, Filter, MoreHorizontal, Calendar, ArrowUpRight } from 'lucide-react';
+import { Plus, Search, Filter, MoreHorizontal, Calendar } from 'lucide-react';
 
 export default function ProjectsPage() {
     const projects = [
