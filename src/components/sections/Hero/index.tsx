@@ -55,6 +55,17 @@ export function Hero() {
                     }}
                 >
                     <motion.div
+                        className={styles.scarcityBadge}
+                        variants={{
+                            hidden: { opacity: 0, y: -10 },
+                            visible: { opacity: 1, y: 0 }
+                        }}
+                    >
+                        <span className={styles.pulseDot} />
+                        Only 1 project slot remaining for March 2026
+                    </motion.div>
+
+                    <motion.div
                         className={styles.trustBadge}
                         variants={{
                             hidden: { opacity: 0, scale: 0.9 },

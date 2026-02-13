@@ -17,25 +17,25 @@ const works = [
         color: 'var(--color-primary)'
     },
     {
-        title: 'BIOgram',
-        category: 'HEALTH & NUTRITION',
-        description: 'Scaling a wellness brand through systematic identity design and acquisition-focused architecture.',
-        image: 'https://images.unsplash.com/photo-1576091160550-2173dba9690a?auto=format&fit=crop&q=80&w=1200',
-        color: 'var(--color-secondary)'
+        title: "BIOgram",
+        category: "Growth & Branding",
+        image: "/images/clients/clearth-biogram-kky.jpg", // Using shared asset as placeholder/representative
+        stats: "+240% Engagement",
+        description: "Repositioning a health-tech brand for the European market."
     },
     {
-        title: 'Clearth',
-        category: 'SUSTAINABILITY',
-        description: 'Brand transformation and digital systems for an eco-conscious growth initiative.',
-        image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1200',
-        color: 'var(--color-accent)'
+        title: "Clearth",
+        category: "GTM Strategy",
+        image: "/images/clients/clearth-biogram-kky.jpg",
+        stats: "$1.2M Pipeline",
+        description: "Engineering a scalable GTM engine for a sustainability startup."
     },
     {
-        title: 'KKY',
-        category: 'FOUNDER BRANDING',
-        description: 'Personal authority positioning and minimalist visual systems for a leader-led venture.',
-        image: 'https://images.unsplash.com/photo-1634942537034-2531766767d7?auto=format&fit=crop&q=80&w=1200',
-        color: 'var(--color-primary)'
+        title: "KKY",
+        category: "Founder Branding",
+        image: "/images/clients/clearth-biogram-kky.jpg",
+        stats: "12 Prime Interviews",
+        description: "Building a personal brand system for a high-profile tech founder."
     }
 ];
 

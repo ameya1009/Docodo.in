@@ -26,3 +26,10 @@ model Newsletter {
   email     String   @unique
   createdAt DateTime @default(now())
 }
+
+model GrowthGraderLead {
+  id        String   @id @default(cuid())
+  email     String
+  answers   Json
+  createdAt DateTime @default(now())
+}

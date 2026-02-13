@@ -65,13 +65,20 @@ export default function AboutPage() {
                             <div className={styles.contentBlock}>
                                 <span className={styles.blockLabel}>01 / Origin Story</span>
                                 <h3 className={styles.blockTitle}>From Electronics to Growth Engines</h3>
-                                <p>
-                                    [Your 300-word origin story will go here. It should cover: Why you started Docodo, your engineering background as an unfair advantage, and what drives you vs. traditional agencies.]
-                                </p>
-                                <p>
-                                    I spent years designing circuits where a single loose connection means failure. I carry that same engineering rigor into digital growth.
-                                    At Docodo, we don't guess. We architect.
-                                </p>
+                                <div className={styles.manifestoQuote}>
+                                    <p className={styles.leadText}>
+                                        "Marketing is just a circuit that hasn't been optimized yet."
+                                    </p>
+                                    <p>
+                                        I spent years designing electronics where a single loose connection means failure.
+                                        I carry that same rigor into digital growth. At Docodo, we don't guess. We architect.
+                                    </p>
+                                    <p className={styles.placeholderNote}>
+                                        {/* Founder: Replace this block with your 300-word origin story regarding Docodo's genesis and your engineering advantage. */}
+                                        The agency model is broken. Founders don't need more "creative brainstorming"—they need predictable revenue systems that scale without breaking.
+                                        Docodo was founded to bridge the gap between product excellence and market dominance through engineering-led GTM.
+                                    </p>
+                                </div>
                             </div>
 
                             <div className={styles.contentBlock}>

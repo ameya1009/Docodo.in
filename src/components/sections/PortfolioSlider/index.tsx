@@ -9,12 +9,20 @@ import styles from './PortfolioSlider.module.css';
 
 const projects = [
     {
-        title: 'BIOgram',
-        category: 'Health & Wellness Branding',
-        image: 'https://images.unsplash.com/photo-1576091160550-2173dba9690a?auto=format&fit=crop&q=80&w=1200',
+        title: "BIOgram Health",
+        category: "Branding",
+        image: "/images/clients/clearth-biogram-kky.jpg",
         color: '#22C55E',
         description: 'Identity design and digital positioning for a healthcare nutrition platform.',
         stats: ['Cohesive Brand Identity', 'User-centric Interface', 'Healthcare Tech Stack'],
+    },
+    {
+        title: "Clearth GTM",
+        category: "Strategy",
+        image: "/images/clients/clearth-biogram-kky.jpg",
+        color: '#2DD4BF',
+        description: 'Visual language and strategic messaging for an eco-conscious initiative.',
+        stats: ['"Clearth Starts With You" Campaign', 'Brand Storytelling', 'Growth Architecture'],
     },
     {
         title: 'Dr. Patangankar',

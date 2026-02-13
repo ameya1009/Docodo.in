@@ -12,14 +12,19 @@ const works = [
         image: '/images/clients/dr-patangankar.jpg'
     },
     {
-        title: 'BIOgram',
-        category: 'Health Brand Identity',
-        image: 'https://images.unsplash.com/photo-1576091160550-2173dba9690a?auto=format&fit=crop&q=80&w=800'
+        title: "BIOgram",
+        category: "Branding",
+        image: "/images/clients/clearth-biogram-kky.jpg"
     },
     {
-        title: 'Clearth',
-        category: 'Eco Growth Strategy',
-        image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800'
+        title: "Clearth",
+        category: "Strategy",
+        image: "/images/clients/clearth-biogram-kky.jpg"
+    },
+    {
+        title: "KKY",
+        category: "Positioning",
+        image: "/images/clients/clearth-biogram-kky.jpg"
     }
 ];
 
