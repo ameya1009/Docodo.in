@@ -11,7 +11,7 @@ const projects = [
     {
         title: "BIOgram Health",
         category: "Branding",
-        image: "/images/clients/clearth-biogram-kky.jpg",
+        image: "/images/clients/biogram.png",
         color: '#22C55E',
         description: 'Identity design and digital positioning for a healthcare nutrition platform.',
         stats: ['Cohesive Brand Identity', 'User-centric Interface', 'Healthcare Tech Stack'],
@@ -19,7 +19,7 @@ const projects = [
     {
         title: "Clearth GTM",
         category: "Strategy",
-        image: "/images/clients/clearth-biogram-kky.jpg",
+        image: "/images/clients/clearth.jpg",
         color: '#2DD4BF',
         description: 'Visual language and strategic messaging for an eco-conscious initiative.',
         stats: ['"Clearth Starts With You" Campaign', 'Brand Storytelling', 'Growth Architecture'],

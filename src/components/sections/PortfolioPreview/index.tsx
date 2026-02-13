@@ -14,17 +14,17 @@ const works = [
     {
         title: "BIOgram",
         category: "Branding",
-        image: "/images/clients/clearth-biogram-kky.jpg"
+        image: "/images/clients/biogram.png"
     },
     {
         title: "Clearth",
         category: "Strategy",
-        image: "/images/clients/clearth-biogram-kky.jpg"
+        image: "/images/clients/clearth.jpg"
     },
     {
         title: "KKY",
         category: "Positioning",
-        image: "/images/clients/clearth-biogram-kky.jpg"
+        image: "/images/clients/kky.png"
     }
 ];
 

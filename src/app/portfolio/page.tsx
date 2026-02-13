@@ -19,21 +19,21 @@ const works = [
     {
         title: "BIOgram",
         category: "Growth & Branding",
-        image: "/images/clients/clearth-biogram-kky.jpg", // Using shared asset as placeholder/representative
+        image: "/images/clients/biogram.png",
         stats: "+240% Engagement",
         description: "Repositioning a health-tech brand for the European market."
     },
     {
         title: "Clearth",
         category: "GTM Strategy",
-        image: "/images/clients/clearth-biogram-kky.jpg",
+        image: "/images/clients/clearth.jpg",
         stats: "$1.2M Pipeline",
         description: "Engineering a scalable GTM engine for a sustainability startup."
     },
     {
         title: "KKY",
         category: "Founder Branding",
-        image: "/images/clients/clearth-biogram-kky.jpg",
+        image: "/images/clients/kky.png",
         stats: "12 Prime Interviews",
         description: "Building a personal brand system for a high-profile tech founder."
     }
