@@ -1,175 +1,175 @@
 'use client';
 
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
-import { ChatDemo } from '@/components/demos/ChatDemo';
+import { AIToolsLayout } from '@/components/layout/AIToolsLayout';
 import { motion } from 'framer-motion';
-import { Brain, Cpu, Shield, Workflow, Sparkles } from 'lucide-react';
-import styles from './AiTools.module.css';
+import { Brain, Cpu, Shield, Workflow, Sparkles, Mail, Users, Dumbbell, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
-const agents = [
+const tools = [
     {
-        icon: <Brain />,
-        title: 'Strategic Reasoning',
-        description: 'Our agents don\'t just follow scripts. They understand context, intent, and complex business logic.'
+        id: 'email-automation',
+        title: 'Smart Email Composer',
+        description: 'Transform bullet points into perfectly crafted emails in seconds. Select your tone and let agents handle the nuance.',
+        icon: <Mail className="w-6 h-6" />,
+        color: 'text-primary',
+        bgColor: 'bg-primary/10',
+        href: '/ai-tools/email-automation',
+        status: 'Active',
+        category: 'Communication'
     },
     {
-        icon: <Cpu />,
-        title: 'Autonomous Execution',
-        description: 'From research to execution, Docodo tools handle the horizontal complexity of growth operations.'
+        id: 'patients-list',
+        title: 'Patient Registry',
+        description: 'Securely manage patient records, history, and prescriptions with AI assistance. Built for healthcare professionals.',
+        icon: <Users className="w-6 h-6" />,
+        color: 'text-blue-500',
+        bgColor: 'bg-blue-500/10',
+        href: '/ai-tools/patients-list',
+        status: 'Active',
+        category: 'Medical'
     },
     {
-        icon: <Shield />,
-        title: 'Trust-First AI',
-        description: 'Private, secure, and accurate. We prioritize data integrity and honest AI representation.'
+        id: 'gym-management',
+        title: 'FitFlow Manager',
+        description: 'Automate gym memberships, track attendance, and manage growth. Streamline your facility operations.',
+        icon: <Dumbbell className="w-6 h-6" />,
+        color: 'text-orange-500',
+        bgColor: 'bg-orange-500/10',
+        href: '/ai-tools/gym-management',
+        status: 'Active',
+        category: 'Facility'
     }
+];
+
+const stats = [
+    { label: 'Active Agents', value: '12', trend: '+2' },
+    { label: 'Workflows Automated', value: '1.2k', trend: '+12%' },
+    { label: 'Time Saved', value: '450h', trend: '+8%' }
 ];
 
 export default function AIToolsPage() {
     return (
-        <main className="min-h-screen bg-black">
-            <Navbar />
-
-            <section className={styles.hero}>
-                <div className="container">
-                    <motion.span
-                        className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        Intelligence Suite
-                    </motion.span>
-                    <motion.h1
-                        className={styles.title}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        Truth + <span className="text-gradient">Intent.</span>
-                    </motion.h1>
-                    <motion.p
-                        className={styles.subtitle}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        Experience the power of autonomous agents engineered for professional growth.
-                        No hype, just high-performance execution.
-                    </motion.p>
-                </div>
-            </section>
-
-            <div className="container">
-                <motion.section
-                    className={styles.demoSection}
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                >
-                    <div className="glass rounded-[2rem] p-4 md:p-8">
-                        <ChatDemo />
+        <AIToolsLayout title="Overview">
+            <div className="space-y-10">
+                {/* Dashboard Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <motion.h1
+                            className="text-3xl font-bold mb-2"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                        >
+                            Welcome to <span className="text-primary">Intelligence</span>
+                        </motion.h1>
+                        <motion.p
+                            className="text-zinc-400"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 }}
+                        >
+                            Unlock autonomous execution with Docodo agents.
+                        </motion.p>
                     </div>
-                </motion.section>
-
-                <div className="grid md:grid-cols-3 gap-6 mb-20">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        <a href="/ai-tools/email-automation" className="block group">
-                            <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-primary/50 transition-all h-full">
-                                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                                    <Sparkles size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Email Automation</h3>
-                                <p className="text-zinc-400 text-sm">Instantly draft professional emails with tone control and key point expansion.</p>
-                            </div>
-                        </a>
-                    </motion.div>
-
-                    {/* Placeholder for Patients List */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <a href="/ai-tools/patients-list" className="block group">
-                            <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-primary/50 transition-all h-full">
-                                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 mb-4 group-hover:scale-110 transition-transform">
-                                    <Shield size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">Patient Management</h3>
-                                <p className="text-zinc-400 text-sm">Securely manage patient records, history, and prescriptions with AI assistance.</p>
-                            </div>
-                        </a>
-                    </motion.div>
-
-                    {/* Placeholder for Gym Management */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.3 }}
-                    >
-                        <a href="/ai-tools/gym-management" className="block group">
-                            <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-primary/50 transition-all h-full">
-                                <div className="w-12 h-12 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 mb-4 group-hover:scale-110 transition-transform">
-                                    <Cpu size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-orange-500 transition-colors">FitFlow Manager</h3>
-                                <p className="text-zinc-400 text-sm">Automate gym memberships, track attendance, and manage growth.</p>
-                            </div>
-                        </a>
-                    </motion.div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-16 items-center py-20">
-                    <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                    >
-                        <h2 className="text-4xl font-bold mb-6">Beyond Mockups. <span className="text-primary">Actual Results.</span></h2>
-                        <p className="text-zinc-400 text-lg leading-relaxed mb-8">
-                            Docodo agents are built on proprietary growth kernels. They don&apos;t just predict text;
-                            they execute workflows that move the needle.
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {stats.map((stat, i) => (
+                        <motion.div
+                            key={stat.label}
+                            className="p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 + i * 0.1 }}
+                        >
+                            <div className="text-sm text-zinc-500 mb-1">{stat.label}</div>
+                            <div className="flex items-end gap-2">
+                                <span className="text-3xl font-bold text-white">{stat.value}</span>
+                                <span className="text-xs text-green-500 font-medium pb-1.5">{stat.trend}</span>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Tools Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold">Active Applications</h2>
+                        <button className="text-sm text-primary hover:underline flex items-center gap-1">
+                            Browse all tools <ArrowRight size={14} />
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {tools.map((tool, i) => (
+                            <motion.div
+                                key={tool.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 + i * 0.1 }}
+                                whileHover={{ y: -5 }}
+                            >
+                                <Link href={tool.href} className="block group">
+                                    <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/60 hover:border-primary/50 transition-all h-full flex flex-col">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className={`${tool.bgColor} ${tool.color} p-3 rounded-xl group-hover:scale-110 transition-transform`}>
+                                                {tool.icon}
+                                            </div>
+                                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-zinc-800 text-zinc-400">
+                                                {tool.category}
+                                            </span>
+                                        </div>
+
+                                        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                                            {tool.title}
+                                        </h3>
+
+                                        <p className="text-zinc-400 text-sm leading-relaxed mb-6 flex-1">
+                                            {tool.description}
+                                        </p>
+
+                                        <div className="pt-4 border-t border-zinc-800/50 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                                <span className="text-xs text-zinc-500">{tool.status}</span>
+                                            </div>
+                                            <ArrowRight size={16} className="text-zinc-600 group-hover:text-primary transform group-hover:translate-x-1 transition-all" />
+                                        </div>
+                                    </div>
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Automation Spotlight */}
+                <motion.div
+                    className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 relative overflow-hidden"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                >
+                    <div className="relative z-10 max-w-2xl">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="text-primary" size={20} />
+                            <span className="text-xs font-bold uppercase tracking-widest text-primary">Pro Feature</span>
+                        </div>
+                        <h2 className="text-3xl font-bold mb-4">Proprietary Growth Kernels</h2>
+                        <p className="text-zinc-400 mb-6 font-medium leading-relaxed">
+                            Docodo agents are built on kernels that don&apos;t just predict text—they execute workflows.
+                            Connect your tools and let the agents handle the routine.
                         </p>
-                        <div className="space-y-6">
-                            {agents.map((agent, i) => (
-                                <div key={i} className="flex gap-4">
-                                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                        {agent.icon}
-                                    </div>
-                                    <div>
-                                        <h4 className="text-lg font-bold text-white">{agent.title}</h4>
-                                        <p className="text-zinc-500 text-sm">{agent.description}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </motion.div>
+                        <button className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl hover:brightness-110 transition-all">
+                            Configure Workflows
+                        </button>
+                    </div>
 
-                    <motion.div
-                        className={styles.visualWrapper}
-                        initial={{ opacity: 0, x: 30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                    >
-                        <div className={styles.visualGlow} />
-                        <Workflow className="w-24 h-24 text-primary opacity-20" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-64 h-64 border border-primary/20 rounded-full animate-ping opacity-10" />
-                        </div>
-                    </motion.div>
-                </div>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 blur-sm pointer-events-none">
+                        <Brain className="w-64 h-64" />
+                    </div>
+                </motion.div>
             </div>
-
-            <Footer />
-        </main>
+        </AIToolsLayout>
     );
 }
 

@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
+import { AIToolsLayout } from '@/components/layout/AIToolsLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { motion } from 'framer-motion';
-import { Search, Plus, User, Calendar, CreditCard, Activity, TrendingUp, Users, AlertCircle } from 'lucide-react';
+import { Search, Plus, User, Activity, Users, AlertCircle, ArrowUpRight, Filter, MoreHorizontal } from 'lucide-react';
 
 interface Member {
     id: string;
@@ -100,180 +99,191 @@ export default function GymManagementPage() {
     };
 
     return (
-        <main className="min-h-screen bg-black text-white">
-            <Navbar />
-
-            <section className="pt-32 pb-20 container">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <AIToolsLayout title="FitFlow Manager">
+            <div className="space-y-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <span className="text-primary font-bold tracking-widest text-xs uppercase mb-2 block">
-                            Facility Management
-                        </span>
-                        <h1 className="text-3xl md:text-4xl font-bold">
-                            FitFlow <span className="text-primary">Manager</span>
-                        </h1>
+                        <h1 className="text-2xl font-bold">FitFlow Manager</h1>
+                        <p className="text-zinc-500 text-sm">Automate facility operations and member growth with agents assistance.</p>
                     </div>
 
-                    <div className="flex gap-4 w-full md:w-auto">
-                        <Button onClick={() => setIsAddMemberOpen(true)}>
-                            <Plus size={18} className="mr-2" /> New Member
-                        </Button>
+                    <Button className="rounded-xl h-10 shadow-lg shadow-primary/10" onClick={() => setIsAddMemberOpen(true)}>
+                        <Plus size={18} className="mr-2" /> Register Member
+                    </Button>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="p-6 border-zinc-800 bg-zinc-900/40 backdrop-blur-sm flex items-center justify-between group">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500 group-hover:scale-110 transition-transform">
+                                <Activity size={24} />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold text-white">{stats.active}</div>
+                                <div className="text-xs font-bold uppercase tracking-widest text-zinc-500">Active Members</div>
+                            </div>
+                        </div>
+                        <ArrowUpRight size={20} className="text-zinc-700 group-hover:text-green-500 transition-colors" />
+                    </Card>
+
+                    <Card className="p-6 border-zinc-800 bg-zinc-900/40 backdrop-blur-sm flex items-center justify-between group">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
+                                <AlertCircle size={24} />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold text-white">{stats.expiring}</div>
+                                <div className="text-xs font-bold uppercase tracking-widest text-zinc-500">Expiring Soon</div>
+                            </div>
+                        </div>
+                        <ArrowUpRight size={20} className="text-zinc-700 group-hover:text-yellow-500 transition-colors" />
+                    </Card>
+
+                    <Card className="p-6 border-zinc-800 bg-zinc-900/40 backdrop-blur-sm flex items-center justify-between group">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                <Users size={24} />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold text-white">{stats.total}</div>
+                                <div className="text-xs font-bold uppercase tracking-widest text-zinc-500">Total Database</div>
+                            </div>
+                        </div>
+                        <ArrowUpRight size={20} className="text-zinc-700 group-hover:text-primary transition-colors" />
+                    </Card>
+                </div>
+
+                {/* Search & Navigation */}
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Find members by name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-zinc-900/40 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-sm focus:border-primary focus:outline-none transition-all"
+                        />
                     </div>
+                    <button className="flex items-center gap-2 px-6 py-3 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-400 text-sm hover:text-white transition-all">
+                        <Filter size={16} /> Filters
+                    </button>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <Card className="p-6 border-zinc-800 bg-zinc-900/50 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                            <Activity size={24} />
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold">{stats.active}</div>
-                            <div className="text-sm text-zinc-400">Active Members</div>
-                        </div>
-                    </Card>
-                    <Card className="p-6 border-zinc-800 bg-zinc-900/50 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500">
-                            <AlertCircle size={24} />
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold">{stats.expiring}</div>
-                            <div className="text-sm text-zinc-400">Expiring Soon</div>
-                        </div>
-                    </Card>
-                    <Card className="p-6 border-zinc-800 bg-zinc-900/50 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                            <Users size={24} />
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold">{stats.total}</div>
-                            <div className="text-sm text-zinc-400">Total Members</div>
-                        </div>
-                    </Card>
-                </div>
-
-                {/* Search & List */}
-                <div className="mb-6 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search members..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-10 pr-4 py-3 text-sm focus:border-primary focus:outline-none transition-colors"
-                    />
-                </div>
-
-                <div className="grid gap-4">
+                <div className="grid gap-3">
                     {filteredMembers.map((member) => (
-                        <Card key={member.id} className="p-4 border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 transition-colors flex flex-col md:flex-row items-center justify-between gap-4">
+                        <Card key={member.id} className="p-4 border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 transition-all flex flex-col md:flex-row items-center justify-between gap-4 group">
                             <div className="flex items-center gap-4 w-full md:w-auto">
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${member.plan === 'Elite' ? 'bg-amber-500/10 text-amber-500' :
-                                        member.plan === 'Pro' ? 'bg-blue-500/10 text-blue-500' : 'bg-zinc-800 text-zinc-400'
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border transition-all ${member.plan === 'Elite' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
+                                    member.plan === 'Pro' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' : 'bg-zinc-800 border-zinc-700 text-zinc-400'
                                     }`}>
                                     <User size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-lg">{member.name}</h3>
-                                    <div className="flex items-center gap-2 text-sm text-zinc-400">
-                                        <span className={`px-2 py-0.5 rounded text-xs border ${member.plan === 'Elite' ? 'border-amber-500/30 text-amber-500' :
-                                                member.plan === 'Pro' ? 'border-blue-500/30 text-blue-500' : 'border-zinc-700 text-zinc-400'
+                                    <h3 className="font-bold text-white group-hover:text-primary transition-colors">{member.name}</h3>
+                                    <div className="flex items-center gap-2 text-[10px] mt-1">
+                                        <span className={`px-2 py-0.5 rounded font-bold uppercase tracking-wider border ${member.plan === 'Elite' ? 'border-amber-500/30 text-amber-500 bg-amber-500/5' :
+                                            member.plan === 'Pro' ? 'border-blue-500/30 text-blue-500 bg-blue-500/5' : 'border-zinc-700 text-zinc-500 bg-zinc-800'
                                             }`}>{member.plan} Plan</span>
-                                        <span>•</span>
-                                        <span>Expires: {member.expiryDate}</span>
+                                        <span className="text-zinc-600">•</span>
+                                        <span className="text-zinc-500 font-medium lowercase">Renews: {member.expiryDate}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
-                                <div className="text-right hidden md:block">
-                                    <div className="text-xs text-zinc-500 mb-1">Last Check-in</div>
-                                    <div className="text-sm font-medium flex items-center gap-1">
-                                        <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                                <div className="text-right hidden sm:block">
+                                    <div className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5 font-bold">Latest Check-in</div>
+                                    <div className="text-xs font-semibold text-zinc-400 flex items-center justify-end gap-1.5 lowercase">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                                         {member.lastCheckIn}
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={() => toggleStatus(member.id)}
-                                    className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${member.status === 'Active' ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20' :
-                                            member.status === 'Expiring' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                                'bg-zinc-800 text-zinc-500 border-zinc-700 hover:bg-green-500/10 hover:text-green-500'
+                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${member.status === 'Active' ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20' :
+                                        member.status === 'Expiring' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                            'bg-zinc-800 text-zinc-500 border-zinc-700 hover:bg-green-500/10 hover:text-green-500 hover:border-green-500/20'
                                         }`}
                                 >
                                     {member.status}
+                                </button>
+
+                                <button className="p-2.5 rounded-xl bg-zinc-800 text-zinc-500 hover:text-white transition-all">
+                                    <MoreHorizontal size={18} />
                                 </button>
                             </div>
                         </Card>
                     ))}
                 </div>
-            </section>
-
-            <Footer />
+            </div>
 
             <Modal
                 isOpen={isAddMemberOpen}
                 onClose={() => setIsAddMemberOpen(false)}
                 title="Register New Member"
             >
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <div>
-                        <label className="block text-sm text-zinc-400 mb-1">Member Name</label>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Member Name</label>
                         <input
                             type="text"
-                            className="w-full bg-black border border-zinc-800 rounded-lg p-2 text-white focus:border-primary focus:outline-none"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-primary focus:outline-none transition-all"
                             value={newMember.name}
                             onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                            placeholder="e.g. Dwayne Johnson"
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Membership Plan</label>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Membership Tier</label>
                             <select
-                                className="w-full bg-black border border-zinc-800 rounded-lg p-2 text-white focus:border-primary focus:outline-none"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-primary focus:outline-none transition-all"
                                 value={newMember.plan}
                                 onChange={(e) => setNewMember({ ...newMember, plan: e.target.value })}
                             >
-                                <option value="Basic">Basic</option>
-                                <option value="Pro">Pro</option>
-                                <option value="Elite">Elite</option>
+                                <option value="Basic">Basic Access</option>
+                                <option value="Pro">Pro Access</option>
+                                <option value="Elite">Elite Access</option>
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm text-zinc-400 mb-1">Duration (Months)</label>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Contract Period</label>
                             <select
-                                className="w-full bg-black border border-zinc-800 rounded-lg p-2 text-white focus:border-primary focus:outline-none"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:border-primary focus:outline-none transition-all"
                                 value={newMember.duration}
                                 onChange={(e) => setNewMember({ ...newMember, duration: e.target.value })}
                             >
                                 <option value="1">1 Month</option>
                                 <option value="3">3 Months</option>
                                 <option value="6">6 Months</option>
-                                <option value="12">1 Year</option>
+                                <option value="12">Full Year</option>
                             </select>
                         </div>
                     </div>
 
-                    <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-zinc-400">Total Due</span>
-                            <span className="text-xl font-bold text-primary">
+                    <div className="p-5 bg-primary/5 border border-primary/20 rounded-2xl">
+                        <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Subscription Total</span>
+                            <span className="text-2xl font-bold text-primary">
                                 ${(
                                     (newMember.plan === 'Basic' ? 29 : newMember.plan === 'Pro' ? 59 : 99) *
                                     parseInt(newMember.duration)
                                 )}
                             </span>
                         </div>
-                        <div className="text-xs text-zinc-500 text-right">
-                            Includes taxes & fees
+                        <div className="text-[10px] text-zinc-600 font-medium text-right lowercase italic">
+                            all taxes & processing fees included
                         </div>
                     </div>
 
-                    <Button className="w-full mt-2" onClick={handleAddMember}>
-                        Confirm Registration
+                    <Button className="w-full h-12 rounded-xl mt-2 shadow-lg shadow-primary/20" onClick={handleAddMember}>
+                        Analyze & Confirm Registration
                     </Button>
                 </div>
             </Modal>
-        </main>
+        </AIToolsLayout>
     );
 }

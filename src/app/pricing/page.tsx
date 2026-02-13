@@ -55,8 +55,8 @@ export default function PricingPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
                                 className={`p-8 rounded-3xl border ${tier.highlighted
-                                        ? 'border-primary bg-primary/5 shadow-[0_0_50px_-12px_rgba(var(--primary-rgb),0.3)]'
-                                        : 'border-zinc-800 bg-zinc-900/50'
+                                    ? 'border-primary bg-primary/5 shadow-[0_0_50px_-12px_rgba(var(--primary-rgb),0.3)]'
+                                    : 'border-zinc-800 bg-zinc-900/50'
                                     } text-left flex flex-col`}
                             >
                                 <div className="flex justify-between items-start mb-6">
@@ -81,11 +81,9 @@ export default function PricingPage() {
                                 </ul>
                                 <Button
                                     className="w-full py-6 text-base"
-                                    variant={tier.highlighted ? 'default' : 'outline'}
+                                    variant={tier.highlighted ? 'primary' : 'outline'}
                                     asChild
-                                >
-                                    <Link href="/contact">{tier.cta}</Link>
-                                </Button>
+                                ><Link href="/contact">{tier.cta}</Link></Button>
                             </motion.div>
                         ))}
                     </div>
@@ -99,9 +97,7 @@ export default function PricingPage() {
                         <Sparkles className="w-8 h-8 text-primary mx-auto mb-4" />
                         <h4 className="text-xl font-bold mb-2">Need something custom?</h4>
                         <p className="text-zinc-500 mb-6">We build dedicated growth stacks for enterprise needs.</p>
-                        <Button variant="link" className="text-primary hover:text-primary-light" asChild>
-                            <Link href="/contact">Talk to Strategy &rarr;</Link>
-                        </Button>
+                        <Button variant="link" className="text-primary hover:text-primary-light" asChild><Link href="/contact">Talk to Strategy &rarr;</Link></Button>
                     </motion.div>
                 </div>
             </section>

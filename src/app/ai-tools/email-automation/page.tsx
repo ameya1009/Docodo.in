@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
+import { AIToolsLayout } from '@/components/layout/AIToolsLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { motion } from 'framer-motion';
-import { Send, Sparkles, Copy, Check } from 'lucide-react';
+import { Send, Sparkles, Copy, Check, Info } from 'lucide-react';
 
 export default function EmailAutomationPage() {
     const [recipient, setRecipient] = useState('');
@@ -47,134 +46,140 @@ export default function EmailAutomationPage() {
     };
 
     return (
-        <main className="min-h-screen bg-black text-white">
-            <Navbar />
-
-            <section className="pt-32 pb-20 container">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="max-w-4xl mx-auto"
-                >
-                    <div className="text-center mb-12">
-                        <span className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">
-                            AI Workflow
-                        </span>
-                        <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                            Smart <span className="text-primary">Email Composer</span>
-                        </h1>
-                        <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-                            Transform bullet points into perfectly crafted emails in seconds.
-                            Select your tone and let our agents handle the nuance.
-                        </p>
+        <AIToolsLayout title="Email Automation">
+            <div className="max-w-5xl mx-auto space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold">Smart Email Composer</h1>
+                        <p className="text-zinc-500 text-sm">Draft professional emails with tone control and agents assistance.</p>
                     </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-blue-500 text-xs font-medium">
+                        <Info size={14} />
+                        Usage: 12/100 credits this month
+                    </div>
+                </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {/* Input Section */}
-                        <Card className="p-6 border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-                            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                                <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">1</span>
-                                Draft Details
-                            </h2>
+                <div className="grid lg:grid-cols-2 gap-8">
+                    {/* Input Section */}
+                    <Card className="p-6 border-zinc-800 bg-zinc-900/40 backdrop-blur-sm">
+                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs">1</span>
+                            Composer Context
+                        </h2>
 
-                            <div className="space-y-4">
+                        <div className="space-y-5">
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm text-zinc-400 mb-2">Recipient Name</label>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Recipient</label>
                                     <input
                                         type="text"
                                         value={recipient}
                                         onChange={(e) => setRecipient(e.target.value)}
-                                        className="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors"
+                                        className="w-full bg-black/40 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-primary focus:outline-none transition-all"
                                         placeholder="e.g. John Doe"
                                     />
                                 </div>
-
                                 <div>
-                                    <label className="block text-sm text-zinc-400 mb-2">Subject Context</label>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Subject</label>
                                     <input
                                         type="text"
                                         value={subject}
                                         onChange={(e) => setSubject(e.target.value)}
-                                        className="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors"
-                                        placeholder="e.g. Q4 Marketing Strategy"
+                                        className="w-full bg-black/40 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:border-primary focus:outline-none transition-all"
+                                        placeholder="Project Update"
                                     />
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label className="block text-sm text-zinc-400 mb-2">Key Points</label>
-                                    <textarea
-                                        value={points}
-                                        onChange={(e) => setPoints(e.target.value)}
-                                        className="w-full bg-black/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none transition-colors h-32 resize-none"
-                                        placeholder="- Budget approval needed&#10;- Timeline extended by 1 week&#10;- New creative assets attached"
-                                    />
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Key Points (One per line)</label>
+                                <textarea
+                                    value={points}
+                                    onChange={(e) => setPoints(e.target.value)}
+                                    className="w-full bg-black/40 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:border-primary focus:outline-none transition-all h-32 resize-none"
+                                    placeholder="- Budget approved&#10;- Timeline extended&#10;- Assets attached"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Drafting Tone</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {['Professional', 'Friendly', 'Urgent'].map((t) => (
+                                        <button
+                                            key={t}
+                                            onClick={() => setTone(t)}
+                                            className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all ${tone === t
+                                                ? 'bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)]'
+                                                : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                                                }`}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label className="block text-sm text-zinc-400 mb-2">Tone</label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {['Professional', 'Friendly', 'Urgent'].map((t) => (
-                                            <button
-                                                key={t}
-                                                onClick={() => setTone(t)}
-                                                className={`px-3 py-2 rounded-lg text-sm border transition-all ${tone === t
-                                                        ? 'bg-primary/20 border-primary text-primary'
-                                                        : 'bg-black/50 border-zinc-800 text-zinc-400 hover:border-zinc-700'
-                                                    }`}
-                                            >
-                                                {t}
-                                            </button>
-                                        ))}
+                            <Button
+                                size="lg"
+                                className="w-full h-12 rounded-xl"
+                                onClick={handleGenerate}
+                                disabled={isGenerating || !points}
+                            >
+                                {isGenerating ? (
+                                    <>
+                                        <span className="animate-spin mr-2">⟳</span> Writing Draft...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="mr-2 h-4 w-4" /> Generate with AI
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </Card>
+
+                    {/* Output Section */}
+                    <div className="flex flex-col h-full">
+                        <Card className="p-0 border-zinc-800 bg-zinc-900/40 backdrop-blur-sm h-full flex flex-col overflow-hidden">
+                            <div className="p-4 border-bottom border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+                                <h2 className="text-sm font-bold flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs">2</span>
+                                    Generated Preview
+                                </h2>
+                                {generatedEmail && (
+                                    <button
+                                        onClick={handleCopy}
+                                        className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700"
+                                    >
+                                        {copied ? (
+                                            <>
+                                                <Check size={14} className="text-green-500" />
+                                                <span>Copied!</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy size={14} />
+                                                <span>Copy Draft</span>
+                                            </>
+                                        )}
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className={`flex-1 p-6 font-mono text-sm leading-relaxed ${!generatedEmail ? 'flex items-center justify-center' : 'text-zinc-300'}`}>
+                                {generatedEmail ? (
+                                    <div className="whitespace-pre-wrap">{generatedEmail}</div>
+                                ) : (
+                                    <div className="text-center space-y-3">
+                                        <Send className="mx-auto text-zinc-700 mb-2" size={32} />
+                                        <p className="text-zinc-600 max-w-[200px]">Fill in the details and generate your first draft.</p>
                                     </div>
-                                </div>
-
-                                <Button
-                                    size="lg"
-                                    className="w-full mt-4"
-                                    onClick={handleGenerate}
-                                    disabled={isGenerating || !points}
-                                >
-                                    {isGenerating ? (
-                                        <>
-                                            <span className="animate-spin mr-2">⟳</span> Writing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="mr-2 h-4 w-4" /> Generate Draft
-                                        </>
-                                    )}
-                                </Button>
+                                )}
                             </div>
                         </Card>
-
-                        {/* Output Section */}
-                        <div className="relative">
-                            <Card className="p-6 border-zinc-800 bg-zinc-900/50 backdrop-blur-sm h-full flex flex-col">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold flex items-center gap-2">
-                                        <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">2</span>
-                                        AI Output
-                                    </h2>
-                                    {generatedEmail && (
-                                        <button
-                                            onClick={handleCopy}
-                                            className="text-zinc-400 hover:text-white transition-colors"
-                                            title="Copy to clipboard"
-                                        >
-                                            {copied ? <Check size={20} className="text-green-500" /> : <Copy size={20} />}
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className={`flex-1 rounded-xl border border-zinc-800 bg-black/50 p-6 whitespace-pre-wrap leading-relaxed ${!generatedEmail ? 'flex items-center justify-center text-zinc-600' : 'text-zinc-300'}`}>
-                                    {generatedEmail || "Your generated email will appear here..."}
-                                </div>
-                            </Card>
-                        </div>
                     </div>
-                </motion.div>
-            </section>
-            <Footer />
-        </main>
+                </div>
+            </div>
+        </AIToolsLayout>
     );
 }
