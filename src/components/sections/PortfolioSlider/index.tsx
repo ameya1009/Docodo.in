@@ -128,7 +128,7 @@ export function PortfolioSlider() {
                                     <Image
                                         src={project.image}
                                         alt={project.title}
-                                        className={styles.image}
+                                        className={`${styles.image} object-cover`}
                                         fill
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     />
