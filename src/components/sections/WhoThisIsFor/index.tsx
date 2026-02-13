@@ -6,16 +6,16 @@ import styles from './WhoThisIsFor.module.css';
 
 const criteria = {
     for: [
-        "Founders with <10 employees",
-        "Businesses needing systems, not just tasks",
-        "Teams that value speed over bureaucracy",
-        "Founders willing to invest in long-term growth"
+        "Founder-led B2B SaaS ($1M - $10M ARR)",
+        "Technical founders scaling beyond their personal network",
+        "Teams needing a growth 'engine', not just a landing page",
+        "Founders who value engineering rigor over agency fluff"
     ],
     notFor: [
-        "Enterprise-scale infrastructure needs",
-        "Companies wanting a full-time in-house team",
-        "Low-budget/price-only shoppers",
-        "Anyone expecting overnight results"
+        "Pre-revenue startups looking for 'hacks'",
+        "Enterprise-scale companies with massive internal silos",
+        "Founders looking for the cheapest hourly retainer",
+        "Anyone who views marketing as separate from engineering"
     ]
 };
 

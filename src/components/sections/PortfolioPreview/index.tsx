@@ -4,22 +4,22 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import styles from './PortfolioPreview.module.css';
 
-const projects = [
+const works = [
     {
-        title: 'Scaling Neon Fintech (+40% CAC Efficiency)',
-        category: 'High-Velocity GTM System',
-        color: '#00E5FF',
+        title: 'Dr. Patangankar',
+        category: 'Medical Infrastructure',
+        image: '/images/clients/dr-patangankar.jpg'
     },
     {
-        title: '3x Direct Revenue for Aura Wellness',
-        category: 'Authority & Brand Transformation',
-        color: '#7C3AED',
+        title: 'BIOgram',
+        category: 'Health Brand Identity',
+        image: 'https://images.unsplash.com/photo-1576091160550-2173dba9690a?auto=format&fit=crop&q=80&w=800'
     },
     {
-        title: 'Nexus AI: Engineered for Product-Led Growth',
-        category: 'Full-Stack Performance Architecture',
-        color: '#F59E0B',
-    },
+        title: 'Clearth',
+        category: 'Eco Growth Strategy',
+        image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800'
+    }
 ];
 
 export function PortfolioPreview() {
@@ -32,15 +32,18 @@ export function PortfolioPreview() {
                 </div>
 
                 <div className={styles.grid}>
-                    {projects.map((project, index) => (
+                    {works.map((work, index) => (
                         <Card key={index} className={styles.projectCard}>
-                            <div
-                                className={styles.projectImage}
-                                style={{ background: `linear-gradient(135deg, ${project.color}20, ${project.color}80)` }}
-                            />
+                            <div className={styles.projectImageWrapper}>
+                                {work.image ? (
+                                    <img src={work.image} alt={work.title} className={styles.projectImage} />
+                                ) : (
+                                    <div className={styles.projectImagePlaceholder} />
+                                )}
+                            </div>
                             <div className={styles.projectInfo}>
-                                <h3>{project.title}</h3>
-                                <p>{project.category}</p>
+                                <h3>{work.title}</h3>
+                                <p>{work.category}</p>
                             </div>
                         </Card>
                     ))}

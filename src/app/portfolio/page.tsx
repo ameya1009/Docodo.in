@@ -10,46 +10,32 @@ import styles from './Portfolio.module.css';
 
 const works = [
     {
-        title: 'Neon Fintech Portal',
-        category: 'FINTECH & SAAS',
-        description: 'Engineered a conversion-focused dashboard that increased user retention by 35% through intuitive IA.',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200',
+        title: 'Dr. Patangankar',
+        category: 'HEALTHCARE ARCHITECTURE',
+        description: 'A comprehensive digital ecosystem for a specialized medical centre, streamlining patient acquisition and authority.',
+        image: '/images/clients/dr-patangankar.jpg',
         color: 'var(--color-primary)'
     },
     {
-        title: 'Aura Wellness',
-        category: 'D2C E-COMMERCE',
-        description: 'Complete brand transformation and headless commerce implementation resulting in 3x revenue growth.',
-        image: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&q=80&w=1200',
+        title: 'BIOgram',
+        category: 'HEALTH & NUTRITION',
+        description: 'Scaling a wellness brand through systematic identity design and acquisition-focused architecture.',
+        image: 'https://images.unsplash.com/photo-1576091160550-2173dba9690a?auto=format&fit=crop&q=80&w=1200',
         color: 'var(--color-secondary)'
     },
     {
-        title: 'Nexus AI Dashboard',
-        category: 'AI ARCHITECTURE',
-        description: 'Next-gen analytics platform for enterprise AI teams, focusing on complex data visualization.',
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200',
+        title: 'Clearth',
+        category: 'SUSTAINABILITY',
+        description: 'Brand transformation and digital systems for an eco-conscious growth initiative.',
+        image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1200',
         color: 'var(--color-accent)'
     },
     {
-        title: 'Urban Estate',
-        category: 'PROPTECH',
-        description: 'Immersive real-estate discovery engine with AR integration and intelligent lead capture.',
-        image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1200',
-        color: 'var(--color-primary)'
-    },
-    {
-        title: 'Flow Automate',
-        category: 'REV-OPS',
-        description: 'Strategic B2B automation systems that removed procurement friction for scaling startups.',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200',
-        color: 'var(--color-secondary)'
-    },
-    {
-        title: 'Zenith Brand',
-        category: 'ID & SYSTEMS',
-        description: 'Modular design system and category-defining identity for a category-leading digital studio.',
+        title: 'KKY',
+        category: 'FOUNDER BRANDING',
+        description: 'Personal authority positioning and minimalist visual systems for a leader-led venture.',
         image: 'https://images.unsplash.com/photo-1634942537034-2531766767d7?auto=format&fit=crop&q=80&w=1200',
-        color: 'var(--color-accent)'
+        color: 'var(--color-primary)'
     }
 ];
 

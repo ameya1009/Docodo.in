@@ -74,8 +74,8 @@ export function Hero() {
                         }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        We build systems for founders <br />
-                        <span className={styles.glitchText}>who move fast.</span>
+                        Growth systems for founders <br />
+                        <span className={styles.glitchText}>scaling $1M - $10M ARR.</span>
                     </motion.h1>
 
                     <motion.p
@@ -85,8 +85,9 @@ export function Hero() {
                             visible: { opacity: 1, y: 0 }
                         }}
                     >
-                        Docodo engineers conversion-first websites and automated GTM systems
-                        that allow you to focus on the product, not the pipeline.
+                        We engineer conversion-first websites and automated GTM engines
+                        that turn product excellence into predictable revenue.
+                        No fluff. Just engineering rigor.
                     </motion.p>
 
                     <motion.div
@@ -96,11 +97,11 @@ export function Hero() {
                             visible: { opacity: 1, y: 0 }
                         }}
                     >
-                        <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/contact')}>
-                            Get a Free Growth Audit
+                        <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/growth-grader')}>
+                            Get Your Free Growth Audit
                         </Button>
-                        <Button variant="outline" size="lg" className={styles.secBtn} onClick={() => router.push('/about#how-we-work')}>
-                            See Our Playbook
+                        <Button variant="outline" size="lg" className={styles.secBtn} onClick={() => router.push('/about#methodology')}>
+                            See Our Methodology
                         </Button>
                     </motion.div>
                 </motion.div>

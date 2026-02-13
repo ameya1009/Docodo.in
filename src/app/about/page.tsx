@@ -63,36 +63,24 @@ export default function AboutPage() {
                         </div>
                         <div className={styles.manifestoContent}>
                             <div className={styles.contentBlock}>
-                                <span className={styles.blockLabel}>01 / Philosophy</span>
-                                <h3 className={styles.blockTitle}>Truth + Intent</h3>
+                                <span className={styles.blockLabel}>01 / Origin Story</span>
+                                <h3 className={styles.blockTitle}>From Electronics to Growth Engines</h3>
+                                <p>
+                                    [Your 300-word origin story will go here. It should cover: Why you started Docodo, your engineering background as an unfair advantage, and what drives you vs. traditional agencies.]
+                                </p>
                                 <p>
                                     I spent years designing circuits where a single loose connection means failure. I carry that same engineering rigor into digital growth.
                                     At Docodo, we don't guess. We architect.
                                 </p>
+                            </div>
+
+                            <div className={styles.contentBlock}>
+                                <span className={styles.blockLabel}>02 / The Philosophy</span>
+                                <h3 className={styles.blockTitle}>Systems Over Splashes</h3>
                                 <p>
+                                    Traditional marketing is built on "splashes"—momentary bursts of attention. We build steady-state engines.
                                     Every line of code and every automation node we build has a singular intent: <strong>measurable revenue efficiency.</strong>
                                 </p>
-                            </div>
-
-                            <div className={styles.contentBlock}>
-                                <span className={styles.blockLabel}>02 / Credential</span>
-                                <h3 className={styles.blockTitle}>Engineered for Reliability</h3>
-                                <div className={styles.credGrid}>
-                                    <div className={styles.credItem}>
-                                        <Award className="text-primary w-5 h-5" />
-                                        <span>Electronics & Telecommunication Engineer</span>
-                                    </div>
-                                    <div className={styles.credItem}>
-                                        <Shield className="text-primary w-5 h-5" />
-                                        <span>Certified Systems Architect</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={styles.contentBlock}>
-                                <div className={styles.quoteBox}>
-                                    "Traditional agencies are built on retainers. We are built on results. If we haven't increased your operational velocity, we haven't done our job."
-                                </div>
                             </div>
                         </div>
                     </div>

@@ -9,29 +9,29 @@ const services = [
     {
         icon: <LineChart className="w-8 h-8 text-primary" />,
         title: 'Full-Funnel Demand Generation',
-        description: 'Next-gen SEO systems + multi-channel lead capture. We move beyond "traffic" to build scalable pipeline engines.',
-        pricing: 'Starting from ₹45,000',
-        timeline: '3-4 Weeks'
+        description: 'SEO systems + conversion-focused lead capture. We build the demand engine that adds measurable pipeline, not just vanity traffic.',
+        pricing: 'Investment: ₹45,000 - ₹65,000',
+        timeline: '3-4 Weeks Setup'
     },
     {
         icon: <Palette className="w-8 h-8 text-secondary" />,
-        title: 'High-Velocity GTM Systems',
-        description: 'Rapid-deployment landing pages + high-intent conversion architecture. Perfect for scaling SaaS and premium services.',
-        pricing: 'Starting from ₹35,000',
+        title: 'Founder-led GTM Systems',
+        description: 'High-velocity landing pages and conversion architecture. Perfect for technical founders who need product excellence reflected in their GTM.',
+        pricing: 'Investment: ₹35,000 - ₹55,000',
         timeline: '2-3 Weeks'
     },
     {
         icon: <Bot className="w-8 h-8 text-accent" />,
-        title: 'Revenue Operations Automation',
-        description: 'WhatsApp CRM integration + intelligent lead routing. We remove friction from your sales process through AI.',
-        pricing: 'Starting from ₹25,000',
+        title: 'Revenue Ops Automation',
+        description: 'Intelligent lead routing and CRM integration. We remove operational friction so you can focus on closing, not chasing.',
+        pricing: 'Investment: ₹25,000+',
         timeline: '1-2 Weeks'
     },
     {
         icon: <Rocket className="w-8 h-8 text-primary" />,
-        title: 'Authority & Category Leadership',
-        description: 'Strategic content engines + ecosystem positioning. We turn your expertise into a measurable competitive advantage.',
-        pricing: 'Starting from ₹20,000/mo',
+        title: 'Authority Architecture',
+        description: 'Strategic content engines that turn your expertise into category leadership. We build your proprietary demand system.',
+        pricing: 'Retainer: ₹20,000/mo',
         timeline: 'Ongoing'
     }
 ];
