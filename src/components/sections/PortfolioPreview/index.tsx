@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import Image from 'next/image';
 import styles from './PortfolioPreview.module.css';
 
 const works = [
@@ -34,12 +35,14 @@ export function PortfolioPreview() {
                 <div className={styles.grid}>
                     {works.map((work, index) => (
                         <Card key={index} className={styles.projectCard}>
-                            <div className={styles.projectImageWrapper}>
-                                {work.image ? (
-                                    <img src={work.image} alt={work.title} className={styles.projectImage} />
-                                ) : (
-                                    <div className={styles.projectImagePlaceholder} />
-                                )}
+                            <div className={styles.projectImageWrapper} style={{ position: 'relative', height: '100%', width: '100%' }}>
+                                <Image
+                                    src={work.image}
+                                    alt={work.title}
+                                    fill
+                                    className={styles.projectImage}
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw"
+                                />
                             </div>
                             <div className={styles.projectInfo}>
                                 <h3>{work.title}</h3>
