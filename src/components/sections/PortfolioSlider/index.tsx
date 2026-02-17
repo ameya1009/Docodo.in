@@ -33,14 +33,6 @@ const projects = [
         stats: ['Streamlined Patient Funnel', 'Institutional Authority', 'Conversion-First Design'],
     },
     {
-        title: 'Clearth',
-        category: 'Sustainable Brand Systems',
-        image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1200',
-        color: '#2DD4BF',
-        description: 'Visual language and strategic messaging for an eco-conscious initiative.',
-        stats: ['"Clearth Starts With You" Campaign', 'Brand Storytelling', 'Growth Architecture'],
-    },
-    {
         title: 'KKY',
         category: 'Personal Identity & Positioning',
         image: 'https://images.unsplash.com/photo-1634942537034-2531766767d7?auto=format&fit=crop&q=80&w=1200',
