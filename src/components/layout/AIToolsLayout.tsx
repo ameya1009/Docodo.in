@@ -48,17 +48,15 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
         }
     ];
 
-    const currentTool = menuItems.find(item => item.href === pathname);
-
     return (
         <div className={styles.layout}>
             {/* Sidebar */}
             <aside className={styles.sidebar}>
                 <div className={styles.sidebarHeader}>
                     <div className={styles.logoIcon}>
-                        <Sparkles size={24} />
+                        <Sparkles size={20} />
                     </div>
-                    <span className={styles.logoText}>Docodo Intelligence</span>
+                    <span className={styles.logoText}>Intelligence</span>
                 </div>
 
                 <nav className={styles.nav}>
@@ -83,7 +81,7 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
                         </Link>
                         <Link href="/" className={styles.navItem}>
                             <LogOut className={styles.navIcon} />
-                            Exit Dashboard
+                            Exit
                         </Link>
                     </div>
                 </nav>
@@ -91,9 +89,9 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
                 <div className={styles.sidebarFooter}>
                     <div className={styles.upgradePrompt}>
                         <p className={styles.upgradeText}>
-                            Unlock advanced agent capabilities with Pro plan.
+                            Get advanced agent capabilities with Pro.
                         </p>
-                        <button className="w-full py-2 bg-primary text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all">
+                        <button className="w-full py-1.5 bg-white text-black text-[10px] font-bold rounded-md hover:opacity-90 transition-all">
                             Upgrade Now
                         </button>
                     </div>
@@ -105,23 +103,23 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
                 <header className={styles.header}>
                     <div className={styles.breadcrumb}>
                         <Link href="/" className={styles.breadcrumbLink}>Docodo</Link>
-                        <ChevronRight size={14} />
+                        <ChevronRight size={10} />
                         <Link href="/ai-tools" className={styles.breadcrumbLink}>Intelligence</Link>
-                        {title && (
+                        {title && title !== 'Overview' && (
                             <>
-                                <ChevronRight size={14} />
-                                <span className="text-white font-medium">{title}</span>
+                                <ChevronRight size={10} />
+                                <span className="text-white font-semibold">{title}</span>
                             </>
                         )}
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-xs text-zinc-400 font-medium">System Status: Active</span>
+                        <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Active</span>
                         </div>
                         <button className="lg:hidden p-2 text-zinc-400">
-                            <Menu size={20} />
+                            <Menu size={18} />
                         </button>
                     </div>
                 </header>
@@ -131,7 +129,7 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
                 </div>
 
                 <footer className={styles.footer}>
-                    <p>© 2026 Docodo Intelligence Suite. All rights reserved.</p>
+                    <p>© 2026 Docodo Intelligence Suite</p>
                     <div className="flex gap-4">
                         <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
                         <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
