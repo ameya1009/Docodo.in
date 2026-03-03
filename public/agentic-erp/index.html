@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic ERP CEO Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --card: rgba(255, 255, 255, 0.05);
+            --accent: #00f2ff;
+            --text: #ffffff;
+            --subtext: #a0a0a0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px; /* Mobile First */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--subtext);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .agent-notifications {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .agent-notifications h2 {
+            font-size: 1rem;
+            margin-top: 0;
+            color: var(--subtext);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification {
+            border-left: 2px solid var(--accent);
+            padding-left: 15px;
+            margin-bottom: 15px;
+        }
+
+        .notification p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .oracle-bar {
+            position: sticky;
+            bottom: 20px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 30px;
+            box-sizing: border-box;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        button.query-btn {
+            background: var(--accent);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .pricing-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .razorpay-btn {
+            background: #232a3a;
+            color: #fff;
+            border: 0.5px solid #484d58;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .razorpay-btn:hover {
+            background: #333d4f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Agentic ERP</h1>
+            <p style="color: var(--subtext); font-size: 0.8rem;">Reasoning Engine v1.0 | Active Agents: 3</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Daily Margin</div>
+                <div class="value">24.5%</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Tasks Automated</div>
+                <div class="value">142</div>
+            </div>
+        </div>
+
+        <div class="agent-notifications">
+            <h2><span style="color: var(--accent)">●</span> Agent Activity</h2>
+            <div class="notification">
+                <p><strong>Inventory Agent:</strong> Low stock detected for Chip-A1. Draft PO #882 created.</p>
+                <small style="color: var(--subtext)">2 mins ago</small>
+            </div>
+            <div class="notification">
+                <p><strong>Finance Agent:</strong> SAP Migration sync complete. 12,000 entities cleaned.</p>
+                <small style="color: var(--subtext)">1 hour ago</small>
+            </div>
+        </div>
+
+        <div class="pricing-section">
+            <button class="razorpay-btn" onclick="payNow()">
+                Pay Success Fee (Task #142)
+            </button>
+            <p style="font-size: 0.7rem; color: var(--subtext); margin-top: 10px;">
+                Success-Based Pricing: $1.00 per agent task
+            </p>
+        </div>
+
+        <div class="oracle-bar">
+            <input type="text" placeholder="Ask Oracle (NL2SQL)...">
+            <button class="query-btn">→</button>
+        </div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        function payNow() {
+            var options = {
+                "key": "rzp_test_YOUR_KEY", 
+                "amount": "100", // $1
+                "currency": "USD",
+                "name": "Agentic ERP",
+                "description": "Success-Based Task Fee",
+                "handler": function (response){
+                    alert("Payment Successful: " + response.razorpay_payment_id);
+                },
+                "theme": {
+                    "color": "#00f2ff"
+                }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+        }
+    </script>
+</body>
+</html>
