@@ -39,6 +39,17 @@ const tools = [
         href: '/ai-tools/gym-management',
         status: 'Active',
         category: 'Facility'
+    },
+    {
+        id: 'agentic-erp',
+        title: 'Agentic ERP',
+        description: 'Autonomous reasoning engine for Finance, Inventory, and CRM. The UI is secondary to execution.',
+        icon: <Brain className="w-6 h-6" />,
+        color: 'text-cyan-400',
+        bgColor: 'bg-cyan-400/10',
+        href: '/ai-tools/agentic-erp',
+        status: 'New',
+        category: 'Enterprise'
     }
 ];
 
