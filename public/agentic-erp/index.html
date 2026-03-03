@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +31,8 @@
 
         .container {
             width: 100%;
-            max-width: 450px; /* Mobile First */
+            max-width: 450px;
+            /* Mobile First */
             padding: 20px;
             box-sizing: border-box;
         }
@@ -94,10 +96,28 @@
             gap: 10px;
         }
 
+        .notifications-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
         .notification {
             border-left: 2px solid var(--accent);
             padding-left: 15px;
             margin-bottom: 15px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .notification p {
@@ -118,6 +138,12 @@
             display: flex;
             gap: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: 0.3s;
+        }
+
+        .oracle-bar:focus-within {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.12);
         }
 
         input {
@@ -137,14 +163,19 @@
             border-radius: 50%;
             cursor: pointer;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .pricing-section {
             text-align: center;
             margin-top: 20px;
+            margin-bottom: 80px;
         }
 
-        .razorpay-btn {
+        .razorpay-btn,
+        .demo-btn {
             background: #232a3a;
             color: #fff;
             border: 0.5px solid #484d58;
@@ -153,77 +184,147 @@
             font-size: 0.9rem;
             cursor: pointer;
             transition: 0.3s;
+            margin: 5px;
         }
 
-        .razorpay-btn:hover {
+        .demo-btn {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .razorpay-btn:hover,
+        .demo-btn:hover {
             background: #333d4f;
+        }
+
+        .oracle-response {
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid var(--accent);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            display: none;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1>Agentic ERP</h1>
-            <p style="color: var(--subtext); font-size: 0.8rem;">Reasoning Engine v1.0 | Active Agents: 3</p>
+            <p style="color: var(--subtext); font-size: 0.8rem;">Reasoning Engine v2.0 | [Target: docodo.in]</p>
         </header>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="label">Daily Margin</div>
-                <div class="value">24.5%</div>
+                <div class="value" id="margin-val">24.5%</div>
             </div>
             <div class="stat-card">
                 <div class="label">Tasks Automated</div>
-                <div class="value">142</div>
+                <div class="value" id="tasks-count">--</div>
             </div>
         </div>
 
         <div class="agent-notifications">
-            <h2><span style="color: var(--accent)">●</span> Agent Activity</h2>
-            <div class="notification">
-                <p><strong>Inventory Agent:</strong> Low stock detected for Chip-A1. Draft PO #882 created.</p>
-                <small style="color: var(--subtext)">2 mins ago</small>
-            </div>
-            <div class="notification">
-                <p><strong>Finance Agent:</strong> SAP Migration sync complete. 12,000 entities cleaned.</p>
-                <small style="color: var(--subtext)">1 hour ago</small>
+            <h2><span style="color: var(--accent)">●</span> Live Agent Activity</h2>
+            <div id="notifications-list" class="notifications-list">
+                <!-- Notifications load here -->
             </div>
         </div>
 
         <div class="pricing-section">
+            <button class="demo-btn" onclick="triggerAgent()">
+                Test Inventory Agent
+            </button>
             <button class="razorpay-btn" onclick="payNow()">
-                Pay Success Fee (Task #142)
+                Pay Success Fee
             </button>
             <p style="font-size: 0.7rem; color: var(--subtext); margin-top: 10px;">
                 Success-Based Pricing: $1.00 per agent task
             </p>
         </div>
 
+        <div id="oracle-response" class="oracle-response"></div>
+
         <div class="oracle-bar">
-            <input type="text" placeholder="Ask Oracle (NL2SQL)...">
-            <button class="query-btn">→</button>
+            <input type="text" id="oracle-query" placeholder="Ask Oracle (NL2SQL)..." onkeypress="handleEnter(event)">
+            <button class="query-btn" onclick="runOracle()">→</button>
         </div>
     </div>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+        async function fetchTasks() {
+            try {
+                const res = await fetch('/api/tasks');
+                const tasks = await res.json();
+                const list = document.getElementById('notifications-list');
+                list.innerHTML = '';
+                tasks.forEach(task => {
+                    const div = document.createElement('div');
+                    div.className = 'notification';
+                    div.innerHTML = `<p><strong>${task.agent} Agent:</strong> ${task.message}</p>
+                                     <small style="color: var(--subtext)">${task.time}</small>`;
+                    list.appendChild(div);
+                });
+                document.getElementById('tasks-count').innerText = tasks.length;
+            } catch (e) { console.error(e); }
+        }
+
+        async function runOracle() {
+            const query = document.getElementById('oracle-query').value;
+            if (!query) return;
+            const respDiv = document.getElementById('oracle-response');
+            respDiv.style.display = 'block';
+            respDiv.innerText = 'Oracle thinking...';
+
+            try {
+                const res = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: query })
+                });
+                const data = await res.json();
+                respDiv.innerText = data.result;
+            } catch (e) {
+                respDiv.innerText = 'Oracle offline. Check backend.';
+            }
+        }
+
+        async function triggerAgent() {
+            try {
+                await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'low_stock', payload: { sku: 'CHIP-A1-X' } })
+                });
+                alert('Event emitted. Reasoning Engine notified.');
+                setTimeout(fetchTasks, 1000);
+            } catch (e) { alert('Integration failed.'); }
+        }
+
+        function handleEnter(e) { if (e.key === 'Enter') runOracle(); }
+
         function payNow() {
             var options = {
-                "key": "rzp_test_YOUR_KEY", 
-                "amount": "100", // $1
+                "key": "rzp_test_YOUR_KEY",
+                "amount": "100",
                 "currency": "USD",
                 "name": "Agentic ERP",
                 "description": "Success-Based Task Fee",
-                "handler": function (response){
-                    alert("Payment Successful: " + response.razorpay_payment_id);
-                },
-                "theme": {
-                    "color": "#00f2ff"
-                }
+                "handler": function (response) { alert("Payment Successful: " + response.razorpay_payment_id); },
+                "theme": { "color": "#00f2ff" }
             };
             var rzp1 = new Razorpay(options);
             rzp1.open();
         }
+
+        // Auto-refresh tasks
+        setInterval(fetchTasks, 5000);
+        fetchTasks();
     </script>
 </body>
+
 </html>
