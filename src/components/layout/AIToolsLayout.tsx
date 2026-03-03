@@ -12,7 +12,8 @@ import {
     Sparkles,
     Settings,
     LogOut,
-    Menu
+    Menu,
+    Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import styles from './AIToolsLayout.module.css';
@@ -45,6 +46,11 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
             icon: <Dumbbell className={styles.navIcon} />,
             label: 'FitFlow Manager',
             href: '/ai-tools/gym-management'
+        },
+        {
+            icon: <Brain className={styles.navIcon} />,
+            label: 'Agentic ERP',
+            href: '/ai-tools/agentic-erp'
         }
     ];
 
