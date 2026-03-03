@@ -73,8 +73,7 @@ export default function AboutPage() {
                                         I spent years designing electronics where a single loose connection means failure.
                                         I carry that same rigor into digital growth. At Docodo, we don't guess. We architect.
                                     </p>
-                                    <p className={styles.placeholderNote}>
-                                        {/* Founder: Replace this block with your 300-word origin story regarding Docodo's genesis and your engineering advantage. */}
+                                    <p>
                                         The agency model is broken. Founders don't need more "creative brainstorming"—they need predictable revenue systems that scale without breaking.
                                         Docodo was founded to bridge the gap between product excellence and market dominance through engineering-led GTM.
                                     </p>

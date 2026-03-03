@@ -124,25 +124,35 @@ export default function ServicesPage() {
                             }}
                             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                         >
-                            <div className={styles.card}>
+                            <div
+                                className={styles.card}
+                                style={{ '--pkg-color': pkg.color } as React.CSSProperties}
+                            >
                                 <div className={styles.cardGlow} />
-                                <div className={styles.iconWrapper}>
+                                <div className={styles.iconWrapper} style={{ color: pkg.color }}>
                                     {pkg.icon}
                                 </div>
                                 <h3 className="text-2xl font-bold text-white mb-2">{pkg.title}</h3>
-                                <div className={styles.price}>{pkg.price}</div>
+                                <div className={styles.price} style={{ color: pkg.color }}>{pkg.price}</div>
                                 <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
                                     {pkg.description}
                                 </p>
                                 <ul className={styles.features}>
                                     {pkg.features.map((feature, idx) => (
                                         <li key={idx} className={styles.feature}>
-                                            <Check className="w-5 h-5 text-primary shrink-0" />
+                                            <Check className="w-5 h-5 shrink-0" style={{ color: pkg.color }} />
                                             <span>{feature}</span>
                                         </li>
                                     ))}
                                 </ul>
-                                <Button className="w-full mt-4 group">
+                                <Button
+                                    className="w-full mt-4 group"
+                                    style={{
+                                        backgroundColor: pkg.color,
+                                        color: '#000',
+                                        boxShadow: `0 0 20px -5px ${pkg.color}66`
+                                    } as React.CSSProperties}
+                                >
                                     Deploy System <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                                 </Button>
                             </div>

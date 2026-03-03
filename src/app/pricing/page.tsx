@@ -55,7 +55,7 @@ export default function PricingPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
                                 className={`p-8 rounded-3xl border ${tier.highlighted
-                                    ? 'border-primary bg-primary/5 shadow-[0_0_50px_-12px_rgba(var(--primary-rgb),0.3)]'
+                                    ? 'border-primary bg-primary/5 shadow-[0_0_50px_-12px_rgba(0,229,255,0.3)]'
                                     : 'border-zinc-800 bg-zinc-900/50'
                                     } text-left flex flex-col`}
                             >

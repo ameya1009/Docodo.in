@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -25,6 +25,7 @@ interface AIToolsLayoutProps {
 
 export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
     const pathname = usePathname();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const menuItems = [
         {
@@ -56,8 +57,19 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
 
     return (
         <div className={styles.layout}>
+            {/* Sidebar Overlay */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[48] lg:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={styles.sidebar}>
+            <aside className={cn(
+                styles.sidebar,
+                isMobileMenuOpen && styles.mobileSidebarOpen
+            )}>
                 <div className={styles.sidebarHeader}>
                     <div className={styles.logoIcon}>
                         <Sparkles size={20} />
@@ -124,7 +136,10 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
                             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Active</span>
                         </div>
-                        <button className="lg:hidden p-2 text-zinc-400">
+                        <button
+                            className="lg:hidden p-2 text-zinc-400 hover:text-white transition-colors"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        >
                             <Menu size={18} />
                         </button>
                     </div>

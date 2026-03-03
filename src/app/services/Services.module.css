@@ -40,7 +40,7 @@
 
 .card:hover {
     background: rgba(255, 255, 255, 0.02);
-    border-color: var(--color-primary-glow);
+    border-color: var(--pkg-color);
     transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
@@ -51,8 +51,9 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(0, 229, 255, 0.03), transparent 70%);
+    background: radial-gradient(circle, var(--pkg-color), transparent 70%);
     opacity: 0;
+    filter: blur(40px);
     transition: opacity 0.5s ease;
     pointer-events: none;
 }

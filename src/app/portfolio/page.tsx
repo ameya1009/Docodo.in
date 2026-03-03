@@ -108,11 +108,18 @@ export default function PortfolioPage() {
                                     />
                                     <div className={styles.overlay} />
                                     <div className={styles.content}>
-                                        <span className={styles.tag}>{work.category}</span>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className={styles.tag}>{work.category}</span>
+                                            {work.stats && (
+                                                <span className="text-[10px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20 uppercase tracking-widest">
+                                                    {work.stats}
+                                                </span>
+                                            )}
+                                        </div>
                                         <h3 className={styles.cardTitle}>{work.title}</h3>
                                         <p className={styles.description}>{work.description}</p>
-                                        <Button variant="outline" size="sm" className="mt-4 border-white/20 hover:bg-white hover:text-black">
-                                            View Outcome <ArrowRight className="ml-2 w-4 h-4" />
+                                        <Button variant="outline" size="sm" className="mt-6 border-white/10 hover:bg-white hover:text-black group transition-all duration-500">
+                                            Case Study <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                                         </Button>
                                     </div>
                                 </div>

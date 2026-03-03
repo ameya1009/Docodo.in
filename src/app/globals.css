@@ -1,18 +1,24 @@
 :root {
   /* Premium Brand Palette - HSL for better control */
-  --color-primary-hsl: 185, 100%, 50%; /* Cyan 500 equivalent but pure */
+  --color-primary-hsl: 185, 100%, 50%;
+  /* Cyan 500 equivalent but pure */
   --color-primary: hsl(var(--color-primary-hsl));
+  --color-primary-dark: hsl(185, 100%, 40%);
   --color-primary-glow: hsla(var(--color-primary-hsl), 0.5);
-  
-  --color-secondary-hsl: 263, 70%, 50%; /* Violet 600 */
+
+  --color-secondary-hsl: 263, 70%, 50%;
+  /* Violet 600 */
   --color-secondary: hsl(var(--color-secondary-hsl));
+  --color-secondary-dark: hsl(263, 70%, 40%);
   --color-secondary-glow: hsla(var(--color-secondary-hsl), 0.5);
 
-  --color-accent-hsl: 38, 92%, 50%; /* Amber 500 */
+  --color-accent-hsl: 38, 92%, 50%;
+  /* Amber 500 */
   --color-accent: hsl(var(--color-accent-hsl));
 
   /* Nuanced Neutral Palette */
-  --color-bg: #030303; /* Deeper than basic black */
+  --color-bg: #030303;
+  /* Deeper than basic black */
   --color-surface: #0a0a0b;
   --color-surface-hover: #121214;
   --color-border: rgba(255, 255, 255, 0.08);
@@ -70,7 +76,12 @@ body {
 }
 
 /* Typography Hierarchy */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading), sans-serif;
   font-weight: 700;
   color: var(--color-text-main);
@@ -78,14 +89,32 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.03em;
 }
 
-h1 { font-size: clamp(3.5rem, 9vw, 6rem); letter-spacing: -0.05em; }
-h2 { font-size: clamp(2.5rem, 6vw, 4rem); letter-spacing: -0.04em; }
-h3 { font-size: clamp(1.75rem, 4vw, 2.75rem); }
+h1 {
+  font-size: clamp(3.5rem, 9vw, 6rem);
+  letter-spacing: -0.05em;
+}
+
+h2 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  letter-spacing: -0.04em;
+}
+
+h3 {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+}
 
 @media (max-width: 768px) {
-  h1 { font-size: 3rem; }
-  h2 { font-size: 2.25rem; }
-  h3 { font-size: 1.75rem; }
+  h1 {
+    font-size: 3rem;
+  }
+
+  h2 {
+    font-size: 2.25rem;
+  }
+
+  h3 {
+    font-size: 1.75rem;
+  }
 }
 
 a {
@@ -114,11 +143,10 @@ a:hover {
 
 /* 1. Ultra-Refined Gradient Text */
 .text-gradient {
-  background: linear-gradient(135deg, 
-    var(--color-primary) 0%, 
-    var(--color-secondary) 50%,
-    var(--color-accent) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-primary) 0%,
+      var(--color-secondary) 50%,
+      var(--color-accent) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -127,7 +155,9 @@ a:hover {
 }
 
 @keyframes shine {
-  to { background-position: 200% center; }
+  to {
+    background-position: 200% center;
+  }
 }
 
 /* 2. Advanced Glassmorphism */
@@ -176,7 +206,8 @@ a:hover {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 30px -5px var(--color-primary-glow);
-  background: #fff; /* Flash effect on hover */
+  background: #fff;
+  /* Flash effect on hover */
 }
 
 .btn-outline {
@@ -195,8 +226,10 @@ a:hover {
 body::before {
   content: "";
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image: url("https://grainy-gradients.vercel.app/noise.svg");
   opacity: 0.03;
   pointer-events: none;
