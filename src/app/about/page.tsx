@@ -23,15 +23,15 @@ export default function AboutPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                         >
-                            <span className={styles.kicker}>The Docodo Story</span>
+                            <span className={styles.kicker}>The Docodo Vision</span>
                             <h1 className={styles.headline}>
-                                We're not an agency.<br />
-                                We're your <span className="text-gradient">Growth Engineers.</span>
+                                The Apple of <br />
+                                <span className="text-gradient">SMB Digital Growth.</span>
                             </h1>
                             <p className={styles.introPara}>
-                                Founded by an electronics engineer, Docodo was built on a simple premise:
-                                Marketing is just another system to be optimized. We've stripped away the fluff
-                                and high-agency overhead to build high-velocity growth engines for founders.
+                                Integrated Websites, Digital Marketing, and AI Automations
+                                engineered to give Pune clinics, cafes, and salons
+                                the power of a tech giant at an accessible, Android-scale volume.
                             </p>
                         </motion.div>
                         <div className={styles.heroVisualSpace}>
@@ -67,15 +67,15 @@ export default function AboutPage() {
                                 <h3 className={styles.blockTitle}>From Electronics to Growth Engines</h3>
                                 <div className={styles.manifestoQuote}>
                                     <p className={styles.leadText}>
-                                        "Marketing is just a circuit that hasn't been optimized yet."
+                                        "Apple delight for the SMB price point."
                                     </p>
                                     <p>
-                                        I spent years designing electronics where a single loose connection means failure.
-                                        I carry that same rigor into digital growth. At Docodo, we don't guess. We architect.
+                                        I spent years in engineering rigor, where failure isn't an option.
+                                        I saw 80M+ Indian SMBs struggling with 'fluff' agencies that lack technical depth.
                                     </p>
                                     <p>
-                                        The agency model is broken. Founders don't need more "creative brainstorming"—they need predictable revenue systems that scale without breaking.
-                                        Docodo was founded to bridge the gap between product excellence and market dominance through engineering-led GTM.
+                                        Docodo is my response: An integrated 'Growth OS' where every Pune salon, clinic, and gym gets
+                                        premium engineering and AI-powered ROI starting at ₹4,999. No hassle. Just growth.
                                     </p>
                                 </div>
                             </div>

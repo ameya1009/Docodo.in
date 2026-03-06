@@ -48,7 +48,7 @@
 
 .iconWrapper {
     margin-bottom: 2rem;
-    width: 3.5rem;
+    width: fit-content;
     height: 3.5rem;
     display: flex;
     align-items: center;
@@ -57,6 +57,7 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-md);
     transition: all 0.3s ease;
+    padding: var(--space-sm);
 }
 
 .card:hover .iconWrapper {

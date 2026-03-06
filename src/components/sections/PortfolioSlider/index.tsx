@@ -10,35 +10,35 @@ import styles from './PortfolioSlider.module.css';
 const projects = [
     {
         title: "BIOgram Health",
-        category: "Branding",
+        category: "Health Clinic Growth",
         image: "/images/clients/biogram.png",
-        color: '#22C55E',
-        description: 'Identity design and digital positioning for a healthcare nutrition platform.',
-        stats: ['Cohesive Brand Identity', 'User-centric Interface', 'Healthcare Tech Stack'],
+        color: '#00FFFF',
+        description: '+200% lead increase within 3 months via an automated patient acquisition funnel.',
+        stats: ['200% Lead Growth', 'Automated Funnel', '₹50k/mo ROI'],
     },
     {
-        title: "Clearth GTM",
-        category: "Strategy",
+        title: "Dr. Patangankar",
+        category: "Medical Centre Overhaul",
+        image: "/images/clients/dr-patangankar.jpg",
+        color: '#FF6B6B',
+        description: 'Complete digital transformation for a Pune-based Neuro centre, driving massive booking growth.',
+        stats: ['+₹45k/mo Bookings', 'WhatsApp Integration', 'Top Local SEO'],
+    },
+    {
+        title: "Viman Nagar Cafe",
+        category: "Food & Beverage Automation",
+        image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=1200",
+        color: '#FACC15',
+        description: 'Increased monthly orders by ₹40,000 using a custom WhatsApp ordering bot.',
+        stats: ['₹40k Order Boost', 'Bot Automation', 'Daily 50+ Inquiries'],
+    },
+    {
+        title: 'Clearth GTM',
+        category: 'Eco-SaaS GTM Strategy',
         image: "/images/clients/clearth.jpg",
-        color: '#2DD4BF',
-        description: 'Visual language and strategic messaging for an eco-conscious initiative.',
-        stats: ['"Clearth Starts With You" Campaign', 'Brand Storytelling', 'Growth Architecture'],
-    },
-    {
-        title: 'Dr. Patangankar',
-        category: 'Medical Centre Digital Overhaul',
-        image: '/images/clients/dr-patangankar.jpg',
-        color: '#0EA5E9',
-        description: 'Complete digital presence engineering for a leading Neuro, Spine & Pain Management Centre.',
-        stats: ['Streamlined Patient Funnel', 'Institutional Authority', 'Conversion-First Design'],
-    },
-    {
-        title: 'KKY',
-        category: 'Personal Identity & Positioning',
-        image: 'https://images.unsplash.com/photo-1634942537034-2531766767d7?auto=format&fit=crop&q=80&w=1200',
-        color: '#A855F7',
-        description: 'Bespoke identity system for a founder-led venture.',
-        stats: ['Minimalist Aesthetic', 'Authority Positioning', 'Scalable Asset Library'],
+        color: '#10B981',
+        description: 'Bespoke identity and GTM architecture for a sustainability-focused tech venture.',
+        stats: ['Category Leadership', 'Authority Build', 'Investor Ready'],
     }
 ];
 
@@ -107,10 +107,10 @@ export function PortfolioSlider() {
             <div className={styles.sticky}>
                 <div className="container">
                     <div className={styles.header}>
-                        <motion.span className={styles.label}>Case Studies</motion.span>
-                        <h2 className="text-gradient">Strategic Impact</h2>
+                        <motion.span className={styles.label}>ROI Case Studies</motion.span>
+                        <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tighter">Pune Success Stories</h2>
                         <p className={styles.subtitle}>
-                            We deliver measurable business outcomes. Explore our recent engineering triumphs.
+                            We don&apos;t just build sites; we engineer growth. See how Pune SMBs are scaling with Docodo.
                         </p>
                     </div>
                 </div>

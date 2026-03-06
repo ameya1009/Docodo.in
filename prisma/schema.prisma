@@ -33,3 +33,34 @@ model GrowthGraderLead {
   answers   Json
   createdAt DateTime @default(now())
 }
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  credits       Int            @default(50)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  transactions  Transaction[]
+  usageLog      ToolUsage[]
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  amount        Float
+  credits       Int
+  status        String   // PENDING, COMPLETED, FAILED
+  razorpayId    String?  @unique
+  createdAt     DateTime @default(now())
+}
+
+model ToolUsage {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  toolName      String
+  creditsUsed   Int
+  createdAt     DateTime @default(now())
+}

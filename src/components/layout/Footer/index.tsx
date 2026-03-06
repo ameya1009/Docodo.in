@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Linkedin, Newspaper, Headphones, Loader2 } from 'lucide-react';
+import { Linkedin, Newspaper, Headphones, Loader2, Twitter, Instagram } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export function Footer() {
@@ -48,16 +48,18 @@ export function Footer() {
                             Docodo<span className={styles.dot}>.</span>
                         </Link>
                         <p className={styles.tagline}>
-                            Marketing-as-a-Service for the AI era.
-                            <br />Automated. Intelligent. Scalable.
+                            The Apple of SMB Digital Growth.
+                            <br />Premium. Integrated. ROI-Engineered.
+                            <br /><span className="text-zinc-500">Made in Pune for the World.</span>
                         </p>
                     </div>
 
                     <div className={styles.links}>
                         <h4>Platform</h4>
                         <Link href="/services">Services</Link>
-                        <Link href="/ai-tools">AI Tools</Link>
+                        <Link href="/cases">Case Studies</Link>
                         <Link href="/pricing">Pricing</Link>
+                        <Link href="/dashboard/marketplace">AI Marketplace</Link>
                     </div>
 
                     <div className={styles.links}>
@@ -97,15 +99,17 @@ export function Footer() {
                 <div className={styles.bottom}>
                     <p>&copy; {new Date().getFullYear()} Docodo. All rights reserved.</p>
                     <div className={styles.socials}>
-                        <a href="https://www.linkedin.com/in/ameya-kshirsagar-1002" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Founder Profile">
+                        <a href="https://linkedin.com/company/docodo" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="LinkedIn">
                             <Linkedin size={20} />
                         </a>
-                        <a href="https://medium.com/@ameyakshirsagar02" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Writings on AI & Growth">
-                            <Newspaper size={20} />
+                        <a href="https://twitter.com/docodo_in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Twitter/X">
+                            <Twitter size={20} />
                         </a>
-                        {/* Featured Audio Content */}
-                        <a href="https://open.spotify.com/episode/1ycc6RT0WXrw8yGM6yzcJk" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Audio Discussions">
-                            <Headphones size={20} />
+                        <a href="https://instagram.com/docodo.in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Instagram">
+                            <Instagram size={20} />
+                        </a>
+                        <a href="https://medium.com/@ameyakshirsagar02" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Blog">
+                            <Newspaper size={20} />
                         </a>
                     </div>
                 </div>

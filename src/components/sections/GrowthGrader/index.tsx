@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
+import { ViralAuditButton } from '@/components/ui/ViralAuditButton';
 import { Target, Zap, TrendingUp, BarChart3 } from 'lucide-react';
 import styles from './GrowthGrader.module.css';
 
@@ -68,10 +69,12 @@ export function GrowthGrader() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.5 }}
+                            className="flex flex-col sm:flex-row gap-4"
                         >
-                            <Button size="lg" className={styles.ctaButton} onClick={() => window.location.href = '/contact'}>
+                            <Button size="lg" className={styles.ctaButton} onClick={() => window.location.href = '/growth-grader'}>
                                 Grade Your Growth Now
                             </Button>
+                            <ViralAuditButton potential="50,000" />
                         </motion.div>
                     </div>
 

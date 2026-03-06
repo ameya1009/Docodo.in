@@ -1,106 +1,114 @@
 'use client';
 
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Check, ArrowRight } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Sparkles, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
 
 const tiers = [
     {
-        name: 'Sprint',
-        price: 'Custom',
-        description: 'For high-growth startups needing immediate GTM execution.',
-        features: ['AI Content Engine', 'Lead Scraper Setup', 'Performance Creative', 'Weekly Strategy Sync'],
-        cta: 'Book a Sprint'
+        name: "SMB Starter",
+        price: "₹4,999",
+        description: "Perfect for Pune salons & cafes starting their GTM journey.",
+        features: ["AI-Built Landing Page", "WhatsApp Integration", "Basic SEO Setup", "Growth Audit Report", "50 Free Credits"],
+        highlight: false
     },
     {
-        name: 'Scale',
-        price: 'Custom',
-        description: 'Full-funnel automation for established ventures.',
-        features: ['Full GTM Stack', 'Custom AI Agents', 'Predictive Analytics', '24/7 Priority Support'],
-        cta: 'Get Started',
-        highlighted: true
+        name: "Growth Pro",
+        price: "₹14,999",
+        description: "The integrated OS for medical clinics & dental centers.",
+        features: ["Custom Web App", "Advanced Local SEO", "Full Ad Setup", "AI Booking Bot", "500 Free Credits", "Priority Support"],
+        highlight: true
+    },
+    {
+        name: "Enterprise OS",
+        price: "₹29,999+",
+        description: "Scale your high-volume business with custom engineering.",
+        features: ["Bespoke Web Systems", "Custom Agentic AI Bots", "Full-Funnel Management", "Premium Content Engine", "Unlimited Tool Credits", "Dedicated Engineer"],
+        highlight: false
     }
 ];
 
 export default function PricingPage() {
     return (
-        <main className="min-h-screen bg-black text-white">
+        <main className="bg-black min-h-screen">
             <Navbar />
 
-            <section className="pt-32 pb-20 relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/10 blur-[120px] rounded-full opacity-50 pointer-events-none" />
-
-                <div className="container relative z-10 text-center">
-                    <motion.div
+            <div className="container py-32">
+                <div className="text-center max-w-3xl mx-auto mb-20">
+                    <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
+                        className="text-white text-6xl font-extrabold mb-6 tracking-tighter"
                     >
-                        <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                            Invest in <span className="text-gradient">Intelligent Growth.</span>
-                        </h1>
-                        <p className="text-zinc-400 max-w-2xl mx-auto text-lg mb-12">
-                            Transparent, results-driven pricing designed for founders who value speed and precision.
-                        </p>
-                    </motion.div>
+                        Android Scale. <span className="text-gradient">Apple Delight.</span>
+                    </motion.h1>
+                    <p className="text-zinc-400 text-xl leading-relaxed">
+                        Premium engineering growth systems at prices that make sense for the 80M+ Indian SMBs. No hidden fees. Just ROI.
+                    </p>
+                </div>
 
-                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-20">
-                        {tiers.map((tier, i) => (
-                            <motion.div
-                                key={tier.name}
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className={`p-8 rounded-3xl border ${tier.highlighted
-                                    ? 'border-primary bg-primary/5 shadow-[0_0_50px_-12px_rgba(0,229,255,0.3)]'
-                                    : 'border-zinc-800 bg-zinc-900/50'
-                                    } text-left flex flex-col`}
+                <div className="grid md:grid-cols-3 gap-8 mb-20">
+                    {tiers.map((tier, idx) => (
+                        <motion.div
+                            key={tier.name}
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className={`p-10 rounded-3xl border ${tier.highlight
+                                    ? 'bg-zinc-900/50 border-cyan-500/50 shadow-[0_0_50px_rgba(0,255,255,0.1)]'
+                                    : 'bg-zinc-900/20 border-white/10'
+                                } flex flex-col h-full`}
+                        >
+                            <h2 className="text-2xl font-bold text-white mb-2">{tier.name}</h2>
+                            <p className="text-zinc-500 text-sm mb-8">{tier.description}</p>
+
+                            <div className="mb-8">
+                                <span className="text-4xl font-bold text-white">{tier.price}</span>
+                                {tier.price !== 'Custom' && <span className="text-zinc-500 text-sm font-medium ml-2">/ one-time</span>}
+                            </div>
+
+                            <div className="space-y-4 mb-10 flex-grow">
+                                {tier.features.map(feature => (
+                                    <div key={feature} className="flex items-start gap-3">
+                                        <div className="mt-1 p-0.5 bg-cyan-500/20 rounded-full text-cyan-400">
+                                            <Check size={14} />
+                                        </div>
+                                        <span className="text-zinc-300 text-sm">{feature}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <Button
+                                variant={tier.highlight ? 'primary' : 'outline'}
+                                size="lg"
+                                className="w-full font-bold py-6 text-lg"
                             >
-                                <div className="flex justify-between items-start mb-6">
-                                    <h3 className="text-2xl font-bold">{tier.name}</h3>
-                                    {tier.highlighted && (
-                                        <span className="bg-primary text-black text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter">
-                                            Most Popular
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="mb-6">
-                                    <span className="text-4xl font-bold">{tier.price}</span>
-                                </div>
-                                <p className="text-zinc-400 text-sm mb-8">{tier.description}</p>
-                                <ul className="space-y-4 mb-10 flex-1">
-                                    {tier.features.map(feature => (
-                                        <li key={feature} className="flex items-center gap-3 text-sm text-zinc-300">
-                                            <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <Button
-                                    className="w-full py-6 text-base"
-                                    variant={tier.highlighted ? 'primary' : 'outline'}
-                                    asChild
-                                ><Link href="/contact">{tier.cta}</Link></Button>
-                            </motion.div>
+                                Get Started <ArrowRight className="ml-2" />
+                            </Button>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* FAQ Section Placeholder */}
+                <section className="max-w-3xl mx-auto">
+                    <h2 className="text-3xl font-bold text-white mb-10 text-center">Frequently Asked Questions</h2>
+                    <div className="space-y-4">
+                        {[
+                            { q: "Why is it more affordable for Pune SMBs?", a: "We use an 'Android Volume' model—leveraging AI for high-velocity engineering to keep costs low while delivering Apple-grade UX." },
+                            { q: "What are AI Tool Credits?", a: "Credits allow you to run powerful growth agents like Surfer SEO or Zapier Agents directly from your Docodo dashboard." },
+                            { q: "Do you offer Marathi support?", a: "Yes, our bots and consulting can be localized in Marathi/Hinglish to better serve your local customers." }
+                        ].map((item, i) => (
+                            <div key={i} className="bg-zinc-900/40 p-6 rounded-2xl border border-white/5">
+                                <h3 className="text-white font-bold mb-2">{item.q}</h3>
+                                <p className="text-zinc-500 text-sm">{item.a}</p>
+                            </div>
                         ))}
                     </div>
-
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="p-12 rounded-3xl border border-dashed border-zinc-800 bg-zinc-900/20"
-                    >
-                        <Sparkles className="w-8 h-8 text-primary mx-auto mb-4" />
-                        <h4 className="text-xl font-bold mb-2">Need something custom?</h4>
-                        <p className="text-zinc-500 mb-6">We build dedicated growth stacks for enterprise needs.</p>
-                        <Button variant="link" className="text-primary hover:text-primary-light" asChild><Link href="/contact">Talk to Strategy &rarr;</Link></Button>
-                    </motion.div>
-                </div>
-            </section>
+                </section>
+            </div>
 
             <Footer />
         </main>

@@ -54,16 +54,6 @@ export function Hero() {
                         }
                     }}
                 >
-                    <motion.div
-                        className={styles.scarcityBadge}
-                        variants={{
-                            hidden: { opacity: 0, y: -10 },
-                            visible: { opacity: 1, y: 0 }
-                        }}
-                    >
-                        <span className={styles.pulseDot} />
-                        Only 1 project slot remaining for March 2026
-                    </motion.div>
 
                     <motion.div
                         className={styles.trustBadge}
@@ -72,9 +62,9 @@ export function Hero() {
                             visible: { opacity: 1, scale: 1 }
                         }}
                     >
-                        <span>Founder-Led Growth Studio</span>
+                        <span>Your AI-Powered SMB Growth OS</span>
                         <div className={styles.badgeDot} />
-                        <span>Built by Engineers</span>
+                        <span>Built by Engineers for Pune</span>
                     </motion.div>
 
                     <motion.h1
@@ -85,8 +75,8 @@ export function Hero() {
                         }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        Growth systems for founders <br />
-                        <span className={styles.glitchText}>scaling $1M - $10M ARR.</span>
+                        Scale Your Pune Business <br />
+                        <span className={styles.glitchText}>with AI Magic.</span>
                     </motion.h1>
 
                     <motion.p
@@ -96,9 +86,9 @@ export function Hero() {
                             visible: { opacity: 1, y: 0 }
                         }}
                     >
-                        We engineer conversion-first websites and automated GTM engines
-                        that turn product excellence into predictable revenue.
-                        No fluff. Just engineering rigor.
+                        Sites, Apps, Marketing & Bots that deliver ₹50k+/month ROI. <br />
+                        Engineered for cafes, clinics, salons, and gyms.
+                        Starting at ₹4,999.
                     </motion.p>
 
                     <motion.div
@@ -109,10 +99,13 @@ export function Hero() {
                         }}
                     >
                         <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/growth-grader')}>
-                            Get Your Free Growth Audit
+                            Get Free Audit
                         </Button>
-                        <Button variant="outline" size="lg" className={styles.secBtn} onClick={() => router.push('/about#methodology')}>
-                            See Our Methodology
+                        <Button variant="outline" size="lg" className={styles.demoBtn} onClick={() => router.push('/dashboard/marketplace')}>
+                            Try AI Tools
+                        </Button>
+                        <Button variant="ghost" size="lg" className={styles.secBtn} onClick={() => router.push('/contact')}>
+                            Book Call
                         </Button>
                     </motion.div>
                 </motion.div>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Menu } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Menu, ShoppingBag, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 
@@ -13,6 +13,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const nav = [
         { icon: <LayoutDashboard size={22} />, label: 'Overview', href: '/dashboard' },
+        { icon: <ShoppingBag size={22} />, label: 'Marketplace', href: '/dashboard/marketplace' },
+        { icon: <CreditCard size={22} />, label: 'Credits', href: '/dashboard/credits' },
         { icon: <FileText size={22} />, label: 'Projects', href: '/dashboard/projects' },
         { icon: <Users size={22} />, label: 'Team', href: '/dashboard/team' },
         { icon: <Settings size={22} />, label: 'Settings', href: '/dashboard/settings' },

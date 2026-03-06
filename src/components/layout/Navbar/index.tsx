@@ -11,8 +11,8 @@ import styles from './Navbar.module.css';
 
 const navItems = [
     { name: 'Services', href: '/services' },
-    { name: 'AI Tools', href: '/ai-tools' },
-    { name: 'Portfolio', href: '/portfolio' },
+    { name: 'Cases', href: '/cases' },
+    { name: 'Pricing', href: '/pricing' },
     { name: 'Blog', href: '/blog' },
     { name: 'About', href: '/about' },
 ];
@@ -58,7 +58,10 @@ export function Navbar() {
 
                 <div className={styles.actions}>
                     <Link href="/contact" className={styles.hideMobile}>
-                        <Button variant="primary" size="sm">Get Free Audit</Button>
+                        <Button variant="outline" size="sm" className="mr-2">Book Call</Button>
+                    </Link>
+                    <Link href="/growth-grader" className={styles.hideMobile}>
+                        <Button variant="primary" size="sm">Free Audit</Button>
                     </Link>
 
                     <button

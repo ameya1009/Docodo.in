@@ -7,32 +7,36 @@ import styles from './Services.module.css';
 
 const services = [
     {
-        icon: <LineChart className="w-8 h-8 text-primary" />,
-        title: 'Full-Funnel Demand Generation',
-        description: 'SEO systems + conversion-focused lead capture. We build the demand engine that adds measurable pipeline, not just vanity traffic.',
-        pricing: 'Investment: ₹45,000 - ₹65,000',
-        timeline: '3-4 Weeks Setup'
+        icon: <Palette className="w-8 h-8 text-cyan-400" />,
+        title: 'Websites & Apps',
+        description: 'AI-built, mobile-first sites/apps with WhatsApp & booking integration. Engineered for salons, clinics, and cafes.',
+        pricing: 'From ₹4,999',
+        roi: '+₹20k/mo potential',
+        size: 'large'
     },
     {
-        icon: <Palette className="w-8 h-8 text-secondary" />,
-        title: 'Founder-led GTM Systems',
-        description: 'High-velocity landing pages and conversion architecture. Perfect for technical founders who need product excellence reflected in their GTM.',
-        pricing: 'Investment: ₹35,000 - ₹55,000',
-        timeline: '2-3 Weeks'
+        icon: <LineChart className="w-8 h-8 text-pink-400" />,
+        title: 'Marketing & SEO',
+        description: 'ROI-focused Pune localized SEO and ads. We turn search intent into walk-in customers.',
+        pricing: 'Setup: ₹9,999',
+        roi: '18% conversion lift',
+        size: 'small'
     },
     {
-        icon: <Bot className="w-8 h-8 text-accent" />,
-        title: 'Revenue Ops Automation',
-        description: 'Intelligent lead routing and CRM integration. We remove operational friction so you can focus on closing, not chasing.',
-        pricing: 'Investment: ₹25,000+',
-        timeline: '1-2 Weeks'
+        icon: <Bot className="w-8 h-8 text-amber-400" />,
+        title: 'AI Automations',
+        description: 'WhatsApp bots for leads & auto-nurture. Run your business while you sleep.',
+        pricing: '₹2,999/mo',
+        roi: '10 hrs/week saved',
+        size: 'small'
     },
     {
-        icon: <Rocket className="w-8 h-8 text-primary" />,
-        title: 'Authority Architecture',
-        description: 'Strategic content engines that turn your expertise into category leadership. We build your proprietary demand system.',
-        pricing: 'Retainer: ₹20,000/mo',
-        timeline: 'Ongoing'
+        icon: <Rocket className="w-8 h-8 text-emerald-400" />,
+        title: 'Consulting OS',
+        description: 'Founder-led growth playbooks and technical audit to scale your SMB infrastructure.',
+        pricing: 'Custom',
+        roi: '3x growth velocity',
+        size: 'medium'
     }
 ];
 
@@ -41,10 +45,9 @@ export function Services() {
         <section className="section bg-zinc-950/50">
             <div className="container">
                 <div className={styles.header}>
-                    <h2 className="text-gradient">Core Growth Systems</h2>
+                    <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tight">Integrated Growth OS</h2>
                     <p className={styles.subtitle}>
-                        We engineer the infrastructure your business needs to scale,
-                        combining strategic depth with technical precision.
+                        Everything your Pune business needs to scale, integrated into one seamless platform.
                     </p>
                 </div>
 
@@ -66,32 +69,31 @@ export function Services() {
                     {services.map((service, index) => (
                         <motion.div
                             key={index}
+                            className={`${styles.cardWrapper} ${styles[service.size]}`}
                             variants={{
                                 hidden: { opacity: 0, y: 20 },
                                 visible: { opacity: 1, y: 0 }
                             }}
-                            transition={{ duration: 0.5 }}
                         >
-                            <Card className={`${styles.card} glass glass-hover`}>
-                                <div className={styles.iconWrapper}>
-                                    {service.icon}
+                            <Card className={`${styles.card} glass glass-hover h-full`}>
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className={styles.iconWrapper}>
+                                        {service.icon}
+                                    </div>
+                                    <div className="bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full">
+                                        <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">{service.roi}</span>
+                                    </div>
                                 </div>
-                                <CardHeader>
-                                    <CardTitle className="text-white">{service.title}</CardTitle>
+                                <CardHeader className="p-0 mb-4">
+                                    <CardTitle className="text-white text-2xl font-bold">{service.title}</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <p className="text-zinc-400 leading-relaxed text-sm">
+                                <CardContent className="p-0 space-y-6">
+                                    <p className="text-zinc-400 leading-relaxed">
                                         {service.description}
                                     </p>
-                                    <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="text-zinc-500">Pricing</span>
-                                            <span className="text-primary font-medium">{service.pricing}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="text-zinc-500">Timeline</span>
-                                            <span className="text-zinc-300">{service.timeline}</span>
-                                        </div>
+                                    <div className="pt-6 border-t border-white/5 flex justify-between items-center">
+                                        <span className="text-zinc-500 text-sm font-medium">Pricing</span>
+                                        <span className="text-white font-bold">{service.pricing}</span>
                                     </div>
                                 </CardContent>
                             </Card>

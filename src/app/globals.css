@@ -1,54 +1,47 @@
 :root {
-  /* Premium Brand Palette - HSL for better control */
-  --color-primary-hsl: 185, 100%, 50%;
-  /* Cyan 500 equivalent but pure */
-  --color-primary: hsl(var(--color-primary-hsl));
-  --color-primary-dark: hsl(185, 100%, 40%);
-  --color-primary-glow: hsla(var(--color-primary-hsl), 0.5);
+  /* Apple-Inspired Premium Palette - 2026 Trends */
+  --color-primary: #00FFFF;
+  /* Electric Neon Blue */
+  --color-secondary: #FF6B6B;
+  /* Sunset Coral */
+  --color-accent: #C0C0C0;
+  /* Holographic Silver */
 
-  --color-secondary-hsl: 263, 70%, 50%;
-  /* Violet 600 */
-  --color-secondary: hsl(var(--color-secondary-hsl));
-  --color-secondary-dark: hsl(263, 70%, 40%);
-  --color-secondary-glow: hsla(var(--color-secondary-hsl), 0.5);
+  --color-bg: #000000;
+  /* Pure Black */
+  --color-surface: #0A0A0A;
+  /* Deep Charcoal */
+  --color-surface-hover: #141414;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-bright: rgba(255, 255, 255, 0.2);
 
-  --color-accent-hsl: 38, 92%, 50%;
-  /* Amber 500 */
-  --color-accent: hsl(var(--color-accent-hsl));
-
-  /* Nuanced Neutral Palette */
-  --color-bg: #030303;
-  /* Deeper than basic black */
-  --color-surface: #0a0a0b;
-  --color-surface-hover: #121214;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-text-main: #f8fafc;
-  --color-text-muted: #94a3b8;
-  --color-text-inverted: #000000;
+  --color-text-main: #FFFFFF;
+  --color-text-muted: #A1A1AA;
+  --color-text-dim: #71717A;
 
   /* Typography */
   --font-sans: var(--font-inter);
   --font-heading: var(--font-outfit);
 
-  /* Spacing Scale (Mathematical) */
-  --space-unit: 1rem;
+  /* Spacing (Apple-style generous spacing) */
+  --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
-  --space-sm: 0.75rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 4rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 5rem;
   --space-3xl: 8rem;
 
-  --section-padding: clamp(6rem, 12vw, 12rem);
+  --section-padding: clamp(5rem, 15vw, 10rem);
+  --container-width: 1400px;
 
   /* Refined Radius */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 32px;
   --radius-full: 9999px;
 
-  --container-width: 1280px;
   --header-height: 80px;
 }
 

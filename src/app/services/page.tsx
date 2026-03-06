@@ -1,185 +1,122 @@
 'use client';
 
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Check, ArrowRight, Zap, Palette, Rocket, Bot } from 'lucide-react';
-import styles from './Services.module.css';
+import { Layout, LineChart, Bot, CheckCircle2 } from 'lucide-react';
 
-const servicePackages = [
+const serviceDetails = [
     {
-        title: 'Modern Growth Website',
-        price: 'From ₹25,000',
-        description: 'Engineered for conversion and speed. We don\'t just build sites; we build high-performance business assets.',
-        icon: <Rocket />,
-        color: 'var(--color-primary)',
+        title: "Websites & Apps",
+        id: "sites",
+        icon: <Layout className="w-12 h-12 text-cyan-400" />,
+        description: "Engineering mobile-first, conversion-optimized site architecture that turns visitors into revenue.",
         features: [
-            'Next.js 15 Performance Architecture',
-            'Full Responsive Design Systems',
-            'Conversion Rate Optimization (CRO)',
-            'SEO Data-Layer Integration',
-            'Scalable CMS Architecture'
-        ]
+            "AI-Built Custom UI/UX",
+            "WhatsApp & Booking API Integration",
+            "Next.js High-Performance Stack",
+            "Pune Localized Content Strategy"
+        ],
+        pricing: "Starting at ₹4,999"
     },
     {
-        title: 'Social Growth Authority',
-        price: 'From ₹15,000/mo',
-        description: 'Elite content strategy and execution that turns your presence into a measurable trust-building machine.',
-        icon: <Palette />,
-        color: 'var(--color-secondary)',
+        title: "Digital Marketing & GTM",
+        id: "marketing",
+        icon: <LineChart className="w-12 h-12 text-pink-400" />,
+        description: "Precision-engineered SEO and ad systems designed specifically for the Indian SMB ecosystem.",
         features: [
-            'Authority-Driven Content Engine',
-            'Premium Reel & Short-form Editing',
-            'Strategic Hashtag & Keyword Ops',
-            'Profile Optimization & UI Audit',
-            'Bi-Weekly Performance Insights'
-        ]
+            "Local SEO Dominance (Pune Focus)",
+            "ROI-Tracked Meta & Google Ads",
+            "High-Conversion Landing Pages",
+            "Content Engine for Authority"
+        ],
+        pricing: "Setup from ₹9,999"
     },
     {
-        title: 'AI Automation Systems',
-        price: 'Custom Quote',
-        description: 'Intelligent lead capture and process automation that removes human friction from your sales cycle.',
-        icon: <Bot />,
-        color: 'var(--color-accent)',
+        title: "AI Automations & Bots",
+        id: "bots",
+        icon: <Bot className="w-12 h-12 text-amber-400" />,
+        description: "Removing operational friction with intelligent agents that run your business 24/7.",
         features: [
-            'WhatsApp CRM & Bot Integration',
-            'Autonomous Lead Nurture Funnels',
-            'Revenue Operations Automation',
-            'Intelligent Lead Scoring Systems',
-            '24/7 AI Engagement Agents'
-        ]
-    },
-    {
-        title: 'Full GTM Orchestration',
-        price: 'Tailored Strategy',
-        description: 'The "Top 1%" treatment. We act as your fractional growth engineering team, scaling everything.',
-        icon: <Zap />,
-        color: 'var(--color-primary)',
-        features: [
-            'Full-Funnel Growth Engineering',
-            'Custom AI Model Implementation',
-            'Omnichannel Scale Strategy',
-            'Founder-Led Marketing Systems',
-            'Dedicated Growth Ops Engineer'
-        ]
+            "Custom WhatsApp Business Bots",
+            "Lead Nurturing Automations",
+            "CRM & Pipeline Integration",
+            " मराठी/Hinglish Language Support"
+        ],
+        pricing: "₹2,999/mo Retainer"
     }
 ];
 
 export default function ServicesPage() {
     return (
-        <main className="min-h-screen bg-black">
+        <main className="bg-black min-h-screen">
             <Navbar />
 
-            <section className={styles.hero}>
+            <section className="pt-32 pb-20">
                 <div className="container">
-                    <motion.span
-                        className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        Growth Solutions
-                    </motion.span>
-                    <motion.h1
-                        className={styles.title}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        Clear, Transparent <span className="text-gradient">Systems.</span>
-                    </motion.h1>
-                    <motion.p
-                        className={styles.subtitle}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        We strip away enterprise complexity and replace it with engineering precision.
-                        Choose the infrastructure your growth demands.
-                    </motion.p>
+                    <div className="max-w-3xl mb-20">
+                        <motion.span
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="text-cyan-500 font-bold uppercase tracking-widest text-sm"
+                        >
+                            The Integrated OS
+                        </motion.span>
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-white text-6xl font-extrabold mt-4 mb-6 tracking-tighter"
+                        >
+                            High-Velocity <span className="text-gradient">Growth Systems.</span>
+                        </motion.h1>
+                        <p className="text-zinc-400 text-xl leading-relaxed">
+                            We don&apos;t just build tools; we build the infrastructure your business needs to dominate the Pune market.
+                        </p>
+                    </div>
+
+                    <div className="space-y-32">
+                        {serviceDetails.map((service, idx) => (
+                            <motion.div
+                                key={service.id}
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className={`flex flex-col lg:flex-row items-center gap-16 ${idx % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}
+                            >
+                                <div className="lg:w-1/2">
+                                    <div className="mb-6">{service.icon}</div>
+                                    <h2 className="text-4xl font-bold text-white mb-6">{service.title}</h2>
+                                    <p className="text-zinc-400 text-lg mb-8 leading-relaxed">
+                                        {service.description}
+                                    </p>
+                                    <ul className="space-y-4 mb-10">
+                                        {service.features.map(feature => (
+                                            <li key={feature} className="flex items-center gap-3 text-zinc-300">
+                                                <CheckCircle2 size={18} className="text-cyan-500" />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className="flex items-center gap-6">
+                                        <Button variant="primary" size="lg">Get Started</Button>
+                                        <span className="text-zinc-500 font-medium">{service.pricing}</span>
+                                    </div>
+                                </div>
+                                <div className="lg:w-1/2 w-full aspect-video bg-zinc-900/50 rounded-3xl border border-white/5 relative overflow-hidden group">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-zinc-800 font-black text-8xl tracking-tighter opacity-10 uppercase">{service.id}</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </section>
-
-            <div className="container">
-                <motion.div
-                    className={styles.grid}
-                    initial="hidden"
-                    animate="visible"
-                    variants={{
-                        hidden: { opacity: 0 },
-                        visible: {
-                            opacity: 1,
-                            transition: {
-                                staggerChildren: 0.1
-                            }
-                        }
-                    }}
-                >
-                    {servicePackages.map((pkg, i) => (
-                        <motion.div
-                            key={i}
-                            variants={{
-                                hidden: { opacity: 0, y: 30 },
-                                visible: { opacity: 1, y: 0 }
-                            }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                            <div
-                                className={styles.card}
-                                style={{ '--pkg-color': pkg.color } as React.CSSProperties}
-                            >
-                                <div className={styles.cardGlow} />
-                                <div className={styles.iconWrapper} style={{ color: pkg.color }}>
-                                    {pkg.icon}
-                                </div>
-                                <h3 className="text-2xl font-bold text-white mb-2">{pkg.title}</h3>
-                                <div className={styles.price} style={{ color: pkg.color }}>{pkg.price}</div>
-                                <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-                                    {pkg.description}
-                                </p>
-                                <ul className={styles.features}>
-                                    {pkg.features.map((feature, idx) => (
-                                        <li key={idx} className={styles.feature}>
-                                            <Check className="w-5 h-5 shrink-0" style={{ color: pkg.color }} />
-                                            <span>{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <Button
-                                    className="w-full mt-4 group"
-                                    style={{
-                                        backgroundColor: pkg.color,
-                                        color: '#000',
-                                        boxShadow: `0 0 20px -5px ${pkg.color}66`
-                                    } as React.CSSProperties}
-                                >
-                                    Deploy System <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                </Button>
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
-
-                <motion.section
-                    className={styles.ctaSection}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                >
-                    <h2 className="mb-4">Not sure what you need?</h2>
-                    <p className="text-zinc-400 max-w-xl mx-auto mb-8 text-lg">
-                        Every business is at a different stage. Let&apos;s architect a
-                        custom roadmap specific to your current constraints and goals.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button size="lg" className="px-10">Talk to the Founder</Button>
-                        <Button variant="outline" size="lg" className="px-10">Get a Free Audit</Button>
-                    </div>
-                </motion.section>
-            </div>
 
             <Footer />
         </main>
     );
 }
-

@@ -15,13 +15,13 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   metadataBase: new URL("https://docodo.in"),
   title: {
-    default: "Docodo | Founder-First Growth Studio",
+    default: "Docodo | AI-Powered SMB Growth OS for Pune Businesses",
     template: "%s | Docodo"
   },
-  description: "Marketing-as-a-Service Platform engineered for founders scaling from $1M to $10M ARR. Data-backed growth systems and automated GTM engines.",
-  keywords: ["SaaS Growth", "GTM Engineering", "Founder-Led Growth", "Marketing Systems", "Scale from 1M to 10M"],
-  authors: [{ name: "Ameya", url: "https://docodo.in" }],
-  creator: "Ameya",
+  description: "The Apple of SMB Digital Growth. Premium Websites, Digital Marketing, and AI Automations engineered for Pune clinics, salons, and cafes starting at ₹4,999.",
+  keywords: ["Pune SMB Growth", "AI Automation Pune", "Website Design Pune", "Digital Marketing Pune", "WhatsApp Bot Pune", "Growth OS"],
+  authors: [{ name: "Docodo Engineering Team", url: "https://docodo.in" }],
+  creator: "Docodo",
   openGraph: {
     title: "Docodo | Founder-First Growth Studio",
     description: "Engineering growth systems for founders scaling from $1M to $10M ARR.",
@@ -31,10 +31,10 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
-    title: "Docodo | Founder-First Growth Studio",
-    description: "Data-backed growth systems for founders scaling from $1M to $10M ARR.",
-    creator: "@ameya",
+    card: "summary_large_image",
+    title: "Docodo | Your AI-Powered SMB Growth OS",
+    description: "Premium growth systems for Pune businesses. Apple design, Android volume.",
+    creator: "@docodo_in",
   },
   robots: {
     index: true,
@@ -63,22 +63,23 @@ export default function RootLayout({
     "name": "Docodo",
     "@id": "https://docodo.in",
     "url": "https://docodo.in",
-    "telephone": "",
+    "telephone": "+91-PON-DOCODO",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": "London",
-      "addressCountry": "UK"
+      "addressLocality": "Pune",
+      "addressRegion": "Maharashtra",
+      "addressCountry": "IN"
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": 0,
-      "longitude": 0
+      "latitude": 18.5204,
+      "longitude": 73.8567
     },
     "sameAs": [
       "https://www.linkedin.com/company/docodo",
-      "https://twitter.com/docodo"
+      "https://twitter.com/docodo_in"
     ],
-    "priceRange": "$$$"
+    "priceRange": "₹₹"
   };
 
   return (
