@@ -31,6 +31,14 @@ export function Hero() {
 
             {/* Immersive Background Layer */}
             <div className={styles.bgLayers}>
+                <div className={styles.skylineWrapper}>
+                    <img
+                        src="/brain/34775d6c-fa2c-43be-ba45-1cbf261c881d/pune_skyline_premium_hero_1772801908298.png"
+                        alt="Pune skyline"
+                        className={styles.skylineImg}
+                    />
+                    <div className={styles.skylineOverlay} />
+                </div>
                 <div className={styles.videoMask}>
                     <div className={styles.abstractBlob} />
                 </div>
@@ -101,11 +109,8 @@ export function Hero() {
                         <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/growth-grader')}>
                             Get Free Audit
                         </Button>
-                        <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/growth-grader')}>
-                            Get Free Audit
-                        </Button>
-                        <Button variant="outline" size="lg" className={styles.demoBtn} onClick={() => router.push('/dashboard/marketplace')}>
-                            Try Demo
+                        <Button variant="outline" size="lg" className={styles.demoBtn} onClick={() => router.push('/tools')}>
+                            Explore Tools
                         </Button>
                         <Button variant="ghost" size="lg" className={styles.secBtn} onClick={() => router.push('/contact')}>
                             Book Call
