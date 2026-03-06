@@ -45,12 +45,12 @@ export function Footer() {
                 <div className={styles.grid}>
                     <div className={styles.brand}>
                         <Link href="/" className={styles.logo}>
-                            Docodo<span className={styles.dot}>.</span>
+                            Docodo<span className={styles.circuitAccent}></span>
                         </Link>
                         <p className={styles.tagline}>
-                            The Apple of SMB Digital Growth.
-                            <br />Premium. Integrated. ROI-Engineered.
-                            <br /><span className="text-zinc-500">Made in Pune for the World.</span>
+                            <strong>AI Growth OS for Pune SMBs</strong>
+                            <br />Sites, Apps, Marketing & Bots.
+                            <br /><span className={styles.roi}>Delivering ₹50k+/Month ROI.</span>
                         </p>
                     </div>
 
@@ -99,17 +99,14 @@ export function Footer() {
                 <div className={styles.bottom}>
                     <p>&copy; {new Date().getFullYear()} Docodo. All rights reserved.</p>
                     <div className={styles.socials}>
-                        <a href="https://linkedin.com/company/docodo" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="LinkedIn">
+                        <a href="https://linkedin.com/company/docodo_in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="LinkedIn">
                             <Linkedin size={20} />
                         </a>
                         <a href="https://twitter.com/docodo_in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Twitter/X">
                             <Twitter size={20} />
                         </a>
-                        <a href="https://instagram.com/docodo.in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Instagram">
+                        <a href="https://instagram.com/docodo_in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Instagram">
                             <Instagram size={20} />
-                        </a>
-                        <a href="https://medium.com/@ameyakshirsagar02" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Blog">
-                            <Newspaper size={20} />
                         </a>
                     </div>
                 </div>

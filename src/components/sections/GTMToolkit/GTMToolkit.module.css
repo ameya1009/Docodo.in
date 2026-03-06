@@ -39,22 +39,22 @@
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.01);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 31, 63, 0.4);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: 2.5rem;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     height: 100%;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
 }
 
 .card:hover {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: var(--color-primary-glow);
+    background: rgba(0, 31, 63, 0.6);
+    border-color: var(--color-primary-bright);
     transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-premium), var(--glow-blue);
 }
 
 .cardIcon {
@@ -145,7 +145,9 @@
     .ctaBox {
         padding: 2rem;
     }
-}/* Modal Styles */
+}
+
+/* Modal Styles */
 .modalOverlay {
     position: fixed;
     top: 0;

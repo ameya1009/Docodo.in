@@ -37,7 +37,7 @@ export function Navbar() {
             <div className={cn('container', styles.navContainer)}>
                 <Link href="/" className={styles.logo}>
                     <span className={styles.logoText}>Docodo</span>
-                    <span className={styles.logoDot}>.</span>
+                    <span className={styles.circuitAccent}></span>
                 </Link>
 
                 {/* Desktop Nav */}
@@ -58,10 +58,10 @@ export function Navbar() {
 
                 <div className={styles.actions}>
                     <Link href="/contact" className={styles.hideMobile}>
-                        <Button variant="outline" size="sm" className="mr-2">Book Call</Button>
+                        <Button variant="outline" size="sm" className={styles.btnCoral}>Book Call</Button>
                     </Link>
                     <Link href="/growth-grader" className={styles.hideMobile}>
-                        <Button variant="primary" size="sm">Free Audit</Button>
+                        <Button variant="primary" size="sm" className={styles.btnNeon}>Get Free Audit</Button>
                     </Link>
 
                     <button

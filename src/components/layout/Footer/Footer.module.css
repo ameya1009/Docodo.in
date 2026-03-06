@@ -49,15 +49,38 @@
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
-.dot {
-    color: var(--color-primary);
+.circuitAccent {
+    width: 20px;
+    height: 2px;
+    background: var(--color-primary);
+    position: relative;
+}
+
+.circuitAccent::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
 }
 
 .tagline {
     color: var(--color-text-muted);
     line-height: 1.6;
+    font-size: 0.9375rem;
+}
+
+.roi {
+    color: var(--color-primary);
+    font-weight: 600;
 }
 
 .links {

@@ -10,35 +10,35 @@ import styles from './PortfolioSlider.module.css';
 const projects = [
     {
         title: "BIOgram Health",
-        category: "Health Clinic Growth",
-        image: "/images/clients/biogram.png",
-        color: '#00FFFF',
-        description: '+200% lead increase within 3 months via an automated patient acquisition funnel.',
-        stats: ['200% Lead Growth', 'Automated Funnel', '₹50k/mo ROI'],
+        category: "Clinic Growth",
+        image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200",
+        color: '#00D4FF',
+        description: 'Auto-lead capture system for a Pune clinic. Delivering structured patient inquiries with zero tech hassle.',
+        stats: ['200% Lead Growth', '₹45k/mo Bookings', 'WhatsApp Integrated'],
     },
     {
         title: "Dr. Patangankar",
-        category: "Medical Centre Overhaul",
-        image: "/images/clients/dr-patangankar.jpg",
+        category: "Medical Centre",
+        image: "https://images.unsplash.com/photo-1629909613654-28705fe478c5?auto=format&fit=crop&q=80&w=1200",
         color: '#FF6B6B',
-        description: 'Complete digital transformation for a Pune-based Neuro centre, driving massive booking growth.',
-        stats: ['+₹45k/mo Bookings', 'WhatsApp Integration', 'Top Local SEO'],
+        description: 'Complete digital transformation for a Baner medical facility, driving massive local SEO visibility.',
+        stats: ['Top 3 Local Pack', '₹50k/mo Extra ROI', 'Seamless Booking'],
     },
     {
         title: "Viman Nagar Cafe",
-        category: "Food & Beverage Automation",
+        category: "Local Service",
         image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=1200",
-        color: '#FACC15',
-        description: 'Increased monthly orders by ₹40,000 using a custom WhatsApp ordering bot.',
-        stats: ['₹40k Order Boost', 'Bot Automation', 'Daily 50+ Inquiries'],
+        color: '#00D4FF',
+        description: 'Increased monthly orders using a custom WhatsApp ordering bot tailored for Pune foodies.',
+        stats: ['₹40k Order Boost', 'Daily 50+ Inquiries', 'Auto-Menu Bot'],
     },
     {
-        title: 'Clearth GTM',
-        category: 'Eco-SaaS GTM Strategy',
-        image: "/images/clients/clearth.jpg",
-        color: '#10B981',
-        description: 'Bespoke identity and GTM architecture for a sustainability-focused tech venture.',
-        stats: ['Category Leadership', 'Authority Build', 'Investor Ready'],
+        title: "Baner Styling Salon",
+        category: "Wellness SMB",
+        image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1200",
+        color: '#C0C0C0',
+        description: 'Automated booking calendar reducing salon no-shows by 80% and increasing high-value service sales.',
+        stats: ['80% No-Show Drop', '₹35k Extra Sales', 'Member CRM'],
     }
 ];
 
@@ -110,7 +110,7 @@ export function PortfolioSlider() {
                         <motion.span className={styles.label}>ROI Case Studies</motion.span>
                         <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tighter">Pune Success Stories</h2>
                         <p className={styles.subtitle}>
-                            We don&apos;t just build sites; we engineer growth. See how Pune SMBs are scaling with Docodo.
+                            Sites + Apps + Marketing + Bots. See how Docodo delivers real growth for local legends.
                         </p>
                     </div>
                 </div>

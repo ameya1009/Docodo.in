@@ -1,0 +1,110 @@
+.pricingHero {
+    padding-top: 8rem;
+    padding-bottom: 4rem;
+    text-align: center;
+}
+
+.pricingGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 6rem;
+}
+
+@media (min-width: 1024px) {
+    .pricingGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.priceCard {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.priceCard:hover {
+    border-color: var(--color-primary-bright);
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.popularTag {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-primary);
+    color: var(--color-brand-navy);
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.creditSection {
+    background: rgba(0, 212, 255, 0.03);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: var(--radius-2xl);
+    padding: 4rem 2rem;
+    margin-bottom: 6rem;
+}
+
+.creditGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .creditGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.creditPack {
+    background: var(--color-brand-navy);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.creditPack:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+}
+
+.faqContainer {
+    max-width: 800px;
+    margin: 0 auto 6rem;
+}
+
+.faqItem {
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.5rem 0;
+}
+
+.faqQuestion {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.faqAnswer {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}

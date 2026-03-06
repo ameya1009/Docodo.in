@@ -8,21 +8,21 @@ import styles from './GTMToolkit.module.css';
 
 const resources = [
     {
-        title: "SaaS GTM Playbook 2026",
-        description: "The complete framework for scaling B2B SaaS from $1M to $10M ARR using AI-driven systems.",
-        tag: "Playbook",
-        icon: <BookOpen className="w-6 h-6" />
+        title: "Zapier Agents",
+        description: "Automate leads from your site directly to your CRM or WhatsApp group. Pure magic.",
+        tag: "10 Credits/Run",
+        icon: <ArrowRight className="w-6 h-6" />
     },
     {
-        title: "The ABM Toolkit",
-        description: "How to identify, engage, and close high-value accounts with precision targeting.",
-        tag: "Toolkit",
+        title: "Botpress WhatsApp",
+        description: "Deploy a Hinglish-speaking bot in 5 mins. 'Namaskar! Business growth?' is the vibe.",
+        tag: "15 Credits/Flow",
         icon: <ShieldCheck className="w-6 h-6" />
     },
     {
-        title: "Growth Audit Checklist",
-        description: "50+ parameters to benchmark your current marketing performance and identify leaks.",
-        tag: "Checklist",
+        title: "Canva AI Banners",
+        description: "Auto-generate posters for your Baner salon or Viman Nagar cafe in seconds.",
+        tag: "5 Credits/Asset",
         icon: <Download className="w-6 h-6" />
     }
 ];
@@ -106,34 +106,32 @@ export function GTMToolkit() {
     return (
         <section className={styles.toolkit}>
             <div className="container">
-                <div className={styles.header}>
-                    <motion.span
-                        className={styles.label}
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                    >
-                        Strategic Resources
-                    </motion.span>
-                    <motion.h2
-                        className={styles.title}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        The Go-To-Market <span className="text-gradient">Power Kit</span>
-                    </motion.h2>
-                    <motion.p
-                        className={styles.subtitle}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        We don&apos;t just build websites. We engineer growth systems. Access our proprietary frameworks.
-                    </motion.p>
-                </div>
+                <motion.span
+                    className={styles.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                >
+                    AI Marketplace
+                </motion.span>
+                <motion.h2
+                    className={styles.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 }}
+                >
+                    Trending 2026 <span className="text-gradient">AI Tools</span>
+                </motion.h2>
+                <motion.p
+                    className={styles.subtitle}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 }}
+                >
+                    Try our curated stack of agentic tools. All included in your Docodo OS.
+                </motion.p>
 
                 <div className={styles.grid}>
                     {resources.map((resource, index) => (
@@ -157,7 +155,7 @@ export function GTMToolkit() {
                                 className={styles.cardLink}
                                 onClick={() => setSelectedResource(resource)}
                             >
-                                Get Access <ArrowRight className="w-4 h-4 ml-2" />
+                                Try with Free Credits <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                         </motion.div>
                     ))}
@@ -171,10 +169,10 @@ export function GTMToolkit() {
                     transition={{ delay: 0.6 }}
                 >
                     <div className={styles.ctaBox}>
-                        <h3>Want a custom GTM strategy?</h3>
-                        <p>Let&apos;s map out your path to market leadership.</p>
-                        <Button variant="primary" size="lg" onClick={() => window.location.href = '/contact'}>
-                            Book Strategy Call
+                        <h3>Get 50 Free Credits on Signup</h3>
+                        <p>Experience the magic of AI-powered growth today.</p>
+                        <Button variant="primary" size="lg" onClick={() => window.location.href = '/dashboard'}>
+                            Claim Free Credits
                         </Button>
                     </div>
                 </motion.div>

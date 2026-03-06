@@ -28,7 +28,7 @@ export function GrowthGrader() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
                         >
-                            Stop guessing. Start <span className="text-gradient">Benchmarking.</span>
+                            Stop guessing. Start <span className="text-gradient">Scaling.</span>
                         </motion.h2>
 
                         <motion.p
@@ -37,8 +37,8 @@ export function GrowthGrader() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
                         >
-                            Our 2026 Growth Grader analyzes your current GTM strategy,
-                            website conversion architecture, and lead generation velocity.
+                            Our 50-Point Growth Audit analyzes your Pune business across
+                            Sites, Apps, Marketing & Bots to find your path to ₹50k+/month extra ROI.
                         </motion.p>
 
                         <motion.div
@@ -72,7 +72,7 @@ export function GrowthGrader() {
                             className="flex flex-col sm:flex-row gap-4"
                         >
                             <Button size="lg" className={styles.ctaButton} onClick={() => window.location.href = '/growth-grader'}>
-                                Grade Your Growth Now
+                                Start Free 50-Point Audit
                             </Button>
                             <ViralAuditButton potential="50,000" />
                         </motion.div>

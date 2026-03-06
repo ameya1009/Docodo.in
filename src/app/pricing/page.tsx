@@ -1,114 +1,156 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Check, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
+import { Check, Info, Zap, CreditCard, ChevronDown, ArrowRight } from 'lucide-react';
+import styles from './Pricing.module.css';
 
-const tiers = [
+const services = [
     {
-        name: "SMB Starter",
+        name: "Starter (Site)",
         price: "₹4,999",
-        description: "Perfect for Pune salons & cafes starting their GTM journey.",
-        features: ["AI-Built Landing Page", "WhatsApp Integration", "Basic SEO Setup", "Growth Audit Report", "50 Free Credits"],
-        highlight: false
+        description: "Perfect for Pune startups & small boutiques.",
+        features: ["One-page AI Site", "WhatsApp Integration", "Mobile Optimization", "Hosting Included", "Basic SEO"],
+        cta: "Get Started",
+        popular: false
     },
     {
-        name: "Growth Pro",
+        name: "Pro (Growth OS)",
         price: "₹14,999",
-        description: "The integrated OS for medical clinics & dental centers.",
-        features: ["Custom Web App", "Advanced Local SEO", "Full Ad Setup", "AI Booking Bot", "500 Free Credits", "Priority Support"],
-        highlight: true
+        description: "Full automation for clinics & cafes.",
+        features: ["Multi-page Web App", "Razorpay Payment Setup", "Advanced SEO (Google Maps)", "Custom Lead CRM", "Priority Support"],
+        cta: "Scale Now",
+        popular: true
     },
     {
-        name: "Enterprise OS",
-        price: "₹29,999+",
-        description: "Scale your high-volume business with custom engineering.",
-        features: ["Bespoke Web Systems", "Custom Agentic AI Bots", "Full-Funnel Management", "Premium Content Engine", "Unlimited Tool Credits", "Dedicated Engineer"],
-        highlight: false
+        name: "Enterprise",
+        price: "Custom",
+        description: "Scalable systems for chains & franchises.",
+        features: ["Custom Software Architecture", "Multi-location SEO", "Dedicated Account Manager", "Custom WhatsApp Flows", "Security Audit"],
+        cta: "Contact Sales",
+        popular: false
     }
 ];
 
+const creditPacks = [
+    { name: "Starter Pack", credits: "100", price: "₹999", bonus: "0%" },
+    { name: "Pro Pack", credits: "500", price: "₹3,999", bonus: "10%", popular: true },
+    { name: "Growth Pack", credits: "2,000", price: "₹9,999", bonus: "+500 Bonus" }
+];
+
+const faqs = [
+    { q: "Why is Docodo so affordable for Pune SMBs?", a: "We leverage proprietary AI-engineers that automate 80% of the manual coding process, allowing us to pass the savings directly to local business owners while maintaining Apple-level quality." },
+    { q: "How do the AI credits work?", a: "Credits are used for running automated agents in the marketplace. For example, generating an AI audit costs 50 credits, while a lead-gen agent run costs 10 credits." },
+    { q: "Do you include GST?", a: "All prices listed exclude 18% GST which will be calculated at checkout as per Indian law." },
+    { q: "Can I cancel my retainer?", a: "Yes, our retainers are month-to-month. No lock-ins, because we believe in delivering ROI every single month." }
+];
+
 export default function PricingPage() {
+    const [openFaq, setOpenFaq] = useState<number | null>(0);
+
     return (
         <main className="bg-black min-h-screen">
             <Navbar />
 
-            <div className="container py-32">
-                <div className="text-center max-w-3xl mx-auto mb-20">
+            <section className={styles.pricingHero}>
+                <div className="container">
                     <motion.h1
+                        className="text-white text-5xl md:text-7xl font-extrabold mb-6 tracking-tighter"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-white text-6xl font-extrabold mb-6 tracking-tighter"
                     >
-                        Android Scale. <span className="text-gradient">Apple Delight.</span>
+                        Simple, <span className="text-gradient">ROI-First</span> Pricing.
                     </motion.h1>
-                    <p className="text-zinc-400 text-xl leading-relaxed">
-                        Premium engineering growth systems at prices that make sense for the 80M+ Indian SMBs. No hidden fees. Just ROI.
+                    <p className="text-zinc-500 text-lg max-w-2xl mx-auto mb-16">
+                        No hidden fees. No tech jargon. Just pure growth systems engineered for Pune.
                     </p>
-                </div>
 
-                <div className="grid md:grid-cols-3 gap-8 mb-20">
-                    {tiers.map((tier, idx) => (
-                        <motion.div
-                            key={tier.name}
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
-                            className={`p-10 rounded-3xl border ${tier.highlight
-                                    ? 'bg-zinc-900/50 border-cyan-500/50 shadow-[0_0_50px_rgba(0,255,255,0.1)]'
-                                    : 'bg-zinc-900/20 border-white/10'
-                                } flex flex-col h-full`}
-                        >
-                            <h2 className="text-2xl font-bold text-white mb-2">{tier.name}</h2>
-                            <p className="text-zinc-500 text-sm mb-8">{tier.description}</p>
-
-                            <div className="mb-8">
-                                <span className="text-4xl font-bold text-white">{tier.price}</span>
-                                {tier.price !== 'Custom' && <span className="text-zinc-500 text-sm font-medium ml-2">/ one-time</span>}
-                            </div>
-
-                            <div className="space-y-4 mb-10 flex-grow">
-                                {tier.features.map(feature => (
-                                    <div key={feature} className="flex items-start gap-3">
-                                        <div className="mt-1 p-0.5 bg-cyan-500/20 rounded-full text-cyan-400">
-                                            <Check size={14} />
-                                        </div>
-                                        <span className="text-zinc-300 text-sm">{feature}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <Button
-                                variant={tier.highlight ? 'primary' : 'outline'}
-                                size="lg"
-                                className="w-full font-bold py-6 text-lg"
+                    <div className={styles.pricingGrid}>
+                        {services.map((plan, i) => (
+                            <motion.div
+                                key={plan.name}
+                                className={styles.priceCard}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
                             >
-                                Get Started <ArrowRight className="ml-2" />
-                            </Button>
-                        </motion.div>
-                    ))}
-                </div>
+                                {plan.popular && <div className={styles.popularTag}>Most Popular</div>}
+                                <h3 className="text-zinc-400 text-sm font-bold uppercase tracking-widest mb-2">{plan.name}</h3>
+                                <div className="text-4xl font-bold text-white mb-4">{plan.price}</div>
+                                <p className="text-zinc-500 text-sm mb-8">{plan.description}</p>
 
-                {/* FAQ Section Placeholder */}
-                <section className="max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-bold text-white mb-10 text-center">Frequently Asked Questions</h2>
-                    <div className="space-y-4">
-                        {[
-                            { q: "Why is it more affordable for Pune SMBs?", a: "We use an 'Android Volume' model—leveraging AI for high-velocity engineering to keep costs low while delivering Apple-grade UX." },
-                            { q: "What are AI Tool Credits?", a: "Credits allow you to run powerful growth agents like Surfer SEO or Zapier Agents directly from your Docodo dashboard." },
-                            { q: "Do you offer Marathi support?", a: "Yes, our bots and consulting can be localized in Marathi/Hinglish to better serve your local customers." }
-                        ].map((item, i) => (
-                            <div key={i} className="bg-zinc-900/40 p-6 rounded-2xl border border-white/5">
-                                <h3 className="text-white font-bold mb-2">{item.q}</h3>
-                                <p className="text-zinc-500 text-sm">{item.a}</p>
+                                <ul className="space-y-4 mb-10 flex-grow">
+                                    {plan.features.map(f => (
+                                        <li key={f} className="flex items-center gap-3 text-zinc-300 text-sm">
+                                            <Check size={16} className="text-cyan-400 shrink-0" /> {f}
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <Button
+                                    variant={plan.popular ? 'primary' : 'outline'}
+                                    className="w-full"
+                                    onClick={() => window.location.href = '/contact'}
+                                >
+                                    {plan.cta}
+                                </Button>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    <div className={styles.creditSection}>
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+                                <Zap className="text-cyan-400" /> Marketplace Credit Packs
+                            </h2>
+                            <p className="text-zinc-500">Add fuel to your AI agents. 1 Credit = ₹1-₹2 Value.</p>
+                        </div>
+
+                        <div className={styles.creditGrid}>
+                            {creditPacks.map((pack) => (
+                                <div key={pack.name} className={styles.creditPack}>
+                                    <div className="text-cyan-400 font-bold mb-2">{pack.credits} Credits</div>
+                                    <div className="text-2xl font-bold text-white mb-1">{pack.price}</div>
+                                    <div className="text-[10px] text-emerald-400 font-bold uppercase mb-6">{pack.bonus}</div>
+                                    <Button variant="outline" size="sm" className="w-full border-white/10 hover:border-cyan-500/50">
+                                        Buy Now
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={styles.faqContainer}>
+                        <h2 className="text-3xl font-bold text-white mb-12 text-center">Frequently Asked Questions</h2>
+                        {faqs.map((faq, i) => (
+                            <div key={i} className={styles.faqItem}>
+                                <button
+                                    className={styles.faqQuestion}
+                                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                                >
+                                    {faq.q} <ChevronDown className={`transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+                                </button>
+                                <AnimatePresence>
+                                    {openFaq === i && (
+                                        <motion.div
+                                            className={styles.faqAnswer}
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            style={{ overflow: 'hidden' }}
+                                        >
+                                            <p className="pb-4">{faq.a}</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         ))}
                     </div>
-                </section>
-            </div>
+                </div>
+            </section>
 
             <Footer />
         </main>

@@ -7,36 +7,31 @@ import styles from './Services.module.css';
 
 const services = [
     {
-        icon: <Palette className="w-8 h-8 text-cyan-400" />,
+        icon: <Palette className="w-8 h-8" />,
         title: 'Websites & Apps',
-        description: 'AI-built, mobile-first sites/apps with WhatsApp & booking integration. Engineered for salons, clinics, and cafes.',
+        description: 'AI-built mobile-first sites/apps with WhatsApp & Razorpay. Launch your digital storefront in days.',
         pricing: 'From ₹4,999',
-        roi: '+₹20k/mo potential',
-        size: 'large'
+        roi: '₹50k+/mo Potential',
+        size: 'large',
+        color: 'cyan'
     },
     {
-        icon: <LineChart className="w-8 h-8 text-pink-400" />,
+        icon: <LineChart className="w-8 h-8" />,
         title: 'Marketing & SEO',
-        description: 'ROI-focused Pune localized SEO and ads. We turn search intent into walk-in customers.',
+        description: 'Pune localized SEO and ads. We turn search intent into walk-in customers for salons & clinics.',
         pricing: 'Setup: ₹9,999',
-        roi: '18% conversion lift',
-        size: 'small'
+        roi: '+₹30k Revenue Lift',
+        size: 'medium',
+        color: 'coral'
     },
     {
-        icon: <Bot className="w-8 h-8 text-amber-400" />,
+        icon: <Bot className="w-8 h-8" />,
         title: 'AI Automations',
-        description: 'WhatsApp bots for leads & auto-nurture. Run your business while you sleep.',
+        description: 'WhatsApp bots for leads & 24/7 auto-nurture. Save 15+ hours/week on manual follow-ups.',
         pricing: '₹2,999/mo',
-        roi: '10 hrs/week saved',
-        size: 'small'
-    },
-    {
-        icon: <Rocket className="w-8 h-8 text-emerald-400" />,
-        title: 'Consulting OS',
-        description: 'Founder-led growth playbooks and technical audit to scale your SMB infrastructure.',
-        pricing: 'Custom',
-        roi: '3x growth velocity',
-        size: 'medium'
+        roi: '100% Lead Capture',
+        size: 'medium',
+        color: 'blue'
     }
 ];
 
@@ -45,9 +40,9 @@ export function Services() {
         <section className="section bg-zinc-950/50">
             <div className="container">
                 <div className={styles.header}>
-                    <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tight">Integrated Growth OS</h2>
+                    <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tight">AI Growth OS Services</h2>
                     <p className={styles.subtitle}>
-                        Everything your Pune business needs to scale, integrated into one seamless platform.
+                        Everything your Pune business needs to scale, starting at ₹4,999.
                     </p>
                 </div>
 

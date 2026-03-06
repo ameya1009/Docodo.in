@@ -59,87 +59,54 @@
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 1.75rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 99px;
-    color: var(--color-text-muted);
+    background: rgba(0, 31, 63, 0.4);
+    border: 1px solid var(--color-border-bright);
+    border-radius: var(--radius-full);
+    color: var(--color-text-main);
     font-size: 0.75rem;
     font-weight: 700;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     backdrop-filter: blur(20px);
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.15em;
+    box-shadow: var(--shadow-premium);
 }
 
-.scarcityBadge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 1rem;
-    background: rgba(234, 179, 8, 0.1);
-    border: 1px solid rgba(234, 179, 8, 0.2);
+.circuitAccentInline {
+    width: 15px;
+    height: 1.5px;
+    background: var(--color-primary);
+    position: relative;
     border-radius: 99px;
-    color: #EAB308;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 1.5rem;
 }
 
-.pulseDot {
+.circuitAccentInline::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: -3px;
     width: 6px;
     height: 6px;
-    background: #EAB308;
     border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7);
-    }
-
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(234, 179, 8, 0);
-    }
-
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
-    }
-}
-
-.badgeDot {
-    width: 4px;
-    height: 4px;
-    background: var(--color-primary);
-    border-radius: 50%;
+    border: 1.5px solid var(--color-primary);
 }
 
 .headline {
-    font-size: clamp(3.5rem, 10vw, 7.5rem);
-    line-height: 0.95;
-    margin-bottom: 2.5rem;
-    letter-spacing: -0.05em;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 1.05;
+    margin-bottom: 2rem;
+    letter-spacing: -0.04em;
     font-weight: 800;
 }
 
 .glitchText {
     background: linear-gradient(135deg,
             var(--color-primary) 0%,
-            var(--color-secondary) 50%,
-            var(--color-accent) 100%);
-    background-size: 200% auto;
+            var(--color-secondary) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
-    display: inline-block;
-    animation: shine 8s linear infinite;
 }
 
 .subheadline {

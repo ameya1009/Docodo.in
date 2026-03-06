@@ -1,29 +1,26 @@
 :root {
-  /* Apple-Inspired Premium Palette - 2026 Trends */
-  --color-primary: #00FFFF;
-  /* Electric Neon Blue */
-  --color-secondary: #FF6B6B;
-  /* Sunset Coral */
-  --color-accent: #C0C0C0;
-  /* Holographic Silver */
-
-  --color-bg: #000000;
-  /* Pure Black */
-  --color-surface: #0A0A0A;
-  /* Deep Charcoal */
-  --color-surface-hover: #141414;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-border-bright: rgba(255, 255, 255, 0.2);
+  /* Docodo 2026: AI Growth OS for Pune SMBs */
+  --color-primary: #00D4FF; /* Electric Neon Blue */
+  --color-primary-rgb: 0, 212, 255;
+  --color-secondary: #FF6B6B; /* Sunset Coral */
+  --color-accent: #C0C0C0; /* Silver Borders */
+  
+  --color-brand-navy: #001F3F; /* Base Dark Navy */
+  --color-bg: #001F3F;
+  --color-surface: rgba(255, 255, 255, 0.03);
+  --color-surface-hover: rgba(255, 255, 255, 0.06);
+  --color-border: rgba(192, 192, 192, 0.1);
+  --color-border-bright: rgba(0, 212, 255, 0.3);
 
   --color-text-main: #FFFFFF;
   --color-text-muted: #A1A1AA;
   --color-text-dim: #71717A;
 
-  /* Typography */
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-outfit);
+  /* Typography - Apple-esque & Accessible */
+  --font-sans: 'Inter', var(--font-inter), system-ui, sans-serif;
+  --font-heading: 'Outfit', var(--font-outfit), sans-serif;
 
-  /* Spacing (Apple-style generous spacing) */
+  /* Spacing */
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
   --space-sm: 1rem;
@@ -33,16 +30,20 @@
   --space-2xl: 5rem;
   --space-3xl: 8rem;
 
-  --section-padding: clamp(5rem, 15vw, 10rem);
+  --section-padding: clamp(4rem, 10vw, 6rem); /* SMB Friendly spacing */
   --container-width: 1400px;
 
-  /* Refined Radius */
+  /* Radius - Modern Rounded 12px for SMB friendliness */
   --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 32px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
   --radius-full: 9999px;
 
   --header-height: 80px;
+
+  /* Glow / Shadow */
+  --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --glow-blue: 0 0 20px rgba(0, 212, 255, 0.2);
 }
 
 * {

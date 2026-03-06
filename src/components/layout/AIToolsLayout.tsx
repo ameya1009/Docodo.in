@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import styles from './AIToolsLayout.module.css';
+import { useCredits } from '@/hooks/useCredits';
 
 interface AIToolsLayoutProps {
     children: React.ReactNode;
@@ -25,33 +26,29 @@ interface AIToolsLayoutProps {
 
 export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
     const pathname = usePathname();
+    const { credits } = useCredits();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const menuItems = [
         {
             icon: <LayoutDashboard className={styles.navIcon} />,
-            label: 'Overview',
-            href: '/ai-tools'
+            label: 'Marketplace',
+            href: '/dashboard'
         },
         {
-            icon: <Mail className={styles.navIcon} />,
-            label: 'Email Automation',
-            href: '/ai-tools/email-automation'
-        },
-        {
-            icon: <Users className={styles.navIcon} />,
-            label: 'Patient Registry',
-            href: '/ai-tools/patients-list'
-        },
-        {
-            icon: <Dumbbell className={styles.navIcon} />,
-            label: 'FitFlow Manager',
-            href: '/ai-tools/gym-management'
+            icon: <Sparkles className={styles.navIcon} />,
+            label: 'AI Agents',
+            href: '/dashboard/agents'
         },
         {
             icon: <Brain className={styles.navIcon} />,
-            label: 'Agentic ERP',
-            href: '/ai-tools/agentic-erp'
+            label: 'Audit History',
+            href: '/dashboard/audits'
+        },
+        {
+            icon: <Settings className={styles.navIcon} />,
+            label: 'Billing',
+            href: '/dashboard/billing'
         }
     ];
 
@@ -106,12 +103,13 @@ export function AIToolsLayout({ children, title }: AIToolsLayoutProps) {
 
                 <div className={styles.sidebarFooter}>
                     <div className={styles.upgradePrompt}>
-                        <p className={styles.upgradeText}>
-                            Get advanced agent capabilities with Pro.
-                        </p>
-                        <button className="w-full py-1.5 bg-white text-black text-[10px] font-bold rounded-md hover:opacity-90 transition-all">
-                            Upgrade Now
-                        </button>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-[10px] text-zinc-400 font-bold uppercase">Balance</span>
+                            <span className="text-sm font-bold text-cyan-400">{credits} Credits</span>
+                        </div>
+                        <Link href="/pricing" className="w-full block text-center py-1.5 bg-cyan-500 text-black text-[10px] font-bold rounded-md hover:opacity-90 transition-all shadow-[0_0_15px_rgba(34,211,238,0.4)]">
+                            Recharge Now
+                        </Link>
                     </div>
                 </div>
             </aside>

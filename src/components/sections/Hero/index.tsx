@@ -62,9 +62,10 @@ export function Hero() {
                             visible: { opacity: 1, scale: 1 }
                         }}
                     >
-                        <span>Your AI-Powered SMB Growth OS</span>
+                        <span className={styles.circuitAccentInline}></span>
+                        <span>AI Growth OS for Pune SMBs</span>
                         <div className={styles.badgeDot} />
-                        <span>Built by Engineers for Pune</span>
+                        <span>Built by Engineers</span>
                     </motion.div>
 
                     <motion.h1
@@ -75,8 +76,8 @@ export function Hero() {
                         }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        Scale Your Pune Business <br />
-                        <span className={styles.glitchText}>with AI Magic.</span>
+                        Docodo: AI Growth OS <br />
+                        <span className={styles.glitchText}>for Your Pune Business.</span>
                     </motion.h1>
 
                     <motion.p
@@ -86,9 +87,8 @@ export function Hero() {
                             visible: { opacity: 1, y: 0 }
                         }}
                     >
-                        Sites, Apps, Marketing & Bots that deliver ₹50k+/month ROI. <br />
-                        Engineered for cafes, clinics, salons, and gyms.
-                        Starting at ₹4,999.
+                        Sites + Apps + Marketing + Bots = ₹50k+/Month Extra ROI. <br />
+                        No Tech Hassle. Free Audit in 2 Mins.
                     </motion.p>
 
                     <motion.div
@@ -101,8 +101,11 @@ export function Hero() {
                         <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/growth-grader')}>
                             Get Free Audit
                         </Button>
+                        <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/growth-grader')}>
+                            Get Free Audit
+                        </Button>
                         <Button variant="outline" size="lg" className={styles.demoBtn} onClick={() => router.push('/dashboard/marketplace')}>
-                            Try AI Tools
+                            Try Demo
                         </Button>
                         <Button variant="ghost" size="lg" className={styles.secBtn} onClick={() => router.push('/contact')}>
                             Book Call
