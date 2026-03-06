@@ -40,6 +40,10 @@ export function BentoCard({
         const height = rect.height;
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
+
+        cardRef.current.style.setProperty('--mouse-x', `${mouseX}px`);
+        cardRef.current.style.setProperty('--mouse-y', `${mouseY}px`);
+
         const xPct = mouseX / width - 0.5;
         const yPct = mouseY / height - 0.5;
         x.set(xPct);
@@ -56,6 +60,8 @@ export function BentoCard({
             ref={cardRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            whileHover={{ scale: 1.01, y: -5 }}
+            whileTap={{ scale: 0.98 }}
             style={{
                 rotateX,
                 rotateY,
@@ -68,7 +74,12 @@ export function BentoCard({
                 className
             )}
         >
-            {videoSrc && (
+            {videoSrc === 'mock' ? (
+                <div className={styles.videoContainer}>
+                    <div className={styles.videoPlaceholder} />
+                    <div className={styles.videoOverlay} />
+                </div>
+            ) : videoSrc && (
                 <div className={styles.videoContainer}>
                     <video
                         src={videoSrc}
@@ -82,10 +93,10 @@ export function BentoCard({
                 </div>
             )}
 
-            <div
+            <motion.div
                 className={styles.glow}
                 style={{
-                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), ${glowColor}, transparent 40%)`
+                    background: `radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), ${glowColor}, transparent 40%)`
                 } as any}
             />
 

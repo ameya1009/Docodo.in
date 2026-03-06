@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import styles from './Navbar.module.css';
 
 const navItems = [
+    { name: 'Home', href: '/' },
     { name: 'Services', href: '/services' },
     { name: 'Cases', href: '/cases' },
     { name: 'Pricing', href: '/pricing' },

@@ -25,15 +25,15 @@ export default function Home() {
           <BentoCard
             span="2x2"
             className="flex flex-col justify-end relative group"
+            videoSrc="mock"
           >
             {/* Background Image Layer */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
                 src="/brain/34775d6c-fa2c-43be-ba45-1cbf261c881d/pune_skyline_premium_hero_1772801908298.png"
                 alt="Pune Skyline"
-                className="w-full h-full object-cover filter brightness-[0.35] saturate-[1.2] group-hover:scale-110 transition-transform duration-1000"
+                className="w-full h-full object-cover filter brightness-[0.35] saturate-[1.2] group-hover:scale-110 transition-transform duration-1000 opacity-60"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#000814] via-transparent to-transparent" />
             </div>
 
             <div className="relative z-10 p-2">

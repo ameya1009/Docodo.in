@@ -90,8 +90,35 @@
     filter: brightness(0.4) saturate(1.2);
 }
 
+.videoPlaceholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(-45deg,
+            rgba(0, 31, 63, 1),
+            rgba(0, 212, 255, 0.2),
+            rgba(168, 85, 247, 0.2),
+            rgba(0, 31, 63, 1));
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 .videoOverlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent, rgba(0, 31, 63, 0.8));
+    background: radial-gradient(circle at center, transparent 0%, rgba(0, 8, 20, 0.8) 100%);
+    z-index: 1;
 }
