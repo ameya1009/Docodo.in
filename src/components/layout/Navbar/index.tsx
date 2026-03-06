@@ -13,6 +13,7 @@ const navItems = [
     { name: 'Services', href: '/services' },
     { name: 'Cases', href: '/cases' },
     { name: 'Pricing', href: '/pricing' },
+    { name: 'Tools', href: '/tools' },
     { name: 'Blog', href: '/blog' },
     { name: 'About', href: '/about' },
 ];
@@ -57,11 +58,11 @@ export function Navbar() {
                 </nav>
 
                 <div className={styles.actions}>
-                    <Link href="/contact" className={styles.hideMobile}>
-                        <Button variant="outline" size="sm" className={styles.btnCoral}>Book Call</Button>
+                    <Link href="/dashboard" className={styles.hideMobile}>
+                        <Button variant="outline" size="sm" className={styles.btnCoral}>Dashboard</Button>
                     </Link>
-                    <Link href="/growth-grader" className={styles.hideMobile}>
-                        <Button variant="primary" size="sm" className={styles.btnNeon}>Get Free Audit</Button>
+                    <Link href="/tools" className={styles.hideMobile}>
+                        <Button variant="primary" size="sm" className={styles.btnNeon}>Explore Tools</Button>
                     </Link>
 
                     <button

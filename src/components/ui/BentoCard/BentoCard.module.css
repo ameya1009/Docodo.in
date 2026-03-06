@@ -1,0 +1,97 @@
+.card {
+    position: relative;
+    border-radius: 2rem;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.dark {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.content {
+    position: relative;
+    z-index: 2;
+    padding: 2.5rem;
+    height: 100%;
+}
+
+.glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.card:hover .glow {
+    opacity: 1;
+}
+
+/* Span classes */
+.span_1x1 {
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+.span_1x2 {
+    grid-column: span 1;
+    grid-row: span 2;
+}
+
+.span_2x1 {
+    grid-column: span 2;
+    grid-row: span 1;
+}
+
+.span_2x2 {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.span_3x1 {
+    grid-column: span 3;
+    grid-row: span 1;
+}
+
+.span_3x2 {
+    grid-column: span 3;
+    grid-row: span 2;
+}
+
+@media (max-width: 1024px) {
+
+    .span_2x1,
+    .span_2x2,
+    .span_3x1,
+    .span_3x2 {
+        grid-column: span 1;
+    }
+}
+
+.videoContainer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) saturate(1.2);
+}
+
+.videoOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, rgba(0, 31, 63, 0.8));
+}
