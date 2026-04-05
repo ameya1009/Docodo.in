@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
+import { Checkout } from '@/components/pricing/Checkout';
 import { Check, Info, Zap, CreditCard, ChevronDown, ArrowRight } from 'lucide-react';
 import styles from './Pricing.module.css';
 
@@ -36,9 +37,9 @@ const services = [
 ];
 
 const creditPacks = [
-    { name: "Starter Pack", credits: "100", price: "₹999", bonus: "0%" },
-    { name: "Pro Pack", credits: "500", price: "₹3,999", bonus: "10%", popular: true },
-    { name: "Growth Pack", credits: "2,000", price: "₹9,999", bonus: "+500 Bonus" }
+    { name: "Starter Pack", credits: 100, price: 999, displayPrice: "₹999", bonus: "0%" },
+    { name: "Pro Pack", credits: 500, price: 3999, displayPrice: "₹3,999", bonus: "10%", popular: true },
+    { name: "Growth Pack", credits: 2000, price: 9999, displayPrice: "₹9,999", bonus: "+500 Bonus" }
 ];
 
 const faqs = [
@@ -113,11 +114,15 @@ export default function PricingPage() {
                             {creditPacks.map((pack) => (
                                 <div key={pack.name} className={styles.creditPack}>
                                     <div className="text-cyan-400 font-bold mb-2">{pack.credits} Credits</div>
-                                    <div className="text-2xl font-bold text-white mb-1">{pack.price}</div>
+                                    <div className="text-2xl font-bold text-white mb-1">{pack.displayPrice}</div>
                                     <div className="text-[10px] text-emerald-400 font-bold uppercase mb-6">{pack.bonus}</div>
-                                    <Button variant="outline" size="sm" className="w-full border-white/10 hover:border-cyan-500/50">
-                                        Buy Now
-                                    </Button>
+                                    <Checkout 
+                                        amount={pack.price} 
+                                        credits={pack.credits} 
+                                        packName={pack.name} 
+                                        variant="outline" 
+                                        className="w-full border-white/10 hover:border-cyan-500/50" 
+                                    />
                                 </div>
                             ))}
                         </div>

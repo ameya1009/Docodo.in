@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { FloatingShapes } from '@/components/ui/FloatingShapes';
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas';
 import styles from './Hero.module.css';
 
 export function Hero() {
@@ -32,11 +33,7 @@ export function Hero() {
             {/* Immersive Background Layer */}
             <div className={styles.bgLayers}>
                 <div className={styles.skylineWrapper}>
-                    <img
-                        src="/brain/34775d6c-fa2c-43be-ba45-1cbf261c881d/pune_skyline_premium_hero_1772801908298.png"
-                        alt="Pune skyline"
-                        className={styles.skylineImg}
-                    />
+                    <BackgroundCanvas />
                     <div className={styles.skylineOverlay} />
                 </div>
                 <div className={styles.videoMask}>
