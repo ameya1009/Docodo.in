@@ -1,0 +1,58 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
+export async function POST(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { topic, tone } = await req.json();
+        if (!topic) {
+           return NextResponse.json({ error: 'Please provide a topic' }, { status: 400 });
+        }
+
+        const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+        if (!user) {
+             return NextResponse.json({ error: 'User not found' }, { status: 400 });
+        }
+
+        const COST = 1; // 1 credit
+
+        if (user.credits < COST) {
+            return NextResponse.json({ error: 'Insufficient credits' }, { status: 400 });
+        }
+
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+        const prompt = `Act as an expert Business Email Writer. Write a professional email about the following topic: "${topic}". The tone of the email should be ${tone || "professional"}. Please provide only the subject line and the email body text. Use standard placeholders like [Name] where necessary.`;
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+
+        // Log usage & deduct
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: user.id },
+                data: { credits: { decrement: COST } }
+            }),
+            prisma.toolUsage.create({
+                data: {
+                    userId: user.id,
+                    toolName: 'Email Writer',
+                    creditsUsed: COST
+                }
+            })
+        ]);
+
+        return NextResponse.json({ result: text, newCredits: user.credits - COST });
+
+    } catch (error: any) {
+        console.error('Email Writer Tool error:', error);
+        return NextResponse.json({ error: error.message || 'Failed to generate' }, { status: 500 });
+    }
+}

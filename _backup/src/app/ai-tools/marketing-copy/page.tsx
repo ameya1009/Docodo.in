@@ -1,0 +1,108 @@
+'use client';
+
+import { useState } from 'react';
+import { AIToolsLayout } from '@/components/layout/AIToolsLayout';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Sparkles, Loader2 } from 'lucide-react';
+
+export default function MarketingCopyPage() {
+    const [product, setProduct] = useState('');
+    const [valueProp, setValueProp] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [result, setResult] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleGenerate = async () => {
+        if (!product || !valueProp) return;
+        setIsLoading(true);
+        setError(null);
+        setResult(null);
+
+        try {
+            const res = await fetch('/api/tools/marketing-copy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product, valueProp })
+            });
+            const data = await res.json();
+            
+            if (!res.ok) {
+                setError(data.error || 'Something went wrong');
+            } else {
+                setResult(data.result);
+            }
+        } catch (err: any) {
+            setError(err.message || 'Network error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <AIToolsLayout title="Marketing Copy Generator">
+            <div className="max-w-4xl mx-auto space-y-8 pb-20 pt-10">
+                <div className="text-center">
+                    <h1 className="text-4xl font-black text-white mb-4 tracking-tighter">AI Marketing Copy</h1>
+                    <p className="text-zinc-500 font-medium">Generate high-converting ads and social media posts.</p>
+                </div>
+
+                <Card className="p-8 bg-zinc-900/40 border-zinc-800/50 backdrop-blur-2xl rounded-[2.5rem]">
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">Product Name & Brief Info</label>
+                            <input
+                                type="text"
+                                value={product}
+                                onChange={(e) => setProduct(e.target.value)}
+                                placeholder="E.g., SuperWidget 3000..."
+                                className="w-full bg-black border border-zinc-800 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-green-500/50 focus:border-green-500/50 focus:outline-none transition-all placeholder:text-zinc-700"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">Value Proposition (What's special?)</label>
+                            <textarea
+                                value={valueProp}
+                                onChange={(e) => setValueProp(e.target.value)}
+                                placeholder="It saves 10 hours a week by automating..."
+                                className="w-full h-32 bg-black border border-zinc-800 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-green-500/50 focus:border-green-500/50 focus:outline-none transition-all placeholder:text-zinc-700 resize-none"
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-sm font-medium">
+                                {error}
+                            </div>
+                        )}
+
+                        <Button 
+                            onClick={handleGenerate} 
+                            disabled={isLoading || !product || !valueProp}
+                            className="w-full bg-gradient-to-r from-green-400 to-emerald-600 text-black h-14 rounded-2xl font-black tracking-tight text-base shadow-xl flex items-center justify-center gap-3 transition-transform hover:scale-[1.02]"
+                        >
+                            {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
+                            {isLoading ? 'Generating Magic...' : 'Generate Copy (Costs 2 Credits)'}
+                        </Button>
+                    </div>
+
+                    {result && (
+                        <div className="mt-8 pt-8 border-t border-zinc-800/50 space-y-4">
+                            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Generated Output</h3>
+                            <div className="p-6 bg-black border border-zinc-800 rounded-xl text-white font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                                {result}
+                            </div>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => navigator.clipboard.writeText(result)}
+                                className="w-full rounded-xl border-zinc-700 text-zinc-400 hover:text-white"
+                            >
+                                Copy to Clipboard
+                            </Button>
+                        </div>
+                    )}
+                </Card>
+            </div>
+        </AIToolsLayout>
+    );
+}
