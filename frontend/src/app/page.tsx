@@ -4,6 +4,10 @@ import { PainPoints } from '@/components/sections/PainPoints';
 import { ProductGrid } from '@/components/sections/ProductGrid';
 import { WhatsAppDemo } from '@/components/sections/WhatsAppDemo';
 import { ContentRepurposer } from '@/components/sections/ContentRepurposer';
+import { GrowthAudit } from '@/components/sections/GrowthAudit';
+import { CaseStudies } from '@/components/sections/CaseStudies';
+import { WhyDocodo } from '@/components/sections/WhyDocodo';
+import { ContentHub } from '@/components/sections/ContentHub';
 import { CarePlans } from '@/components/sections/CarePlans';
 import { Footer } from '@/components/Footer';
 import { MainScene } from '@/components/three/Scene';
@@ -22,9 +26,11 @@ export default function Home() {
         <ProductGrid />
         <WhatsAppDemo />
         <ContentRepurposer />
+        <GrowthAudit />
+        <CaseStudies />
+        <WhyDocodo />
+        <ContentHub />
         <CarePlans />
-        {/* Placeholder for Section 7: Growth Audit */}
-        {/* Placeholder for Section 10: Content Hub */}
         <Footer />
       </div>
     </main>
