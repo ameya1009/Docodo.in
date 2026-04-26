@@ -3,6 +3,7 @@ import { Unbounded, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 const unbounded = Unbounded({
   variable: "--font-display",
@@ -62,9 +63,11 @@ export default function RootLayout({
         jetbrainsMono.variable,
         "antialiased bg-bg-deep text-white"
       )}>
-        <SmoothScroll>
-          {children}
-        </SmoothScroll>
+        <AuthProvider>
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
+        </AuthProvider>
       </body>
     </html>
   );
