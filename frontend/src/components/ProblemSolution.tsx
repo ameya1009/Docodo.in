@@ -54,7 +54,7 @@ export const ProblemSolution = () => {
             <h2 className="text-h2 font-cabinet text-[var(--color-danger)] mb-4">The 2026 SMB Trap</h2>
             <p className="text-body text-[var(--color-text-secondary)]">
               47% of WhatsApp inquiries go unanswered after 5 mins.
-              Manual follow-up. Manual reports. Manual content. You're the bottleneck.
+              Manual follow-up. Manual reports. Manual content. You&apos;re the bottleneck.
             </p>
           </div>
 

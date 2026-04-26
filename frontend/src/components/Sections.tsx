@@ -24,7 +24,7 @@ export const Services = () => (
 );
 
 export const GrowthStack = () => (
-  <section className="py-24 bg-[var(--color-bg-primary)]">
+  <section className="py-24 bg-[var(--color-bg-primary)]" id="growth-stack">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h2 className="text-h2 font-cabinet mb-12">Founder-First Growth Stack™</h2>
       <div className="h-[400px] flex items-center justify-center border border-[var(--color-border)] rounded-xl bg-[var(--color-bg-glass)]">
@@ -60,12 +60,19 @@ export const CarePlans = () => (
   </section>
 );
 
+import { AuditForm } from './AuditForm';
+
 export const AuditCTA = () => (
-  <section className="py-24 bg-[var(--color-accent-primary)] text-black" id="audit-section">
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 className="text-h2 font-cabinet font-extrabold mb-6">Get Your Free 50-Point AI Growth Audit</h2>
-      <p className="text-lg font-medium mb-8">We'll find ₹50,000+ of hidden revenue in your business in 24 hours. No sales call. No nonsense.</p>
-      <Button className="bg-black text-[var(--color-accent-primary)] hover:bg-neutral-900 shadow-xl border-none">Start Free Audit</Button>
+  <section className="py-24 bg-[var(--color-bg-primary)] border-t border-[var(--color-border)]" id="audit-section">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="text-center mb-16">
+        <h2 className="text-h2 font-cabinet font-extrabold mb-6">Get Your Free 50-Point AI Growth Audit</h2>
+        <p className="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
+          We&apos;ll find ₹50,000+ of hidden revenue in your business in 24 hours. 
+          No sales call. No nonsense.
+        </p>
+      </div>
+      <AuditForm />
     </div>
   </section>
 );

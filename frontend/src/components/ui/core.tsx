@@ -1,7 +1,6 @@
 import React from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { motion, HTMLMotionProps } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 export function cn(...inputs: ClassValue[]) {
