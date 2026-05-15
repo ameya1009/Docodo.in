@@ -16,8 +16,7 @@ import { AIChatBubble } from '@/components/ui/AIChatBubble';
 
 export default function Home() {
   return (
-    <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#000814' }}>
-      <Starfield />
+    <main>
       <Navbar />
       <Hero />
       <InfiniteMarquee />
@@ -29,7 +28,6 @@ export default function Home() {
       <GrowthGrader />
       <DifferentiationMatrix />
       <Footer />
-      <AIChatBubble />
     </main>
   );
 }

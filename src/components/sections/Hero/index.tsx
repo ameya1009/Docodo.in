@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { FloatingShapes } from '@/components/ui/FloatingShapes';
+import { GlobalMap } from '@/components/ui/GlobalMap';
 import styles from './Hero.module.css';
 
 export function Hero() {
@@ -46,6 +47,7 @@ export function Hero() {
             </div>
 
             <FloatingShapes />
+            <GlobalMap />
 
             <div className="container">
                 <motion.div
@@ -71,9 +73,9 @@ export function Hero() {
                         }}
                     >
                         <span className={styles.circuitAccentInline}></span>
-                        <span>AI Growth OS for Pune SMBs</span>
+                        <span>#1 Global AI Growth OS</span>
                         <div className={styles.badgeDot} />
-                        <span>Built by Engineers</span>
+                        <span>COEP/VJTI Engineering</span>
                     </motion.div>
 
                     <motion.h1
@@ -84,8 +86,8 @@ export function Hero() {
                         }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     >
-                        Docodo: AI Growth OS <br />
-                        <span className={styles.glitchText}>for Your Pune Business.</span>
+                        Unlock $2,000/Mo ROI.<br />
+                        <span className={styles.glitchText}>Global SMB Growth OS.</span>
                     </motion.h1>
 
                     <motion.p
@@ -95,8 +97,8 @@ export function Hero() {
                             visible: { opacity: 1, y: 0 }
                         }}
                     >
-                        Sites + Apps + Marketing + Bots = ₹50k+/Month Extra ROI. <br />
-                        No Tech Hassle. Free Audit in 2 Mins.
+                        Websites + Apps + Marketing + Bots. <br />
+                        Powered by Trending AI & Safe Git Repos. Free 50 Credits signup.
                     </motion.p>
 
                     <motion.div
@@ -106,14 +108,14 @@ export function Hero() {
                             visible: { opacity: 1, y: 0 }
                         }}
                     >
-                        <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/growth-grader')}>
-                            Get Free Audit
+                        <Button size="lg" className={styles.mainBtn} onClick={() => router.push('/tools')}>
+                            Claim 50 Free Credits
                         </Button>
-                        <Button variant="outline" size="lg" className={styles.demoBtn} onClick={() => router.push('/tools')}>
-                            Explore Tools
+                        <Button variant="outline" size="lg" className={styles.demoBtn} onClick={() => router.push('/dashboard')}>
+                            Build Global Demo
                         </Button>
                         <Button variant="ghost" size="lg" className={styles.secBtn} onClick={() => router.push('/contact')}>
-                            Book Call
+                            Talk to Founder
                         </Button>
                     </motion.div>
                 </motion.div>

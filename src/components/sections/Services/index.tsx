@@ -9,27 +9,27 @@ const services = [
     {
         icon: <Palette className="w-8 h-8" />,
         title: 'Websites & Apps',
-        description: 'AI-built mobile-first sites/apps with WhatsApp & Razorpay. Launch your digital storefront in days.',
-        pricing: 'From ₹4,999',
-        roi: '₹50k+/mo Potential',
+        description: 'Locale-adaptive, mobile-first sites/apps with global WhatsApp & Stripe/PayPal. Launch in <10 mins.',
+        pricing: 'From $59 / ₹4,999',
+        roi: '$500+/mo ROI Potential',
         size: 'large',
         color: 'cyan'
     },
     {
         icon: <LineChart className="w-8 h-8" />,
         title: 'Marketing & SEO',
-        description: 'Pune localized SEO and ads. We turn search intent into walk-in customers for salons & clinics.',
-        pricing: 'Setup: ₹9,999',
-        roi: '+₹30k Revenue Lift',
+        description: 'Full-funnel AI consulting in 50+ countries. 65% CAC reduction via global predictive ad bidding.',
+        pricing: 'Setup: $119 / ₹9,999',
+        roi: '+$1,000 Revenue Lift',
         size: 'medium',
         color: 'coral'
     },
     {
         icon: <Bot className="w-8 h-8" />,
         title: 'AI Automations',
-        description: 'WhatsApp bots for leads & 24/7 auto-nurture. Save 15+ hours/week on manual follow-ups.',
-        pricing: '₹2,999/mo',
-        roi: '100% Lead Capture',
+        description: 'Live credits for n8n/Whisper workflows. Automate lead nurturing & customer trust globally.',
+        pricing: 'From $19 / ₹1,249/mo',
+        roi: '100% Safe Git-Linked',
         size: 'medium',
         color: 'blue'
     }
@@ -40,9 +40,9 @@ export function Services() {
         <section className="section bg-zinc-950/50">
             <div className="container">
                 <div className={styles.header}>
-                    <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tight">AI Growth OS Services</h2>
+                    <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tight">Global Growth OS Bundles</h2>
                     <p className={styles.subtitle}>
-                        Everything your Pune business needs to scale, starting at ₹4,999.
+                        Integrated worldwide solutions for SMBs, starting at $59 / ₹4,999.
                     </p>
                 </div>
 

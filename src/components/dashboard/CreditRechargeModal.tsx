@@ -12,22 +12,43 @@ interface RechargeModalProps {
 }
 
 const packs = [
-    { name: 'Starter Pack', credits: 100, price: '₹999', id: 'p1' },
-    { name: 'Growth Pack', credits: 500, price: '₹3,999', id: 'p2', popular: true },
-    { name: 'Enterprise Pack', credits: 1500, price: '₹9,999', id: 'p3' },
+    { name: 'Starter Pack', credits: 100, price: '$12 / ₹999', id: 'p1' },
+    { name: 'Growth Pack', credits: 500, price: '$49 / ₹3,999', id: 'p2', popular: true },
+    { name: 'Enterprise Pack', credits: 2000, price: '$120 / ₹9,999', id: 'p3' },
 ];
 
 export function CreditRechargeModal({ isOpen, onClose, onSuccess }: RechargeModalProps) {
     const [loading, setLoading] = useState(false);
 
-    const handleRecharge = (pack: typeof packs[0]) => {
+    const handleRecharge = async (pack: typeof packs[0]) => {
         setLoading(true);
-        // Simulate Razorpay Flow
-        setTimeout(() => {
+        try {
+            const response = await fetch('/api/credits/recharge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    packId: pack.id,
+                    amount: pack.price.includes('$') ? parseFloat(pack.price.split('$')[1]) : 0
+                })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // In Phase 3, we simulate the payment success immediately 
+                // but via the real API logic foundation.
+                setTimeout(() => {
+                    setLoading(false);
+                    onSuccess(pack.credits);
+                    onClose();
+                }, 1500);
+            } else {
+                alert('Payment initialization failed.');
+                setLoading(false);
+            }
+        } catch (err) {
+            alert('Network error.');
             setLoading(false);
-            onSuccess(pack.credits);
-            onClose();
-        }, 2000);
+        }
     };
 
     return (
@@ -53,7 +74,7 @@ export function CreditRechargeModal({ isOpen, onClose, onSuccess }: RechargeModa
 
                         <div className="mb-8">
                             <h2 className="text-2xl font-bold text-white mb-2">Recharge Credits</h2>
-                            <p className="text-zinc-400 text-sm">Empower your Growth OS with AI Tool credits via Razorpay.</p>
+                            <p className="text-zinc-400 text-sm">Empower your Growth OS with AI Tool credits via Stripe/Razorpay.</p>
                         </div>
 
                         <div className="space-y-4 mb-8">
@@ -80,14 +101,14 @@ export function CreditRechargeModal({ isOpen, onClose, onSuccess }: RechargeModa
 
                         <div className="flex items-center justify-center gap-6 text-zinc-500 mb-6">
                             <div className="flex items-center gap-2 text-xs uppercase font-bold tracking-widest"><ShieldCheck size={14} /> Secure</div>
-                            <div className="flex items-center gap-2 text-xs uppercase font-bold tracking-widest"><CreditCard size={14} /> Razorpay</div>
+                            <div className="flex items-center gap-2 text-xs uppercase font-bold tracking-widest"><CreditCard size={14} /> Global Pay</div>
                             <div className="flex items-center gap-2 text-xs uppercase font-bold tracking-widest"><Zap size={14} /> Instant</div>
                         </div>
 
                         {loading && (
                             <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center">
                                 <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
-                                <p className="text-white font-bold">Securely connecting to Razorpay...</p>
+                                <p className="text-white font-bold">Securely connecting to payment gateway...</p>
                             </div>
                         )}
                     </motion.div>

@@ -12,11 +12,11 @@ import styles from './Navbar.module.css';
 const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Services', href: '/services' },
+    { name: 'Tools Market', href: '/tools' },
     { name: 'Cases', href: '/cases' },
     { name: 'Pricing', href: '/pricing' },
-    { name: 'Tools', href: '/tools' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'About', href: '/about' },
+    { name: 'Resources', href: '/blog' },
+    { name: 'Global Story', href: '/about' },
 ];
 
 export function Navbar() {

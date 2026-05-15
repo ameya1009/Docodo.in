@@ -48,9 +48,9 @@ export function Footer() {
                             Docodo<span className={styles.circuitAccent}></span>
                         </Link>
                         <p className={styles.tagline}>
-                            <strong>AI Growth OS for Pune SMBs</strong>
-                            <br />Sites, Apps, Marketing & Bots.
-                            <br /><span className={styles.roi}>Delivering ₹50k+/Month ROI.</span>
+                            <strong>#1 Global AI Growth OS for SMBs</strong>
+                            <br />Websites, Apps, Marketing & Bots.
+                            <br /><span className={styles.roi}>Unlocking $500–$2,000/Month ROI.</span>
                         </p>
                     </div>
 
@@ -99,13 +99,13 @@ export function Footer() {
                 <div className={styles.bottom}>
                     <p>&copy; {new Date().getFullYear()} Docodo. All rights reserved.</p>
                     <div className={styles.socials}>
-                        <a href="https://linkedin.com/company/docodo_in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="LinkedIn">
+                        <a href="https://linkedin.com/company/docodo_global" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="LinkedIn">
                             <Linkedin size={20} />
                         </a>
-                        <a href="https://twitter.com/docodo_in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Twitter/X">
+                        <a href="https://twitter.com/docodo_global" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Twitter/X">
                             <Twitter size={20} />
                         </a>
-                        <a href="https://instagram.com/docodo_in" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Instagram">
+                        <a href="https://instagram.com/docodo_global" target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Instagram">
                             <Instagram size={20} />
                         </a>
                     </div>

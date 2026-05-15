@@ -1,16 +1,24 @@
 :root {
-  /* Docodo 2026: AI Growth OS for Pune SMBs */
-  --color-primary: #00D4FF; /* Electric Neon Blue */
-  --color-primary-rgb: 0, 212, 255;
-  --color-secondary: #FF6B6B; /* Sunset Coral */
-  --color-accent: #C0C0C0; /* Silver Borders */
+  /* Docodo 2026: The #1 Global AI Growth OS for SMBs */
+  --color-base: #0F0F0F;
+  --color-emerald-dark: #0A5C4A;
+  --color-emerald-light: #10B981;
+  --color-sapphire-dark: #0F52BA;
+  --color-sapphire-light: #3B82F6;
+  --color-cyan-glow: #22D3EE;
+  --color-gold-accent: #D4AF37;
   
-  --color-brand-navy: #001F3F; /* Base Dark Navy */
-  --color-bg: #001F3F;
+  --color-primary: var(--color-emerald-light);
+  --color-primary-rgb: 16, 185, 129;
+  --color-secondary: var(--color-sapphire-light);
+  --color-accent: var(--color-cyan-glow);
+
+  --color-bg: var(--color-base);
+  --color-brand-navy: var(--color-sapphire-dark);
   --color-surface: rgba(255, 255, 255, 0.03);
   --color-surface-hover: rgba(255, 255, 255, 0.06);
-  --color-border: rgba(192, 192, 192, 0.1);
-  --color-border-bright: rgba(0, 212, 255, 0.3);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-bright: rgba(34, 211, 238, 0.3);
 
   --color-text-main: #FFFFFF;
   --color-text-muted: #A1A1AA;
@@ -18,7 +26,7 @@
 
   /* Typography - Apple-esque & Accessible */
   --font-sans: 'Inter', var(--font-inter), system-ui, sans-serif;
-  --font-heading: 'Outfit', var(--font-outfit), sans-serif;
+  --font-heading: 'Satoshi', var(--font-satoshi), sans-serif;
 
   /* Spacing */
   --space-2xs: 0.25rem;
@@ -30,20 +38,24 @@
   --space-2xl: 5rem;
   --space-3xl: 8rem;
 
-  --section-padding: clamp(4rem, 10vw, 6rem); /* SMB Friendly spacing */
-  --container-width: 1400px;
+  --section-padding: clamp(6rem, 12vw, 10rem);
+  /* More spacious for Global 1% */
+  --container-width: 1440px;
 
-  /* Radius - Modern Rounded 12px for SMB friendliness */
+  /* Radius - Modern Premium */
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-lg: 32px;
   --radius-full: 9999px;
 
-  --header-height: 80px;
+  --header-height: 90px;
 
-  /* Glow / Shadow */
-  --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  --glow-blue: 0 0 20px rgba(0, 212, 255, 0.2);
+  /* Glow / Shadow / Motion */
+  --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --glow-primary: 0 0 30px rgba(16, 185, 129, 0.3); /* Emerald */
+  --glow-secondary: 0 0 30px rgba(59, 130, 246, 0.3); /* Sapphire */
+  --glow-cyan: 0 0 30px rgba(34, 211, 238, 0.4);
+  --transition-smooth: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {

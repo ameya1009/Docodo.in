@@ -18,7 +18,7 @@ export default function DashboardPage() {
     const [recharging, setRecharging] = useState(false);
 
     const handleRunTool = async (tool: typeof tools[0]) => {
-        if (credits < tool.cost) {
+        if (credits === null || credits < tool.cost) {
             alert('Insufficient credits! Please recharge.');
             return;
         }
@@ -67,52 +67,70 @@ export default function DashboardPage() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-10 p-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-500 mb-2">Docodo Growth OS</h1>
-                    <p className="text-zinc-400">Welcome to your AI Marketplace, Ameya. Pune business scaling made easy.</p>
-                </div>
-                <div className="bg-cyan-500/10 border border-cyan-500/20 p-4 rounded-2xl flex items-center gap-6">
-                    <div>
-                        <p className="text-[10px] text-cyan-300 uppercase font-bold mb-1">Total Balance</p>
-                        <p className="text-2xl font-black text-white">{credits} <span className="text-xs font-medium text-cyan-400">Credits</span></p>
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-12">
+                <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                        <span className="px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-[9px] font-black text-cyan-400 uppercase tracking-widest">Global OS v5.0</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Live Engine</span>
                     </div>
-                    <Button
-                        variant="primary"
-                        size="sm"
-                        className="bg-cyan-500 text-black shadow-[0_0_15px_rgba(0,212,255,0.4)]"
-                        onClick={handleRecharge}
-                        disabled={recharging}
-                    >
-                        {recharging ? <Loader2 className="animate-spin" size={16} /> : 'Get Credits'}
-                    </Button>
+                    <h1 className="text-4xl lg:text-6xl font-black tracking-tighter text-white mb-4">Growth <br /><span className="text-zinc-700">Analytics.</span></h1>
+                    <p className="text-zinc-500 font-medium max-w-md leading-relaxed">Scaling your global SMB ecosystem. Your AI automations are currently projecting <span className="text-white">$1,240 ROI</span> this month.</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-3xl min-w-[240px]">
+                        <p className="text-[10px] text-zinc-600 uppercase font-black tracking-[0.2em] mb-4">Global Credits</p>
+                        <div className="flex items-end gap-2 mb-6">
+                            <span className="text-4xl font-black text-white">{credits}</span>
+                            <span className="text-xs font-black text-cyan-400 mb-1.5">FUEL</span>
+                        </div>
+                        <Button
+                            variant="primary"
+                            className="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest h-12 rounded-2xl hover:bg-cyan-500"
+                            onClick={handleRecharge}
+                            disabled={recharging}
+                        >
+                            {recharging ? <Loader2 className="animate-spin" size={16} /> : 'Recharge +30%'}
+                        </Button>
+                    </div>
+
+                    <div className="bg-cyan-500 border border-cyan-400 p-8 rounded-[2.5rem] min-w-[240px]">
+                        <p className="text-[10px] text-black/60 uppercase font-black tracking-[0.2em] mb-4">Projected ROI</p>
+                        <div className="flex items-end gap-2 mb-6">
+                            <span className="text-4xl font-black text-black">$1,240</span>
+                            <span className="text-xs font-black text-black/60 mb-1.5">/MO</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-black text-black uppercase tracking-widest">
+                            <ArrowUpRight size={14} /> +24% vs Last Month
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div>
-                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-                    AI Marketplace
-                    <span className="text-xs font-medium px-2 py-1 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-400">Trending 2026</span>
+            <div className="pt-12 border-t border-white/5">
+                <h2 className="text-2xl font-black text-white mb-8 flex items-center gap-3 tracking-tight">
+                    Quick Market <span className="text-zinc-700">Tools</span>
                 </h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {tools.map((tool) => (
-                        <div key={tool.id} className="bg-white/5 border border-white/10 p-6 rounded-2xl group hover:border-cyan-500/30 transition-all hover:bg-white/10">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-white/5 rounded-xl group-hover:bg-cyan-500/10 transition-colors uppercase text-[10px] font-bold">
+                        <div key={tool.id} className="bg-white/5 border border-white/10 p-8 rounded-[2rem] group hover:border-cyan-500/30 transition-all hover:bg-white/10">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="p-3 bg-white/5 rounded-xl group-hover:bg-cyan-500/10 transition-colors">
                                     {tool.icon}
                                 </div>
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{tool.category}</span>
+                                <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{tool.category}</span>
                             </div>
-                            <h3 className="font-bold text-white mb-1">{tool.title}</h3>
-                            <p className="text-xs text-zinc-400 mb-4">{tool.cost} Credits per run</p>
+                            <h3 className="font-black text-white mb-1 tracking-tight">{tool.title}</h3>
+                            <p className="text-[10px] font-bold text-zinc-500 mb-6">{tool.cost} Credits Per Run</p>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-full text-[10px] py-1"
+                                className="w-full text-[9px] font-black uppercase tracking-widest h-10 rounded-xl"
                                 onClick={() => handleRunTool(tool)}
                                 disabled={loadingTool === tool.id}
                             >
-                                {loadingTool === tool.id ? <Loader2 className="animate-spin" size={12} /> : 'Run Tool'}
+                                {loadingTool === tool.id ? <Loader2 className="animate-spin" size={12} /> : 'Launch Engine'}
                             </Button>
                         </div>
                     ))}

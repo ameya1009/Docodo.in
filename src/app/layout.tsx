@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter } from "next/font/google";
 import { AIChatBubble } from "@/components/ui/AIChatBubble";
+import { Starfield } from "@/components/ui/Starfield";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,26 +9,20 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://docodo.in"),
   title: {
-    default: "Docodo | AI-Powered Growth OS for Pune SMBs",
+    default: "Docodo | AI-Powered Growth OS for Global SMBs",
     template: "%s | Docodo Growth OS"
   },
-  description: "Transform your Pune business with Docodo's AI-Powered Growth OS. Premium websites, AI agents, and ROI-driven marketing for salons, clinics, and cafes. Built by COEP/VJTI engineers.",
+  description: "Transform your business with Docodo's AI-Powered Growth OS. Premium websites, AI agents, and ROI-driven marketing for global clinics, cafes, and e-comm. Built by world-class engineers.",
   keywords: [
-    "AI Growth OS Pune",
-    "SMB Digital Transformation Pune",
-    "Best Website Designer Pune",
-    "WhatsApp AI Bot for Pune Businesses",
-    "Clinic Marketing Pune",
-    "Salon Growth Pune",
-    "Docodo Pune"
+    "AI Growth OS",
+    "Global SMB Digital Transformation",
+    "Premium AI Website Design",
+    "WhatsApp AI Automation",
+    "ROI Tracking Dashboard",
+    "Docodo Global"
   ],
   authors: [{ name: "Ameya - Founder, Docodo", url: "https://docodo.in/about" }],
   creator: "Docodo Engineering",
@@ -137,7 +132,7 @@ export default function RootLayout({
             "name": "How much does it cost?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Pricing starts at ₹4,999 for essential growth services, with scalable AI credit packs."
+              "text": "Pricing starts at $59/₹4,999 for essential growth services, with scalable AI credit packs."
             }
           }
         ]
@@ -147,8 +142,14 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable}`}>
-        {children}
+      <head>
+        <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400&display=swap" rel="stylesheet" />
+      </head>
+      <body className={`${inter.variable} bg-black text-white antialiased`}>
+        <Starfield />
+        <div className="relative min-h-screen">
+          {children}
+        </div>
         <AIChatBubble />
         <script
           type="application/ld+json"

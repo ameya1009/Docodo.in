@@ -72,7 +72,7 @@ export default function ServicesPage() {
     const [activeTab, setActiveTab] = useState(serviceDetails[0]);
 
     return (
-        <main className="bg-black min-h-screen">
+        <main>
             <Navbar />
 
             <section className={styles.section}>
@@ -90,7 +90,7 @@ export default function ServicesPage() {
                             animate={{ opacity: 1, y: 0 }}
                             className="text-white text-5xl md:text-7xl font-extrabold mt-4 mb-6 tracking-tighter"
                         >
-                            Docodo <span className="text-gradient">Growth OS.</span>
+                            Global <span className="text-gradient">Growth OS.</span>
                         </motion.h1>
                         <p className="text-zinc-400 text-lg md:text-xl leading-relaxed">
                             Pick a component for your business engine. Fully managed, zero maintenance, high ROI.

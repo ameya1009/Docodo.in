@@ -6,13 +6,15 @@ import { Zap, Search, Layout, MessageSquare, Briefcase, Play, Info, CheckCircle2
 import { Button } from '@/components/ui/Button';
 import { docodoTools } from '@/lib/docodo-tools';
 import { CreditRechargeModal } from '@/components/dashboard/CreditRechargeModal';
+import { useCredits } from '@/hooks/useCredits';
+import { Loader2 } from 'lucide-react';
 
 const tools = [
     {
         id: 'growth-audit',
         name: 'Growth Audit Pro',
         category: 'Marketing',
-        description: 'Instant SEO & GTM audit for Pune SMBs. Finds ₹20k-50k/mo revenue gaps.',
+        description: 'Instant SEO & GTM audit for Global SMBs. Finds $200-$500/mo revenue gaps.',
         credits: 10,
         icon: <Search className="text-cyan-400" />,
         type: 'docodo'
@@ -39,7 +41,7 @@ const tools = [
         id: 'viral-hooks',
         name: 'Viral Hook Gen',
         category: 'Marketing',
-        description: 'Generate Hinglish social media hooks that get 10x more engagement in Pune.',
+        description: 'Generate multilingual social media hooks that get 10x more engagement worldwide.',
         credits: 5,
         icon: <Layout className="text-pink-400" />,
         type: 'docodo'
@@ -47,8 +49,9 @@ const tools = [
 ];
 
 export default function MarketplacePage() {
-    const [credits, setCredits] = useState(50);
+    const { credits, loading: creditsLoading, updateCredits } = useCredits();
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [isRunning, setIsRunning] = useState<string | null>(null);
 
     const categories = ['All', 'Websites', 'Marketing', 'Automations'];
 
@@ -69,7 +72,9 @@ export default function MarketplacePage() {
                 <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/10 p-4 rounded-2xl flex items-center gap-6 shadow-2xl">
                     <div>
                         <p className="text-xs text-zinc-500 uppercase font-bold tracking-widest">Available Credits</p>
-                        <p className="text-2xl font-bold text-cyan-400">{credits}</p>
+                        <p className="text-2xl font-bold text-cyan-400">
+                            {creditsLoading ? <Loader2 className="animate-spin w-5 h-5 inline-block" /> : credits}
+                        </p>
                     </div>
                     <Button
                         variant="primary"
@@ -125,24 +130,42 @@ export default function MarketplacePage() {
                                 variant="primary"
                                 className="flex-grow gap-2 font-bold"
                                 onClick={async () => {
+                                    if (creditsLoading || !credits) return;
+
                                     if (credits >= tool.credits) {
-                                        setCredits(credits - tool.credits);
-                                        // Specific Tool Logic
-                                        if (tool.id === 'growth-audit') {
-                                            const result = await docodoTools['growth-audit-pro'].execute({ url: 'yoursite.com' });
-                                            alert(`Audit Complete! SEO: ${result.seoScore}, GTM: ${result.gtmScore}. Check your email for full report.`);
-                                        } else if (tool.id === 'viral-hooks') {
-                                            const result = await docodoTools['viral-hooks'].execute({ businessType: 'Clinic', goal: 'Leads' });
-                                            alert(`Hooks Generated: \n1. ${result[0]}\n2. ${result[1]}`);
-                                        } else {
-                                            alert(`Running ${tool.name}... simulation successful.`);
+                                        setIsRunning(tool.id);
+                                        try {
+                                            const response = await fetch('/api/run-tool', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ toolId: tool.id, credits: tool.credits })
+                                            });
+                                            const data = await response.json();
+
+                                            if (data.success) {
+                                                updateCredits(-tool.credits);
+                                                alert(data.result);
+                                            } else {
+                                                alert(`Error: ${data.error}`);
+                                            }
+                                        } catch (err) {
+                                            alert('Network error while running tool.');
+                                        } finally {
+                                            setIsRunning(null);
                                         }
                                     } else {
-                                        alert('Not enough credits! Please recharge via Razorpay.');
+                                        alert('Not enough credits! Please recharge.');
+                                        setIsModalOpen(true);
                                     }
                                 }}
+                                disabled={isRunning !== null || (credits !== null && credits < tool.credits)}
                             >
-                                <Play size={16} fill="currentColor" /> Run Tool
+                                {isRunning === tool.id ? (
+                                    <Loader2 className="animate-spin" size={16} />
+                                ) : (
+                                    <Play size={16} fill="currentColor" />
+                                )}
+                                {isRunning === tool.id ? 'Running...' : 'Run Tool'}
                             </Button>
                             <Button variant="outline" className="p-3">
                                 <Info size={20} />
@@ -162,15 +185,15 @@ export default function MarketplacePage() {
             <div className="bg-gradient-to-r from-cyan-900/20 to-purple-900/20 border border-cyan-500/20 rounded-3xl p-10 flex flex-col lg:flex-row items-center gap-10">
                 <div className="flex-grow text-center lg:text-left">
                     <h2 className="text-3xl font-bold text-white mb-4">Want a Custom AI Tool?</h2>
-                    <p className="text-zinc-400 max-w-xl">We build custom bots and automations tailored to your specific Pune business needs. WhatsApp bots, CRM sync, and more.</p>
+                    <p className="text-zinc-400 max-w-xl">We build custom bots and automations tailored to your specific business needs. WhatsApp bots, CRM sync, and more.</p>
                 </div>
-                <Button variant="primary" size="lg" className="px-10 py-6 text-lg font-bold">Book AI Consultation</Button>
+                <Button variant="primary" size="lg" className="px-10 py-6 text-lg font-bold" onClick={() => window.location.href = '/contact'}>Book AI Consultation</Button>
             </div>
             <CreditRechargeModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={(amount) => {
-                    setCredits(credits + amount);
+                    updateCredits(amount);
                     alert(`Successfully recharged ${amount} credits!`);
                 }}
             />

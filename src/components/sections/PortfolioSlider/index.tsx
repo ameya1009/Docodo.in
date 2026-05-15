@@ -9,36 +9,36 @@ import styles from './PortfolioSlider.module.css';
 
 const projects = [
     {
-        title: "BIOgram Health",
-        category: "Clinic Growth",
-        image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200",
+        title: "NYC Artisan Cafe",
+        category: "Food & Beverage",
+        image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&q=80&w=1200",
         color: '#00D4FF',
-        description: 'Auto-lead capture system for a Pune clinic. Delivering structured patient inquiries with zero tech hassle.',
-        stats: ['200% Lead Growth', '₹45k/mo Bookings', 'WhatsApp Integrated'],
+        description: 'Automated 60% of takeout orders via multi-lang WhatsApp agent for a high-volume Bleecker St. location.',
+        stats: ['+$800/Mo Orders', 'ROI +150%', 'Bot Integrated'],
     },
     {
-        title: "Dr. Patangankar",
-        category: "Medical Centre",
-        image: "https://images.unsplash.com/photo-1629909613654-28705fe478c5?auto=format&fit=crop&q=80&w=1200",
-        color: '#FF6B6B',
-        description: 'Complete digital transformation for a Baner medical facility, driving massive local SEO visibility.',
-        stats: ['Top 3 Local Pack', '₹50k/mo Extra ROI', 'Seamless Booking'],
-    },
-    {
-        title: "Viman Nagar Cafe",
-        category: "Local Service",
-        image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=1200",
-        color: '#00D4FF',
-        description: 'Increased monthly orders using a custom WhatsApp ordering bot tailored for Pune foodies.',
-        stats: ['₹40k Order Boost', 'Daily 50+ Inquiries', 'Auto-Menu Bot'],
-    },
-    {
-        title: "Baner Styling Salon",
-        category: "Wellness SMB",
+        title: "London Aesthetic Salon",
+        category: "Health & Beauty",
         image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=1200",
+        color: '#FF6B6B',
+        description: 'Dynamic scheduling OS in Mayfair reduced no-shows by 75% and increased high-value service sales.',
+        stats: ['+40% Bookings', '75% Less No-Shows', 'Global CRM'],
+    },
+    {
+        title: "Singapore Fitness Hub",
+        category: "Fitness & Wellness",
+        image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=1200",
+        color: '#00D4FF',
+        description: 'Auto-optimized TikTok campaigns drove record memberships for an Orchard Road gym boutique.',
+        stats: ['+$1,200/Mo', 'Viral Reach', 'AI Ads'],
+    },
+    {
+        title: "Pune Wellness Clinic",
+        category: "Healthcare SMB",
+        image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200",
         color: '#C0C0C0',
-        description: 'Automated booking calendar reducing salon no-shows by 80% and increasing high-value service sales.',
-        stats: ['80% No-Show Drop', '₹35k Extra Sales', 'Member CRM'],
+        description: 'Built a patient-first ecosystem in Baner with integrated follow-up bots and medical SEO.',
+        stats: ['+₹45k/Mo Profit', 'Top 3 SEO', 'Auto-nurture'],
     }
 ];
 
@@ -107,10 +107,10 @@ export function PortfolioSlider() {
             <div className={styles.sticky}>
                 <div className="container">
                     <div className={styles.header}>
-                        <motion.span className={styles.label}>ROI Case Studies</motion.span>
-                        <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tighter">Pune Success Stories</h2>
+                        <motion.span className={styles.label}>Global ROI Proof</motion.span>
+                        <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tighter">Worldwide Success Stories</h2>
                         <p className={styles.subtitle}>
-                            Sites + Apps + Marketing + Bots. See how Docodo delivers real growth for local legends.
+                            Sites + Apps + Marketing + Bots. See how Docodo delivers real growth from NYC to Singapore.
                         </p>
                     </div>
                 </div>

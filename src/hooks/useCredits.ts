@@ -3,31 +3,39 @@
 import { useState, useEffect } from 'react';
 
 export function useCredits() {
-    const [credits, setCredits] = useState<number>(50);
+    const [credits, setCredits] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const fetchCredits = async () => {
+        try {
+            const res = await fetch('/api/user/credits');
+            const data = await res.json();
+            if (data.success) {
+                setCredits(data.credits);
+            }
+        } catch (err) {
+            console.error('Failed to fetch credits:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const saved = localStorage.getItem('docodo_credits');
-        if (saved !== null) {
-            setCredits(parseInt(saved, 10));
-        } else {
-            localStorage.setItem('docodo_credits', '50');
-        }
+        fetchCredits();
 
         const handleUpdate = () => {
-            const current = localStorage.getItem('docodo_credits');
-            if (current !== null) setCredits(parseInt(current, 10));
+            fetchCredits();
         };
 
         window.addEventListener('credits-updated', handleUpdate);
         return () => window.removeEventListener('credits-updated', handleUpdate);
     }, []);
 
-    const updateCredits = (amount: number) => {
-        const newTotal = credits + amount;
-        localStorage.setItem('docodo_credits', newTotal.toString());
-        setCredits(newTotal);
+    const updateCredits = async (amount: number) => {
+        // This is now predominantly handled by the server during tool execution or recharge.
+        // We trigger a re-fetch to stay in sync.
         window.dispatchEvent(new Event('credits-updated'));
     };
 
-    return { credits, updateCredits };
+    return { credits, loading, updateCredits, refreshCredits: fetchCredits };
 }
