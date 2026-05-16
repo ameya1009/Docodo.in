@@ -39,7 +39,7 @@ export function Navbar() {
             <div className={cn('container', styles.navContainer)}>
                 <Link href="/" className={styles.logo}>
                     <span className={styles.logoText}>Docodo</span>
-                    <span className={styles.circuitAccent}></span>
+                    
                 </Link>
 
                 {/* Desktop Nav */}
