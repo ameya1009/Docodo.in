@@ -83,7 +83,7 @@ export default function PricingPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                             >
-                                Unlock Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Growth Engine.</span>
+                                Unlock Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sapphire-400">Growth Engine.</span>
                             </motion.h1>
                             <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto mb-10">
                                 Simple, transparent pricing engineered for global scale. Choose the operating system that fits your ambition.

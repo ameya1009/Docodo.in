@@ -6,22 +6,24 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, FileText, Settings, LogOut, Menu, ShoppingBag, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
-
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const pathname = usePathname();
 
     const nav = [
         { icon: <LayoutDashboard size={22} />, label: 'Overview', href: '/dashboard' },
-        { icon: <ShoppingBag size={22} />, label: 'Marketplace', href: '/dashboard/marketplace' },
-        { icon: <CreditCard size={22} />, label: 'Credits', href: '/dashboard/credits' },
-        { icon: <FileText size={22} />, label: 'Projects', href: '/dashboard/projects' },
-        { icon: <Users size={22} />, label: 'Team', href: '/dashboard/team' },
-        { icon: <Settings size={22} />, label: 'Settings', href: '/dashboard/settings' },
+        { icon: <ShoppingBag size={22} />, label: 'AI Marketplace', href: '/tools' },
+        { icon: <CreditCard size={22} />, label: 'Credits Hub', href: '/tools' },
+        { icon: <FileText size={22} />, label: 'Campaigns', href: '/dashboard' },
+        { icon: <Users size={22} />, label: 'Agents config', href: '/dashboard' },
+        { icon: <Settings size={22} />, label: 'Settings', href: '/dashboard' },
     ];
 
     return (
-        <div className="flex h-screen bg-[#050510] text-zinc-100 overflow-hidden relative">
+        <div className="flex h-screen bg-[#0F0F0F] text-zinc-100 overflow-hidden relative">
+            {/* Ambient background glows */}
+            <div className="absolute top-[-10%] left-[-10%] w-[30%] h-[30%] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-sapphire-500/5 blur-[120px] rounded-full pointer-events-none" />
 
             {/* Sidebar */}
             <aside
@@ -29,8 +31,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
                 <div className="h-24 flex items-center px-6 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-black text-lg shadow-[0_0_15px_rgba(34,211,238,0.5)]">D</div>
-                        {isSidebarOpen && <span className="font-bold text-2xl tracking-tight text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Docodo.</span>}
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-sapphire-600 flex items-center justify-center font-bold text-white text-lg shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                            D
+                        </div>
+                        {isSidebarOpen && (
+                            <span className="font-bold text-2xl tracking-tight text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                                Docodo.
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -39,15 +47,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         const isActive = pathname === item.href;
                         return (
                             <Link
-                                key={item.href}
+                                key={item.href + item.label}
                                 href={item.href}
                                 className={`flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-300 group relative mb-1 overflow-hidden ${isActive
-                                    ? 'bg-gradient-to-r from-cyan-500/20 to-transparent text-cyan-300 font-medium border border-cyan-500/20'
+                                    ? 'bg-gradient-to-r from-emerald-500/20 to-transparent text-emerald-300 font-medium border border-emerald-500/20'
                                     : 'text-zinc-400 hover:text-white hover:bg-white/5 hover:pl-5 hover:border hover:border-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]'
                                     }`}
                             >
-                                {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]" />}
-                                <span className={`${isActive ? 'text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]' : 'group-hover:text-white transition-colors duration-300'}`}>{item.icon}</span>
+                                {isActive && (
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
+                                )}
+                                <span className={`${isActive ? 'text-emerald-300 drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]' : 'group-hover:text-white transition-colors duration-300'}`}>
+                                    {item.icon}
+                                </span>
                                 {isSidebarOpen && <span className="text-sm tracking-wide">{item.label}</span>}
                             </Link>
                         );
@@ -55,10 +67,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </nav>
 
                 <div className="p-4 border-t border-white/10">
-                    <Button variant="ghost" className="w-full justify-start gap-4 text-red-400 hover:text-red-300 hover:bg-red-950/30 h-12 rounded-xl hover:shadow-[0_0_15px_rgba(220,38,38,0.2)] transition-all">
-                        <LogOut size={22} />
-                        {isSidebarOpen && "Sign Out"}
-                    </Button>
+                    <Link href="/">
+                        <Button variant="ghost" className="w-full justify-start gap-4 text-red-400 hover:text-red-300 hover:bg-red-950/30 h-12 rounded-xl transition-all">
+                            <LogOut size={22} />
+                            {isSidebarOpen && "Main Site"}
+                        </Button>
+                    </Link>
                 </div>
             </aside>
 
@@ -67,7 +81,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <header className="h-24 px-8 flex items-center justify-between border-b border-white/10 bg-transparent backdrop-blur-sm">
                     <button
                         onClick={() => setSidebarOpen(!isSidebarOpen)}
-                        className="p-2 -ml-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-all hover:shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+                        className="p-2 -ml-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                     >
                         <Menu size={24} />
                     </button>
@@ -75,10 +89,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className="flex items-center gap-6">
                         <div className="text-right hidden md:block">
                             <p className="text-sm font-medium text-white drop-shadow-md">Ameya Kshirsagar</p>
-                            <p className="text-xs text-cyan-400 font-medium tracking-wide drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]">PREMIUM PLAN</p>
+                            <p className="text-xs text-emerald-400 font-bold tracking-wide drop-shadow-[0_0_5px_rgba(16,185,129,0.5)] uppercase">
+                                Growth OS Partner
+                            </p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-600 p-[2px] shadow-[0_0_15px_rgba(34,211,238,0.4)]">
-                            <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-sm font-bold text-white">AK</div>
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-400 to-sapphire-600 p-[2px] shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+                            <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-sm font-bold text-white">
+                                AK
+                            </div>
                         </div>
                     </div>
                 </header>

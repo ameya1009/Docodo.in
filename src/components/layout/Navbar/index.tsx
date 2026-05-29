@@ -37,9 +37,9 @@ export function Navbar() {
             className={cn(styles.header, isScrolled && styles.scrolled)}
         >
             <div className={cn('container', styles.navContainer)}>
-                <Link href="/" className={styles.logo}>
-                    <span className={styles.logoText}>Docodo</span>
-                    
+                <Link href="/" className="flex items-center gap-3">
+                    <img src="/logo.jpg" alt="Docodo Logo" className="w-10 h-10 object-contain rounded-xl" />
+                    <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-[#10B981] to-sapphire-400 drop-shadow-[0_2px_10px_rgba(16,185,129,0.3)]">Docodo</span>
                 </Link>
 
                 {/* Desktop Nav */}

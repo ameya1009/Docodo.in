@@ -6,11 +6,13 @@
   --color-sapphire-dark: #0F52BA;
   --color-sapphire-light: #3B82F6;
   --color-cyan-glow: #22D3EE;
-  --color-gold-accent: #D4AF37;
   
   --color-primary: var(--color-emerald-light);
   --color-primary-rgb: 16, 185, 129;
+  --color-primary-glow: rgba(16, 185, 129, 0.3);
   --color-secondary: var(--color-sapphire-light);
+  --color-secondary-rgb: 59, 130, 246;
+  --color-secondary-glow: rgba(59, 130, 246, 0.3);
   --color-accent: var(--color-cyan-glow);
 
   --color-bg: var(--color-base);
@@ -263,4 +265,32 @@ body::before {
 /* Glow Utility */
 .glow {
   filter: drop-shadow(0 0 10px var(--color-primary-glow));
+}
+
+/* Emerald & Sapphire shine utilities */
+.emerald-shine {
+  background: var(--color-emerald-light);
+  animation: emeraldGlow 4s infinite alternate;
+}
+.sapphire-shine {
+  background: var(--color-sapphire-light);
+  animation: sapphireGlow 4s infinite alternate;
+}
+@keyframes emeraldGlow {
+  from { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.2)); }
+  to { filter: drop-shadow(0 0 25px rgba(16, 185, 129, 0.6)); }
+}
+@keyframes sapphireGlow {
+  from { filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.2)); }
+  to { filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.6)); }
+}
+
+@keyframes emeraldPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes sapphirePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
