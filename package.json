@@ -1,0 +1,5 @@
+{
+  "name": "docodo-root",
+  "private": true,
+  "workspaces": ["frontend"]
+}

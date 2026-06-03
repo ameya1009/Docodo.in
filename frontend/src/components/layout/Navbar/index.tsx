@@ -37,9 +37,11 @@ export function Navbar() {
             className={cn(styles.header, isScrolled && styles.scrolled)}
         >
             <div className={cn('container', styles.navContainer)}>
-                <Link href="/" className="flex items-center gap-3">
-                    <img src="/logo.jpg" alt="Docodo Logo" className="w-10 h-10 object-contain rounded-xl" />
-                    <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-[#10B981] to-sapphire-400 drop-shadow-[0_2px_10px_rgba(16,185,129,0.3)]">Docodo</span>
+                <Link href="/" className="flex items-center gap-2 group">
+                    <span className="relative flex items-center">
+                        <span className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-[#10B981] to-[#3B82F6] drop-shadow-[0_2px_12px_rgba(16,185,129,0.4)] group-hover:from-emerald-300 group-hover:to-[#60a5fa] transition-all duration-300">DOCODO</span>
+                        <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10B981]" />
+                    </span>
                 </Link>
 
                 {/* Desktop Nav */}
