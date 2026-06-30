@@ -1,16 +1,16 @@
 .section {
     padding-top: 8rem;
     padding-bottom: 5rem;
-    background: radial-gradient(circle at top right, rgba(0, 212, 255, 0.05), transparent 40%);
+    background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.05), transparent 45%);
 }
 
 .tabsContainer {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.5rem;
     margin-bottom: 4rem;
     background: rgba(255, 255, 255, 0.02);
-    padding: 0.5rem;
+    padding: 0.4rem;
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     width: fit-content;
@@ -21,25 +21,29 @@
 .tab {
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius-md);
-    color: var(--color-text-muted);
+    color: var(--text-secondary);
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     border: none;
     background: transparent;
     position: relative;
 }
 
+.tab:hover {
+    color: #FFFFFF;
+}
+
 .activeTab {
-    color: white;
+    color: #FFFFFF;
 }
 
 .tabIndicator {
     position: absolute;
     inset: 0;
-    background: rgba(0, 212, 255, 0.1);
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
     border-radius: var(--radius-md);
     z-index: -1;
 }
@@ -47,14 +51,19 @@
 .contentGrid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 4rem;
+    gap: 3.5rem;
     align-items: center;
 }
 
 @media (min-width: 1024px) {
     .contentGrid {
-        grid-template-columns: 1fr 1.2fr;
+        grid-template-columns: 1fr 1.1fr;
     }
+}
+
+.textContent {
+    display: flex;
+    flex-direction: column;
 }
 
 .mockupContainer {
@@ -67,13 +76,18 @@
 .mockup {
     width: 100%;
     height: 100%;
-    background: rgba(9, 9, 11, 0.8);
+    background: rgba(14, 12, 21, 0.85);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    transform: rotateX(5deg) rotateY(-10deg);
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 212, 255, 0.05);
+    transform: rotateX(5deg) rotateY(-8deg);
+    box-shadow: 0 45px 95px rgba(0, 0, 0, 0.8), 0 0 40px rgba(139, 92, 246, 0.05);
     overflow: hidden;
     position: relative;
+    transition: transform 0.4s ease;
+}
+
+.mockup:hover {
+    transform: rotateX(2deg) rotateY(-4deg) scale(1.01);
 }
 
 .mockupInner {
@@ -92,26 +106,28 @@
 
 .mockupBar {
     height: 4px;
-    background: var(--color-primary);
-    width: 40px;
+    background: var(--violet);
+    width: 45px;
     border-radius: 2px;
     margin-bottom: 2rem;
 }
 
 .mockupElement {
     height: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(139, 92, 246, 0.08);
     border-radius: 6px;
     margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .mockupCircle {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-    background: var(--color-primary-bright);
-    opacity: 0.1;
+    background: var(--mint);
+    opacity: 0.15;
     position: absolute;
     bottom: 2rem;
     right: 2rem;
+    box-shadow: 0 0 20px var(--mint);
 }

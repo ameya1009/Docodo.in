@@ -19,6 +19,60 @@ const navItems = [
     { name: 'Global Story', href: '/about' },
 ];
 
+export function Logo3D() {
+    return (
+        <motion.div
+            className="flex items-center gap-2.5 cursor-pointer"
+            style={{ perspective: '1000px' }}
+            whileHover={{ scale: 1.04 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+        >
+            {/* 3D Rotating Isometric Icon */}
+            <motion.div
+                className="relative w-8 h-8 flex items-center justify-center"
+                style={{ transformStyle: 'preserve-3d' }}
+                animate={{ rotateY: [0, 360] }}
+                transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+            >
+                <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_12px_rgba(139,92,246,0.5)]">
+                    <path 
+                        d="M 50 10 L 85 30 L 85 70 L 50 90 L 15 70 L 15 30 Z" 
+                        fill="none" 
+                        stroke="url(#logoGrad)" 
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                    />
+                    <circle cx="50" cy="50" r="14" fill="#10B981" className="animate-pulse" />
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#8B5CF6" />
+                            <stop offset="100%" stopColor="#10B981" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </motion.div>
+
+            {/* Wordmark with sliding video shimmer effect */}
+            <span className="relative font-extrabold tracking-tighter text-2xl select-none">
+                <span className="absolute inset-0 text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-indigo-400 to-mint-400 blur-sm opacity-40">
+                    DOCODO
+                </span>
+                <span 
+                    className="relative text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-indigo-400 to-mint-400"
+                    style={{
+                        backgroundImage: 'linear-gradient(90deg, #8B5CF6, #6366F1, #10B981, #8B5CF6)',
+                        backgroundSize: '200% auto',
+                        animation: 'shimmer 4s linear infinite',
+                    }}
+                >
+                    DOCODO
+                </span>
+                <span className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-mint-400 shadow-[0_0_8px_#10B981]" />
+            </span>
+        </motion.div>
+    );
+}
+
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,11 +91,8 @@ export function Navbar() {
             className={cn(styles.header, isScrolled && styles.scrolled)}
         >
             <div className={cn('container', styles.navContainer)}>
-                <Link href="/" className="flex items-center gap-2 group">
-                    <span className="relative flex items-center">
-                        <span className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-[#10B981] to-[#3B82F6] drop-shadow-[0_2px_12px_rgba(16,185,129,0.4)] group-hover:from-emerald-300 group-hover:to-[#60a5fa] transition-all duration-300">DOCODO</span>
-                        <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10B981]" />
-                    </span>
+                <Link href="/">
+                    <Logo3D />
                 </Link>
 
                 {/* Desktop Nav */}
@@ -62,17 +113,18 @@ export function Navbar() {
 
                 <div className={styles.actions}>
                     <Link href="/dashboard" className={styles.hideMobile}>
-                        <Button variant="outline" size="sm" className={styles.btnCoral}>Dashboard</Button>
+                        <Button variant="outline" size="sm">Dashboard</Button>
                     </Link>
                     <Link href="/tools" className={styles.hideMobile}>
-                        <Button variant="primary" size="sm" className={styles.btnNeon}>Explore Tools</Button>
+                        <Button variant="primary" size="sm">Explore Tools</Button>
                     </Link>
 
                     <button
                         className={styles.mobileMenuBtn}
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        aria-label="Toggle menu"
                     >
-                        {isMobileMenuOpen ? <X /> : <Menu />}
+                        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                     </button>
                 </div>
             </div>
@@ -84,14 +136,18 @@ export function Navbar() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                         className={styles.mobileNav}
                     >
-                        <div className="container">
+                        <div className="container flex flex-col gap-2">
                             {navItems.map((item) => (
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={styles.mobileNavLink}
+                                    className={cn(
+                                        styles.mobileNavLink,
+                                        pathname === item.href && styles.active
+                                    )}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     {item.name}
@@ -99,7 +155,7 @@ export function Navbar() {
                             ))}
                             <div className={styles.mobileActions}>
                                 <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-                                    <Button variant="primary" className="w-full">
+                                    <Button variant="primary" className="w-full h-12 flex items-center justify-center font-bold">
                                         Talk to the Founder
                                     </Button>
                                 </Link>

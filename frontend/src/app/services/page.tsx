@@ -5,65 +5,68 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
-import { Layout, LineChart, Bot, CheckCircle2, ChevronRight, Zap, Smartphone, Globe } from 'lucide-react';
+import { Layout, LineChart, Bot, CheckCircle2, ChevronRight, Zap, Smartphone, Sparkles } from 'lucide-react';
 import styles from './Services.module.css';
 
 const serviceDetails = [
     {
         id: "sites",
         title: "Websites & Apps",
-        label: "Digital Storefronts",
+        label: "Digital Engines",
         icon: <Layout className="w-8 h-8" />,
-        description: "Engineering mobile-first, conversion-optimized site architecture that turns visitors into revenue. Built for Pune's fastest growing SMBs.",
+        description: "We engineer pixel-perfect, premium Next.js websites and web applications tailored for modern businesses. Designed with Apple-level standards, lightning-fast transitions, and high-conversion pathways.",
         features: [
-            "AI-Built Custom UI/UX (Apple-standard)",
-            "WhatsApp & Booking API Integration",
-            "Next.js High-Performance Stack (<1s Load)",
-            "Razorpay & UPI Checkout Ready",
-            "Pune Localized Content Engine"
+            "Next.js High-Performance Architecture",
+            "Apple-Standard Modern UI/UX",
+            "Mobile, Tablet, and Desktop optimization",
+            "Razorpay, Stripe & UPI Gateway Ready",
+            "Hassle-free deployment with 99.9% uptime"
         ],
-        pricing: "Starter ₹4,999 | Pro ₹14,999",
+        pricing: "Starter ₹5,999 | Growth ₹15,999",
+        funnyCopy: "⚠️ Warning: Having a website this beautiful might make your competitors question their life choices.",
         visual: {
-            title: "Mobile App OS",
-            elements: [80, 60, 40, 90]
+            title: "Designed Wordmark & Fluid UI",
+            elements: [95, 80, 60, 90]
         }
     },
     {
         id: "marketing",
         title: "Marketing & SEO",
-        label: "Performance Growth",
+        label: "Growth Velocity",
         icon: <LineChart className="w-8 h-8" />,
-        description: "Precision-engineered SEO and ad systems designed specifically for the Indian SMB ecosystem. We dominate local search in Pune.",
+        description: "Precision-guided SEO campaigns and performance-marketing funnels to dominate local and global searches. We position your brand directly in front of active buyers, eliminating wasted ad spend.",
         features: [
-            "Local SEO Dominance (Baner, Viman Nagar focus)",
-            "ROI-Tracked Meta & Google Ads",
-            "High-Conversion Landing Pages",
-            "Content Engine for Authority",
-            "Monthly Performance Audits"
+            "Hyper-Targeted Local SEO Dominance",
+            "Structured Rich Schema Generator",
+            "ROI-Tracked Meta & Google Ad Funnels",
+            "High-Converting Landing Copywriting",
+            "Real-time analytics and metric dashboards"
         ],
-        pricing: "₹9,999 Setup + Monthly Retainer",
+        pricing: "Managed setup starting ₹9,999",
+        funnyCopy: "🧠 Fact: 93% of search traffic goes to page 1. The remaining 7% is where people hide bodies. We keep you on page 1.",
         visual: {
-            title: "Traffic Analytics",
-            elements: [40, 90, 70, 50]
+            title: "Traffic Growth Curve",
+            elements: [45, 85, 75, 95]
         }
     },
     {
         id: "automations",
         title: "AI Automations",
-        label: "Operational OS",
+        label: "Intelligent Workforces",
         icon: <Bot className="w-8 h-8" />,
-        description: "Removing operational friction with intelligent agents that run your business 24/7. Handle 1000s of leads with zero manual effort.",
+        description: "Auto-pilot your operational tasks, scheduling, and client chats. We deploy conversational AI agents that interact smoothly in Hinglish, English, or Marathi, securing leads 24/7.",
         features: [
-            "Custom WhatsApp Business Bots",
-            " मराठी/Hinglish Language Support",
-            "Lead Nurturing Automations",
-            "Zapier & CRM Sink Architecture",
-            "24/7 Auto-Pilot Lead Capture"
+            "Hinglish / Marathi WhatsApp Booking Bots",
+            "Nap-Proof 24/7 client booking agents",
+            "Automated CRM sync (Zapier / Hubspot)",
+            "Instant lead qualification algorithms",
+            "Automated outreach drafts and follow-ups"
         ],
-        pricing: "Packages from ₹2,499/mo",
+        pricing: "Scale Packs from ₹2,499/mo",
+        funnyCopy: "☕ Pune Special: Our bots don't take afternoon naps. They reply to leads even between 1:00 PM and 4:00 PM.",
         visual: {
-            title: "Logic Flow AI",
-            elements: [60, 40, 80, 100]
+            title: "AI Node Logic Flow",
+            elements: [70, 50, 90, 80]
         }
     }
 ];
@@ -72,31 +75,46 @@ export default function ServicesPage() {
     const [activeTab, setActiveTab] = useState(serviceDetails[0]);
 
     return (
-        <main>
+        <main className="min-h-screen relative overflow-hidden bg-[#07060A]">
             <Navbar />
 
+            {/* Glowing Backdrop Mesh */}
+            <div className="absolute inset-0 pointer-events-none z-1">
+                <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[20%] left-[-10%] w-[450px] h-[450px] bg-mint-500/5 rounded-full blur-[120px]" />
+            </div>
+
             <section className={styles.section}>
-                <div className="container">
+                <div className="container relative z-10">
+                    
+                    {/* Header */}
                     <div className="max-w-3xl mx-auto text-center mb-16">
-                        <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-cyan-500 font-bold uppercase tracking-widest text-sm"
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="mb-4"
                         >
-                            2026 Growth Suite
-                        </motion.span>
+                            <span className="tag tag-mint">
+                                <Sparkles size={11} className="text-mint" />
+                                <span>2026 Premium Growth Suite</span>
+                            </span>
+                        </motion.div>
+                        
                         <motion.h1
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-white text-5xl md:text-7xl font-extrabold mt-4 mb-6 tracking-tighter"
+                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                            className="text-white font-extrabold mt-4 mb-6 tracking-tighter"
+                            style={{ fontSize: 'var(--fs-5xl)' }}
                         >
-                            Global <span className="text-gradient">Growth OS.</span>
+                            Elite <span className="text-gradient">Growth Engine OS</span>
                         </motion.h1>
-                        <p className="text-zinc-400 text-lg md:text-xl leading-relaxed">
-                            Pick a component for your business engine. Fully managed, zero maintenance, high ROI.
+                        <p className="text-zinc-400 font-medium" style={{ fontSize: 'var(--fs-lg)' }}>
+                            Choose the component that fits your scale. Fully managed, optimized for modern viewports, and engineered for high ROI.
                         </p>
                     </div>
 
+                    {/* Tab Navigation */}
                     <div className={styles.tabsContainer}>
                         {serviceDetails.map((service) => (
                             <button
@@ -108,72 +126,83 @@ export default function ServicesPage() {
                                     <motion.div
                                         layoutId="tabIndicator"
                                         className={styles.tabIndicator}
-                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
                                     />
                                 )}
                                 <span className="relative z-10 flex items-center gap-2">
-                                    {service.icon}
-                                    <span className="hidden md:inline">{service.title}</span>
+                                    <span className={activeTab.id === service.id ? "text-mint" : "text-zinc-400"}>
+                                        {service.icon}
+                                    </span>
+                                    <span className="font-bold tracking-tight">{service.title}</span>
                                 </span>
                             </button>
                         ))}
                     </div>
 
+                    {/* Tab Content Block */}
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab.id}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.4 }}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                             className={styles.contentGrid}
                         >
+                            {/* Text Info */}
                             <div className={styles.textContent}>
-                                <motion.span
-                                    className="text-cyan-400 font-bold text-xs uppercase tracking-widest mb-4 block"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                >
+                                <span className="text-violet font-black text-xs uppercase tracking-wider mb-4 block">
                                     {activeTab.label}
-                                </motion.span>
-                                <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+                                </span>
+                                <h2 className="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight">
                                     {activeTab.title}
                                 </h2>
-                                <p className="text-zinc-400 text-lg mb-8 leading-relaxed">
+                                <p className="text-zinc-400 font-medium mb-6 leading-relaxed" style={{ fontSize: 'var(--fs-base)' }}>
                                     {activeTab.description}
                                 </p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                                {/* Humorous tagline box */}
+                                <div className="p-3.5 mb-8 rounded-xl bg-violet/5 border border-violet-500/10 text-[13px] font-semibold text-violet-300 italic flex items-center gap-2.5">
+                                    <span className="text-base">💡</span>
+                                    <span>{activeTab.funnyCopy}</span>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
                                     {activeTab.features.map((feature, i) => (
                                         <div key={i} className="flex items-center gap-3 text-zinc-300">
-                                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                                                <CheckCircle2 size={12} className="text-cyan-500" />
+                                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-mint/10 flex items-center justify-center">
+                                                <CheckCircle2 size={12} className="text-mint" />
                                             </div>
-                                            <span className="text-sm">{feature}</span>
+                                            <span className="text-sm font-semibold">{feature}</span>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                                {/* Dynamic Price banner */}
+                                <div className="p-6 rounded-2xl bg-white/3 border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                     <div>
-                                        <p className="text-[10px] text-zinc-500 font-bold uppercase mb-1">Indicative Pricing</p>
-                                        <p className="text-xl font-bold text-white">{activeTab.pricing}</p>
+                                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Standard Setup</p>
+                                        <p className="text-2xl font-black text-white">{activeTab.pricing}</p>
                                     </div>
-                                    <Button variant="primary" onClick={() => window.location.href = '/contact'} className="gap-2">
-                                        Launch OS <ChevronRight size={16} />
+                                    <Button variant="primary" onClick={() => window.location.href = '/contact'} className="gap-2 h-12 px-6 font-bold uppercase text-[11px] tracking-wider w-full sm:w-auto flex items-center justify-center">
+                                        Activate OS <ChevronRight size={14} />
                                     </Button>
                                 </div>
                             </div>
 
+                            {/* Visual Mockup Card */}
                             <div className={styles.mockupContainer}>
                                 <motion.div
                                     className={styles.mockup}
-                                    initial={{ rotateY: -20, rotateX: 10 }}
-                                    animate={{ rotateY: -10, rotateX: 5 }}
-                                    transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+                                    initial={{ rotateY: -15, rotateX: 8 }}
+                                    animate={{ rotateY: -6, rotateX: 3 }}
+                                    transition={{ duration: 3, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                                 >
                                     <div className={styles.mockupInner}>
-                                        <div className={styles.mockupTitle}>{activeTab.visual.title}</div>
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-xs uppercase tracking-widest text-zinc-400 font-bold">{activeTab.visual.title}</span>
+                                            <div className="w-2 h-2 rounded-full bg-mint shadow-[0_0_6px_#10B981]" />
+                                        </div>
                                         <div className={styles.mockupBar} />
                                         {activeTab.visual.elements.map((w, i) => (
                                             <motion.div
@@ -181,29 +210,30 @@ export default function ServicesPage() {
                                                 className={styles.mockupElement}
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${w}%` }}
-                                                transition={{ delay: 0.5 + (i * 0.1), duration: 1 }}
+                                                transition={{ delay: 0.3 + (i * 0.08), duration: 0.8 }}
                                             />
                                         ))}
                                         <div className={styles.mockupCircle} />
                                     </div>
 
-                                    {/* Abstract icons floating */}
+                                    {/* Abstract glowing components */}
                                     <motion.div
-                                        className="absolute top-10 right-10 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_20px_rgba(34,211,238,0.2)]"
-                                        animate={{ y: [0, -10, 0] }}
-                                        transition={{ duration: 3, repeat: Infinity }}
+                                        className="absolute top-10 right-10 p-3 rounded-xl bg-violet/10 border border-violet-500/20 shadow-[0_0_20px_rgba(139,92,246,0.25)]"
+                                        animate={{ y: [0, -8, 0] }}
+                                        transition={{ duration: 3.5, repeat: Infinity }}
                                     >
-                                        <Zap className="text-cyan-400" />
+                                        <Zap className="text-violet" size={18} />
                                     </motion.div>
                                     <motion.div
-                                        className="absolute bottom-10 left-10 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
-                                        animate={{ y: [0, 10, 0] }}
+                                        className="absolute bottom-10 left-10 p-3 rounded-xl bg-mint/10 border border-mint-500/20 shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+                                        animate={{ y: [0, 8, 0] }}
                                         transition={{ duration: 4, repeat: Infinity }}
                                     >
-                                        <Smartphone className="text-purple-400" />
+                                        <Smartphone className="text-mint" size={18} />
                                     </motion.div>
                                 </motion.div>
                             </div>
+
                         </motion.div>
                     </AnimatePresence>
                 </div>
