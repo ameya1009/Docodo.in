@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Bot, LineChart, Palette, Rocket } from 'lucide-react';
-import styles from './Services.module.css';
+import { cn } from '@/lib/utils';
 
 const services = [
     {
@@ -37,17 +37,17 @@ const services = [
 
 export function Services() {
     return (
-        <section className="section bg-zinc-950/50">
-            <div className="container">
-                <div className={styles.header}>
-                    <h2 className="text-white text-5xl font-extrabold mb-4 tracking-tight">Global Growth OS Bundles</h2>
-                    <p className={styles.subtitle}>
+        <section className="py-24 px-4 bg-zinc-950/50">
+            <div className="container max-w-7xl mx-auto">
+                <div className="text-center mb-16 max-w-2xl mx-auto">
+                    <h2 className="text-white text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Global Growth OS Bundles</h2>
+                    <p className="text-lg text-zinc-400">
                         Integrated worldwide solutions for SMBs, starting at $59 / ₹4,999.
                     </p>
                 </div>
 
                 <motion.div
-                    className={styles.grid}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
@@ -64,33 +64,40 @@ export function Services() {
                     {services.map((service, index) => (
                         <motion.div
                             key={index}
-                            className={`${styles.cardWrapper} ${styles[service.size]}`}
+                            className={cn(
+                                "flex flex-col h-full",
+                                service.size === 'large' && "lg:col-span-1",
+                                service.size === 'medium' && "lg:col-span-1"
+                            )}
                             variants={{
                                 hidden: { opacity: 0, y: 20 },
                                 visible: { opacity: 1, y: 0 }
                             }}
                         >
-                            <Card className={`${styles.card} glass glass-hover h-full`}>
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className={styles.iconWrapper}>
-                                        {service.icon}
+                            <Card className="flex-1 bg-white/5 backdrop-blur-md border border-white/10 p-6 sm:p-8 rounded-2xl hover:bg-white/10 transition-colors h-full flex flex-col justify-between">
+                                <div>
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className="text-white bg-white/10 p-3 rounded-xl border border-white/5">
+                                            {service.icon}
+                                        </div>
+                                        <div className="bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full">
+                                            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">{service.roi}</span>
+                                        </div>
                                     </div>
-                                    <div className="bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full">
-                                        <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">{service.roi}</span>
-                                    </div>
+                                    <CardHeader className="p-0 mb-4">
+                                        <CardTitle className="text-white text-2xl font-bold">{service.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-0 space-y-6">
+                                        <p className="text-zinc-400 leading-relaxed">
+                                            {service.description}
+                                        </p>
+                                    </CardContent>
                                 </div>
-                                <CardHeader className="p-0 mb-4">
-                                    <CardTitle className="text-white text-2xl font-bold">{service.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-0 space-y-6">
-                                    <p className="text-zinc-400 leading-relaxed">
-                                        {service.description}
-                                    </p>
-                                    <div className="pt-6 border-t border-white/5 flex justify-between items-center">
-                                        <span className="text-zinc-500 text-sm font-medium">Pricing</span>
-                                        <span className="text-white font-bold">{service.pricing}</span>
-                                    </div>
-                                </CardContent>
+                                
+                                <div className="pt-6 mt-6 border-t border-white/5 flex justify-between items-center">
+                                    <span className="text-zinc-500 text-sm font-medium">Pricing</span>
+                                    <span className="text-white font-bold">{service.pricing}</span>
+                                </div>
                             </Card>
                         </motion.div>
                     ))}

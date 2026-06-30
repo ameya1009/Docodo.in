@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
-import styles from './Navbar.module.css';
 
 const navItems = [
     { name: 'Home', href: '/' },
@@ -88,39 +87,48 @@ export function Navbar() {
 
     return (
         <header
-            className={cn(styles.header, isScrolled && styles.scrolled)}
+            className={cn(
+                "fixed top-0 left-0 right-0 z-[100] transition-all duration-300 border-b border-transparent",
+                isScrolled ? "bg-[#07060A]/80 backdrop-blur-xl border-white/10 py-4 shadow-[0_4px_30px_rgba(0,0,0,0.5)]" : "bg-transparent py-6"
+            )}
         >
-            <div className={cn('container', styles.navContainer)}>
+            <div className="container max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
                 <Link href="/">
                     <Logo3D />
                 </Link>
 
                 {/* Desktop Nav */}
-                <nav className={styles.desktopNav}>
+                <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
                     {navItems.map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                styles.navLink,
-                                pathname === item.href && styles.active
+                                "relative px-4 py-2 text-sm font-bold text-zinc-400 transition-colors hover:text-white rounded-full hover:bg-white/5",
+                                pathname === item.href && "text-white bg-white/5"
                             )}
                         >
                             {item.name}
+                            {pathname === item.href && (
+                                <motion.div
+                                    layoutId="nav-indicator"
+                                    className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-mint-400 shadow-[0_0_8px_#10B981]"
+                                />
+                            )}
                         </Link>
                     ))}
                 </nav>
 
-                <div className={styles.actions}>
-                    <Link href="/dashboard" className={styles.hideMobile}>
-                        <Button variant="outline" size="sm">Dashboard</Button>
+                <div className="flex items-center gap-4">
+                    <Link href="/dashboard" className="hidden sm:block">
+                        <Button variant="outline" size="sm" className="border-white/10 hover:border-white/30 hover:bg-white/5">Dashboard</Button>
                     </Link>
-                    <Link href="/tools" className={styles.hideMobile}>
+                    <Link href="/tools" className="hidden sm:block">
                         <Button variant="primary" size="sm">Explore Tools</Button>
                     </Link>
 
                     <button
-                        className={styles.mobileMenuBtn}
+                        className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         aria-label="Toggle menu"
                     >
@@ -137,28 +145,36 @@ export function Navbar() {
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                        className={styles.mobileNav}
+                        className="lg:hidden absolute top-full left-0 right-0 bg-[#07060A]/95 backdrop-blur-xl border-b border-white/10 overflow-hidden"
                     >
-                        <div className="container flex flex-col gap-2">
+                        <div className="container px-4 py-6 flex flex-col gap-2">
                             {navItems.map((item) => (
                                 <Link
                                     key={item.href}
                                     href={item.href}
                                     className={cn(
-                                        styles.mobileNavLink,
-                                        pathname === item.href && styles.active
+                                        "px-4 py-4 rounded-xl text-lg font-bold text-zinc-400 transition-colors hover:bg-white/5 hover:text-white",
+                                        pathname === item.href && "text-white bg-white/10"
                                     )}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     {item.name}
                                 </Link>
                             ))}
-                            <div className={styles.mobileActions}>
+                            <div className="pt-6 mt-4 border-t border-white/10 flex flex-col gap-4">
                                 <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
                                     <Button variant="primary" className="w-full h-12 flex items-center justify-center font-bold">
                                         Talk to the Founder
                                     </Button>
                                 </Link>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <Button variant="outline" className="w-full h-12 border-white/10 hover:border-white/30">Dashboard</Button>
+                                    </Link>
+                                    <Link href="/tools" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <Button variant="outline" className="w-full h-12 border-white/10 hover:border-white/30">AI Tools</Button>
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </motion.div>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import styles from './Starfield.module.css';
 
 export function Starfield() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -94,5 +93,5 @@ export function Starfield() {
         };
     }, []);
 
-    return <canvas ref={canvasRef} className={styles.canvas} />;
+    return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-40 mix-blend-screen" />;
 }

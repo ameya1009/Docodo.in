@@ -145,9 +145,9 @@ export default function RootLayout({
       <head>
         <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400&display=swap" rel="stylesheet" />
       </head>
-      <body className={`${inter.variable} bg-black text-white antialiased`}>
+      <body className={`${inter.variable} bg-black text-white antialiased overflow-x-hidden`}>
         <Starfield />
-        <div className="relative min-h-screen">
+        <div className="relative min-h-screen overflow-x-hidden w-full">
           {children}
         </div>
         <AIChatBubble />

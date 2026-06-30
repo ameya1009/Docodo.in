@@ -6,7 +6,6 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Calendar, ArrowRight, Clock, Tag } from 'lucide-react';
-import styles from './Blog.module.css';
 
 interface Resource {
     title: string;
@@ -141,60 +140,52 @@ const resources: Resource[] = [
 ];
 
 export default function BlogPage() {
-
-    const formatPreview = (html: string) => {
-        const tmp = document.createElement("DIV");
-        const spacedHtml = html.replace(/<\/p>|<\/h\d>|<br\s*\/?>/gi, ' ');
-        tmp.innerHTML = spacedHtml;
-        const text = tmp.textContent || tmp.innerText || "";
-        const cleanText = text.replace(/\s+/g, ' ').trim();
-        return cleanText.length > 200 ? cleanText.substring(0, 200) + "..." : cleanText;
-    };
-
     const firstResource = resources[0];
     const remainingResources = resources.slice(1);
 
     return (
-        <main>
+        <main className="bg-[#07060A] min-h-screen pt-24 pb-20">
             <Navbar />
 
-            <div className="container">
+            <div className="container relative z-10 max-w-7xl mx-auto px-4 md:px-6">
                 {/* Editorial Header */}
-                <header className={styles.header}>
+                <header className="py-16 md:py-24 max-w-4xl">
                     <motion.span
-                        className={styles.kicker}
+                        className="inline-block px-4 py-1.5 rounded-full bg-violet-600/10 border border-violet-500/20 text-violet-400 text-xs font-bold uppercase tracking-widest mb-6"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                     >
                         SMB Global Growth Hub
                     </motion.span>
-                    <h1 className={styles.pageTitle}>Global AI <span className="text-gradient">Playbooks.</span></h1>
-                    <p className={styles.pageSubtitle}>
+                    <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-6 leading-[1.1]">
+                        Global AI <span className="text-gradient">Playbooks.</span>
+                    </h1>
+                    <p className="text-xl text-zinc-400 leading-relaxed max-w-2xl">
                         Free engineering-grade reports to help your worldwide SMB scale 10x with AI and technical GTM.
                     </p>
                 </header>
 
-                <section className={styles.feedWrapper}>
+                <section className="space-y-12">
                     {/* Featured Report */}
                     {firstResource && (
                         <motion.div
-                            className={styles.featuredEntry}
+                            className="group relative rounded-[2rem] bg-[#0E0C15]/80 backdrop-blur-xl border border-white/5 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-0 transition-colors hover:border-white/10"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                         >
-                            <div className={styles.featuredImage}>
-                                <img src={firstResource.thumbnail} alt={firstResource.title} />
-                                <div className={styles.imageOverlay} />
+                            <div className="relative h-[300px] lg:h-[500px] overflow-hidden">
+                                <img src={firstResource.thumbnail} alt={firstResource.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#0E0C15] lg:from-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-[#0E0C15]" />
                             </div>
-                            <div className={styles.featuredContent}>
-                                <span className={styles.featuredLabel}>Highest ROI Playbook</span>
-                                <h2 className={styles.featuredTitle}>{firstResource.title}</h2>
-                                <p className={styles.featuredDesc}>{firstResource.description}</p>
-                                <div className={styles.metaLine}>
-                                    <span className={styles.metaItem}><Clock size={14} /> {firstResource.readTime}</span>
-                                    <span className={styles.metaItem}><Calendar size={14} /> {firstResource.date}</span>
+                            <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+                                <span className="text-mint-400 text-sm font-bold tracking-widest uppercase mb-4 inline-block">Highest ROI Playbook</span>
+                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">{firstResource.title}</h2>
+                                <p className="text-zinc-400 text-lg mb-8 leading-relaxed">{firstResource.description}</p>
+                                <div className="flex flex-wrap items-center gap-6 mb-10 text-sm font-medium text-zinc-500">
+                                    <span className="flex items-center gap-2"><Clock size={16} /> {firstResource.readTime}</span>
+                                    <span className="flex items-center gap-2"><Calendar size={16} /> {firstResource.date}</span>
                                 </div>
-                                <Button size="lg" className={styles.primaryReadBtn}>
+                                <Button size="lg" className="self-start">
                                     Download Playbook <ArrowRight className="ml-2" />
                                 </Button>
                             </div>
@@ -202,27 +193,27 @@ export default function BlogPage() {
                     )}
 
                     {/* Grid */}
-                    <div className={styles.masonryGrid}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                         {remainingResources.map((resource, idx) => (
                             <motion.div
                                 key={idx}
-                                className={`${styles.blogCard} ${idx % 3 === 0 ? styles.wide : ''}`}
+                                className={`group rounded-[2rem] bg-[#0E0C15]/80 backdrop-blur-xl border border-white/5 overflow-hidden flex flex-col transition-colors hover:border-white/10 ${idx % 3 === 0 ? 'md:col-span-2' : ''}`}
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                             >
-                                <div className={styles.cardThumb}>
-                                    <img src={resource.thumbnail} alt={resource.title} />
+                                <div className="relative h-[240px] overflow-hidden bg-zinc-900">
+                                    <img src={resource.thumbnail} alt={resource.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100" />
                                 </div>
-                                <div className={styles.cardBody}>
-                                    <div className={styles.cardHeader}>
-                                        <span className={styles.tag}><Tag size={12} /> {resource.category}</span>
-                                        <span className={styles.date}>{resource.date}</span>
+                                <div className="p-8 flex-1 flex flex-col">
+                                    <div className="flex items-center justify-between mb-4 text-xs font-bold uppercase tracking-widest">
+                                        <span className="text-violet-400 flex items-center gap-1.5"><Tag size={12} /> {resource.category}</span>
+                                        <span className="text-zinc-600">{resource.date}</span>
                                     </div>
-                                    <h3 className={styles.cardTitle}>{resource.title}</h3>
-                                    <p className={styles.cardDesc}>{resource.description}</p>
-                                    <button className={styles.ghostLink}>
-                                        Read Report <ArrowRight size={14} />
+                                    <h3 className="text-2xl font-bold text-white mb-4 line-clamp-2">{resource.title}</h3>
+                                    <p className="text-zinc-400 mb-8 flex-1 line-clamp-3">{resource.description}</p>
+                                    <button className="text-white font-bold flex items-center gap-2 text-sm group-hover:text-mint-400 transition-colors self-start mt-auto">
+                                        Read Report <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                                     </button>
                                 </div>
                             </motion.div>
@@ -230,7 +221,6 @@ export default function BlogPage() {
                     </div>
                 </section>
             </div>
-
             <Footer />
         </main>
     );

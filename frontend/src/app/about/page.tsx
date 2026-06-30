@@ -10,7 +10,7 @@ export default function AboutPage() {
     const router = useRouter();
     
     return (
-        <main className="bg-[var(--color-bg)] min-h-screen relative overflow-hidden">
+        <main className="bg-[#07060A] min-h-screen relative overflow-hidden">
             {/* 3D Grid & Noise Background */}
             <div className="absolute inset-0 z-0 pointer-events-none opacity-20"
                 style={{
@@ -21,8 +21,8 @@ export default function AboutPage() {
                 }}
             />
             
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[var(--violet)] rounded-full blur-[150px] opacity-[0.15] mix-blend-screen pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[var(--mint)] rounded-full blur-[120px] opacity-[0.1] mix-blend-screen pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#8B5CF6] rounded-full blur-[150px] opacity-[0.15] mix-blend-screen pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#10B981] rounded-full blur-[120px] opacity-[0.1] mix-blend-screen pointer-events-none" />
 
             <div className="relative z-10">
                 <Navbar />
@@ -37,14 +37,14 @@ export default function AboutPage() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                             >
-                                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-bright border-[var(--color-border-bright)] mb-6 text-[var(--mint)] font-bold uppercase tracking-widest text-xs">
+                                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/20 mb-6 text-[#10B981] font-bold uppercase tracking-widest text-xs">
                                     <Sparkles size={14} /> Docodo Global Vision
                                 </span>
                                 <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter">
                                     Your #1 AI <br className="hidden lg:block" />
-                                    <span className="text-gradient">Growth OS.</span>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#10B981]">Growth OS.</span>
                                 </h1>
-                                <p className="text-[var(--text-secondary)] text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                                <p className="text-zinc-400 text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
                                     Integrated Websites, Digital Marketing, and AI Automations
                                     engineered to give global clinics, cafes, and salons
                                     the power of a tech giant. (Without the tech bro attitude).
@@ -56,7 +56,7 @@ export default function AboutPage() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 1, delay: 0.2 }}
                             >
-                                <div className="absolute inset-0 bg-[var(--violet-glow)] blur-[100px] rounded-full" />
+                                <div className="absolute inset-0 bg-[#8B5CF6]/20 blur-[100px] rounded-full" />
                                 <div className="text-[150px] font-black text-white/5 tracking-tighter leading-none select-none">
                                     GENESIS
                                 </div>
@@ -76,20 +76,20 @@ export default function AboutPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                             >
-                                <div className="glass rounded-[2.5rem] p-8 relative overflow-hidden group card-3d-wrap">
-                                    <div className="card-3d">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--violet-glow)] rounded-bl-full -z-10 group-hover:bg-[var(--mint-glow)] transition-colors" />
+                                <div className="bg-[#0E0C15]/60 border border-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 relative overflow-hidden group perspective-[1000px]">
+                                    <div className="transform-style-3d transition-transform duration-500 group-hover:rotate-x-6 group-hover:-rotate-y-6 group-hover:translate-z-10">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#8B5CF6]/20 rounded-bl-full -z-10 group-hover:bg-[#10B981]/20 transition-colors" />
                                         
-                                        <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[var(--violet)] to-[var(--mint)] p-1 mb-6">
-                                            <div className="w-full h-full bg-[var(--color-bg)] rounded-full flex items-center justify-center border-4 border-[var(--color-bg)]">
+                                        <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#8B5CF6] to-[#10B981] p-1 mb-6">
+                                            <div className="w-full h-full bg-[#07060A] rounded-full flex items-center justify-center border-4 border-[#07060A]">
                                                 <span className="text-2xl font-black text-white">AK</span>
                                             </div>
                                         </div>
 
                                         <h2 className="text-2xl font-bold text-white mb-1">Ameya Kshirsagar</h2>
-                                        <p className="text-gradient-growth font-bold text-sm mb-6">Founder & Chief Hustle Officer</p>
+                                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-[#22D3EE] font-bold text-sm mb-6">Founder & Chief Hustle Officer</p>
 
-                                        <p className="text-[var(--text-secondary)] text-sm mb-8 leading-relaxed">
+                                        <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
                                             Building the Top 1% SaaS products for ambitious SMBs. Surviving on Pune's finest misal and 100x dreams. Formerly engineered high-stakes systems; now democratizing AI growth.
                                         </p>
 
@@ -111,17 +111,17 @@ export default function AboutPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    className="relative pl-8 md:pl-12 border-l border-[var(--color-border)]"
+                                    className="relative pl-8 md:pl-12 border-l border-white/10"
                                 >
-                                    <div className="absolute top-0 left-0 w-1 h-12 bg-[var(--violet)] -translate-x-[2px] rounded-full" />
-                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-widest text-xs mb-4 block">01 / Origin Story</span>
+                                    <div className="absolute top-0 left-0 w-1 h-12 bg-[#8B5CF6] -translate-x-[2px] rounded-full" />
+                                    <span className="text-zinc-500 font-bold uppercase tracking-widest text-xs mb-4 block">01 / Origin Story</span>
                                     <h3 className="text-3xl font-bold text-white mb-6">From Tech Labs to Local Streets</h3>
                                     
-                                    <blockquote className="text-xl md:text-2xl font-medium text-[var(--mint)] italic mb-8 border-l-4 border-[var(--mint)] pl-6 py-2 bg-[var(--mint-glow)] rounded-r-xl">
+                                    <blockquote className="text-xl md:text-2xl font-medium text-[#10B981] italic mb-8 border-l-4 border-[#10B981] pl-6 py-2 bg-[#10B981]/10 rounded-r-xl">
                                         "Democratizing $2,000/Mo ROI for every global SMB, starting with Pune."
                                     </blockquote>
                                     
-                                    <div className="space-y-6 text-[var(--text-secondary)] leading-relaxed text-lg">
+                                    <div className="space-y-6 text-zinc-400 leading-relaxed text-lg">
                                         <p>
                                             I spent years in high-stakes engineering, where precision is paramount.
                                             I saw millions of SMBs worldwide—from Mumbai to NYC—struggling with
@@ -138,13 +138,13 @@ export default function AboutPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    className="relative pl-8 md:pl-12 border-l border-[var(--color-border)]"
+                                    className="relative pl-8 md:pl-12 border-l border-white/10"
                                 >
-                                    <div className="absolute top-0 left-0 w-1 h-12 bg-[var(--mint)] -translate-x-[2px] rounded-full" />
-                                    <span className="text-[var(--text-muted)] font-bold uppercase tracking-widest text-xs mb-4 block">02 / The Philosophy</span>
+                                    <div className="absolute top-0 left-0 w-1 h-12 bg-[#10B981] -translate-x-[2px] rounded-full" />
+                                    <span className="text-zinc-500 font-bold uppercase tracking-widest text-xs mb-4 block">02 / The Philosophy</span>
                                     <h3 className="text-3xl font-bold text-white mb-6">Systems Over Splashes (and Vibes)</h3>
                                     
-                                    <div className="space-y-6 text-[var(--text-secondary)] leading-relaxed text-lg">
+                                    <div className="space-y-6 text-zinc-400 leading-relaxed text-lg">
                                         <p>
                                             Traditional marketing is built on "splashes"—momentary bursts of attention. We build steady-state engines.
                                             Every line of code and every automation node we build has a singular intent: <strong className="text-white">measurable revenue efficiency.</strong>
@@ -160,11 +160,11 @@ export default function AboutPage() {
                 </section>
 
                 {/* Workflow */}
-                <section className="py-24 px-4 bg-[var(--color-bg-2)] border-y border-[var(--color-border)]">
+                <section className="py-24 px-4 bg-[#0E0C15] border-y border-white/10">
                     <div className="container max-w-7xl mx-auto">
                         <div className="text-center mb-20">
                             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">How We Engineer Growth</h2>
-                            <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto">A precise, four-stage protocol for scaling systems without friction.</p>
+                            <p className="text-zinc-400 text-lg max-w-2xl mx-auto">A precise, four-stage protocol for scaling systems without friction.</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -174,28 +174,28 @@ export default function AboutPage() {
                                     title: "Brutal Audit",
                                     desc: "No fluffy pitch decks. We dive into your current stack and roast the leaks in your funnel that are costing you money.",
                                     icon: <Target className="w-8 h-8" />,
-                                    theme: "violet"
+                                    theme: "text-[#8B5CF6]"
                                 },
                                 {
                                     id: "02",
                                     title: "Blueprint Phase",
                                     desc: "We deliver a technical architecture map within 48 hours. You see the solution before we write a single line of code.",
                                     icon: <Zap className="w-8 h-8" />,
-                                    theme: "mint"
+                                    theme: "text-[#10B981]"
                                 },
                                 {
                                     id: "03",
                                     title: "Velocity Buildout",
                                     desc: "Weekly drops. Live staging. Immediate feedback loops. We build in the open so you know we aren't just sleeping on the job.",
                                     icon: <Rocket className="w-8 h-8" />,
-                                    theme: "indigo"
+                                    theme: "text-[#6366F1]"
                                 },
                                 {
                                     id: "04",
                                     title: "Hyper-Optimization",
                                     desc: "We don't hand over and leave. We monitor, refine, and optimize the AI to ensure you can afford that new car.",
                                     icon: <Users className="w-8 h-8" />,
-                                    theme: "violet"
+                                    theme: "text-[#8B5CF6]"
                                 }
                             ].map((step, idx) => (
                                 <motion.div
@@ -204,16 +204,16 @@ export default function AboutPage() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: idx * 0.1 }}
-                                    className="glass-bright rounded-3xl p-8 relative overflow-hidden group hover:bg-white/[0.05] transition-colors"
+                                    className="bg-white/5 border border-white/20 backdrop-blur-xl rounded-3xl p-8 relative overflow-hidden group hover:bg-white/10 transition-colors"
                                 >
                                     <div className="text-[120px] font-black text-white/5 absolute -top-10 -right-4 select-none group-hover:text-white/10 transition-colors">
                                         {step.id}
                                     </div>
-                                    <div className={`mb-6 relative z-10 ${step.theme === 'mint' ? 'text-[var(--mint)]' : step.theme === 'violet' ? 'text-[var(--violet)]' : 'text-[var(--indigo)]'}`}>
+                                    <div className={`mb-6 relative z-10 ${step.theme}`}>
                                         {step.icon}
                                     </div>
                                     <h4 className="text-xl font-bold text-white mb-4 relative z-10">{step.title}</h4>
-                                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed relative z-10">{step.desc}</p>
+                                    <p className="text-zinc-400 text-sm leading-relaxed relative z-10">{step.desc}</p>
                                 </motion.div>
                             ))}
                         </div>
@@ -230,10 +230,10 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                         >
                             Ready to stop guessing and<br />
-                            <span className="text-gradient">start engineering?</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#10B981]">start engineering?</span>
                         </motion.h2>
                         <motion.button 
-                            className="px-10 py-5 bg-[var(--mint)] text-black font-bold uppercase tracking-widest text-sm rounded-full hover:bg-[var(--mint)]/90 hover:scale-105 shadow-[0_0_30px_var(--mint-glow)] transition-all inline-flex items-center gap-2"
+                            className="px-10 py-5 bg-[#10B981] text-black font-bold uppercase tracking-widest text-sm rounded-full hover:bg-[#10B981]/90 hover:scale-105 shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all inline-flex items-center gap-2"
                             onClick={() => router.push('/contact')}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}

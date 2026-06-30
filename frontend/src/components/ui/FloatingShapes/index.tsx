@@ -2,7 +2,6 @@
 
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
-import styles from './FloatingShapes.module.css';
 
 export function FloatingShapes() {
     const mouseX = useMotionValue(0);
@@ -29,10 +28,10 @@ export function FloatingShapes() {
     }, [mouseX, mouseY]);
 
     return (
-        <div className={styles.container}>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
             {/* Circle 1 */}
             <motion.div
-                className={`${styles.shape} ${styles.circle1}`}
+                className="absolute top-1/4 -left-[10%] w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[100px] mix-blend-screen"
                 style={{ x: x1, y: y1 }}
                 animate={{
                     scale: [1, 1.1, 1],
@@ -47,7 +46,7 @@ export function FloatingShapes() {
 
             {/* Circle 2 */}
             <motion.div
-                className={`${styles.shape} ${styles.circle2}`}
+                className="absolute top-1/2 -right-[10%] w-[600px] h-[600px] bg-mint-500/10 rounded-full blur-[100px] mix-blend-screen"
                 style={{ x: x2, y: y2 }}
                 animate={{
                     scale: [1, 1.2, 1],
@@ -58,6 +57,20 @@ export function FloatingShapes() {
                     repeat: Infinity,
                     ease: "easeInOut",
                     delay: 1
+                }}
+            />
+            
+            {/* Extra subtle center glow */}
+            <motion.div
+                className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[120px] mix-blend-screen"
+                animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.1, 0.3, 0.1],
+                }}
+                transition={{
+                    duration: 15,
+                    repeat: Infinity,
+                    ease: "easeInOut",
                 }}
             />
         </div>
