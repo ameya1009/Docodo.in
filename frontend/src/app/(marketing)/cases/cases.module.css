@@ -1,0 +1,128 @@
+.main {
+  padding-top: calc(var(--nav-height) + 4rem);
+  padding-bottom: 6rem;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 4rem auto;
+}
+
+.casesList {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.caseGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  background: rgba(79, 70, 229, 0.15);
+  color: var(--primary-color);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.caseInfo h2 {
+  margin-bottom: 1.5rem;
+}
+
+.metrics {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.metricIcon {
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+}
+
+.metricValue {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.caseVisual {
+  width: 100%;
+  height: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.visualPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(6, 182, 212, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visualPlaceholder2 {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(79, 70, 229, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floatingCard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+@media (max-width: 992px) {
+  .caseGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .caseVisual {
+    height: 300px;
+    order: -1;
+  }
+}
