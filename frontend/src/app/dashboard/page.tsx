@@ -68,8 +68,9 @@ export default function DashboardPage() {
   return (
     <main className={styles.main}>
       <div className={styles.sidebar}>
-        <Link href="/" className={styles.logo}>
-          <ArrowLeft size={18} /> Back to Website
+        <Link href="/" className={styles.logo} style={{ textDecoration: 'none' }}>
+          <ArrowLeft size={18} style={{ marginRight: '8px' }} />
+          <div className="textLogo" style={{ fontSize: '1.25rem' }}>Docodo<span className="textLogoDot">.</span></div>
         </Link>
         <nav className={styles.nav}>
           <a href="#" className={styles.active}><LayoutDashboard size={20} /> Docodo CRM</a>

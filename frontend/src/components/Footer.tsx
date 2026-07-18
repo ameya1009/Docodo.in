@@ -8,9 +8,8 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={`container ${styles.container}`}>
         <div className={styles.brand}>
-          <Link href="/" className={styles.logo}>
-            <img src="/logo.png" alt="Docodo Logo" className={styles.logoIcon} />
-            <span>Docodo</span>
+          <Link href="/" className={styles.logo} style={{ textDecoration: 'none' }}>
+            <div className="textLogo">Docodo<span className="textLogoDot">.</span></div>
           </Link>
           <p className={styles.description}>
             Empowering SaaS brands with next-gen AI agents, premium websites, and custom dashboards.

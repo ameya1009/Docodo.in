@@ -20,9 +20,8 @@ export default function Navbar() {
   return (
     <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
       <div className={`container ${styles.navContainer}`}>
-        <Link href="/" className={styles.logo}>
-          <img src="/logo.png" alt="Docodo Logo" className={styles.logoIcon} />
-          <span>Docodo</span>
+        <Link href="/" className={styles.logo} style={{ textDecoration: 'none' }}>
+          <div className="textLogo">Docodo<span className="textLogoDot">.</span></div>
         </Link>
 
         <div className={`${styles.navLinks} ${mobileMenuOpen ? styles.mobileOpen : ''}`}>
