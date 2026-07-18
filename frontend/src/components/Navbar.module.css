@@ -39,12 +39,40 @@
   color: var(--primary-color);
   width: 28px;
   height: 28px;
+  object-fit: contain;
 }
 
+/* Mobile First Navigation */
 .navLinks {
   display: flex;
-  align-items: center;
-  gap: 2rem;
+  position: absolute;
+  top: var(--nav-height);
+  left: 0;
+  width: 100%;
+  background: var(--bg-color);
+  flex-direction: column;
+  padding: 2rem;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  transition: clip-path var(--transition-normal);
+}
+
+.navLinks.mobileOpen {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+@media (min-width: 768px) {
+  .navLinks {
+    position: static;
+    flex-direction: row;
+    width: auto;
+    background: transparent;
+    padding: 0;
+    gap: 2rem;
+    border-bottom: none;
+    clip-path: none;
+  }
 }
 
 .link {
@@ -78,32 +106,15 @@
 }
 
 .mobileToggle {
-  display: none;
+  display: block;
   background: transparent;
   color: var(--text-primary);
   border: none;
+  cursor: pointer;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .mobileToggle {
-    display: block;
-  }
-  
-  .navLinks {
-    position: absolute;
-    top: var(--nav-height);
-    left: 0;
-    width: 100%;
-    background: var(--bg-color);
-    flex-direction: column;
-    padding: 2rem;
-    gap: 1.5rem;
-    border-bottom: 1px solid var(--glass-border);
-    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
-    transition: clip-path var(--transition-normal);
-  }
-
-  .navLinks.mobileOpen {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    display: none;
   }
 }

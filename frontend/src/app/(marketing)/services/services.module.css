@@ -20,13 +20,13 @@
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  background: rgba(79, 70, 229, 0.15);
+  background: rgba(43, 212, 172, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
   color: var(--primary-color);
-  box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 0 20px rgba(43, 212, 172, 0.2);
 }
 
 .featureList {

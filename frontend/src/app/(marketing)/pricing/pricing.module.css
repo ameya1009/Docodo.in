@@ -49,7 +49,7 @@
   top: 3px;
   left: 4px;
   transition: transform var(--transition-normal);
-  box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+  box-shadow: 0 0 10px rgba(43, 212, 172, 0.5);
 }
 
 .knobActive {
@@ -58,20 +58,32 @@
 
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
   align-items: start;
 }
 
+@media (min-width: 768px) {
+  .pricingGrid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
 .popular {
   border-color: var(--primary-color);
-  box-shadow: 0 0 40px rgba(79, 70, 229, 0.1);
-  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(43, 212, 172, 0.1);
+  transform: scale(1);
+}
+
+@media (min-width: 992px) {
+  .popular {
+    transform: scale(1.05);
+  }
 }
 
 .popular:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 0 60px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 0 60px rgba(43, 212, 172, 0.2);
 }
 
 .popularBadge {
@@ -139,10 +151,4 @@
 .features li svg {
   color: var(--primary-color);
   flex-shrink: 0;
-}
-
-@media (max-width: 992px) {
-  .popular {
-    transform: scale(1);
-  }
 }

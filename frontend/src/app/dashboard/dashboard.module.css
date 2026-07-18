@@ -3,15 +3,27 @@
   min-height: 100vh;
   background: #000;
   padding-top: var(--nav-height);
+  flex-direction: column;
 }
 
 .sidebar {
-  width: 250px;
+  width: 100%;
   background: var(--card-bg);
-  border-right: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
   padding: 2rem;
   display: flex;
   flex-direction: column;
+}
+
+@media (min-width: 992px) {
+  .main {
+    flex-direction: row;
+  }
+  .sidebar {
+    width: 250px;
+    border-right: 1px solid var(--card-border);
+    border-bottom: none;
+  }
 }
 
 .logo {
@@ -40,7 +52,7 @@
 }
 
 .nav a:hover, .nav a.active {
-  background: rgba(79, 70, 229, 0.1);
+  background: rgba(43, 212, 172, 0.1);
   color: var(--primary-color);
 }
 
@@ -66,7 +78,8 @@
   border: 1px solid var(--card-border);
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
 }
 
 .search input {
@@ -107,8 +120,14 @@
 
 .dashboardGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .dashboardGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .statCard h3 {
@@ -126,13 +145,19 @@
 }
 
 .statChange {
-  color: #10b981; /* Emerald green */
+  color: #10b981;
   font-size: 0.875rem;
 }
 
 .mainChart {
-  grid-column: span 3;
+  grid-column: span 1;
   min-height: 400px;
+}
+
+@media (min-width: 992px) {
+  .mainChart {
+    grid-column: span 3;
+  }
 }
 
 .chartPlaceholder {
@@ -161,21 +186,4 @@
 
 .bar:hover {
   filter: brightness(1.2);
-}
-
-@media (max-width: 992px) {
-  .main {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--card-border);
-  }
-  .dashboardGrid {
-    grid-template-columns: 1fr;
-  }
-  .mainChart {
-    grid-column: span 1;
-  }
 }

@@ -21,7 +21,7 @@ export default function Navbar() {
     <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ''}`}>
       <div className={`container ${styles.navContainer}`}>
         <Link href="/" className={styles.logo}>
-          <Cpu className={styles.logoIcon} />
+          <img src="/logo.png" alt="Docodo Logo" className={styles.logoIcon} />
           <span>Docodo</span>
         </Link>
 

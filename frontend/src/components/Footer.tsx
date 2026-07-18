@@ -9,7 +9,7 @@ export default function Footer() {
       <div className={`container ${styles.container}`}>
         <div className={styles.brand}>
           <Link href="/" className={styles.logo}>
-            <Cpu className={styles.logoIcon} />
+            <img src="/logo.png" alt="Docodo Logo" className={styles.logoIcon} />
             <span>Docodo</span>
           </Link>
           <p className={styles.description}>
