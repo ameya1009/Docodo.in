@@ -1,14 +1,17 @@
 'use client';
 
 import React from 'react';
-import { LayoutDashboard, Users, Activity, Settings, Bell, Search } from 'lucide-react';
+import Link from 'next/link';
+import { LayoutDashboard, Users, Activity, Settings, Bell, Search, ArrowLeft } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function DashboardPage() {
   return (
     <main className={styles.main}>
       <div className={styles.sidebar}>
-        <div className={styles.logo}>Docodo</div>
+        <Link href="/" className={styles.logo}>
+          <ArrowLeft size={18} /> Back to Website
+        </Link>
         <nav className={styles.nav}>
           <a href="#" className={styles.active}><LayoutDashboard size={20} /> Dashboard</a>
           <a href="#"><Users size={20} /> Audience</a>
