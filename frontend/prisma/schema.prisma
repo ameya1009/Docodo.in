@@ -8,12 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  leads     Lead[]
+  id               String     @id @default(uuid())
+  email            String     @unique
+  name             String?
+  subscriptionTier String     @default("FREE")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  leads            Lead[]
+  campaigns        Campaign[]
+  chatbots         Chatbot[]
 }
 
 model Lead {
@@ -26,5 +29,29 @@ model Lead {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   assignedTo  User?    @relation(fields: [userId], references: [id])
+  userId      String?
+}
+
+model Campaign {
+  id          String   @id @default(uuid())
+  name        String
+  subject     String?
+  content     String?
+  status      String   @default("Draft")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  owner       User?    @relation(fields: [userId], references: [id])
+  userId      String?
+}
+
+model Chatbot {
+  id          String   @id @default(uuid())
+  name        String
+  themeColor  String   @default("#2bd4ac")
+  welcomeMsg  String   @default("Hello! How can I help you today?")
+  status      String   @default("Draft")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  owner       User?    @relation(fields: [userId], references: [id])
   userId      String?
 }

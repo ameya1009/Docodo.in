@@ -73,10 +73,10 @@ export default function DashboardPage() {
           <div className="textLogo" style={{ fontSize: '1.25rem' }}>Docodo<span className="textLogoDot">.</span></div>
         </Link>
         <nav className={styles.nav}>
-          <a href="#" className={styles.active}><LayoutDashboard size={20} /> Docodo CRM</a>
-          <a href="#"><Users size={20} /> AI Agents</a>
-          <a href="#"><Activity size={20} /> Campaigns</a>
-          <a href="#"><Settings size={20} /> Settings</a>
+          <Link href="/dashboard" className={styles.active}><LayoutDashboard size={20} /> Docodo CRM</Link>
+          <Link href="/dashboard/agents"><Users size={20} /> AI Agents</Link>
+          <Link href="/dashboard/campaigns"><Activity size={20} /> Campaigns</Link>
+          <Link href="/dashboard/settings"><Settings size={20} /> Settings</Link>
         </nav>
       </div>
       
