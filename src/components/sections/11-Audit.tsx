@@ -11,6 +11,7 @@ import { GlowOrb } from "@/components/ui/FeedbackElements";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { WHATSAPP_LINK } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   businessName: z.string().min(2, "Business name is required"),

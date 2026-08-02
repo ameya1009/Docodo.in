@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { Card } from "@/components/ui/Card";
 import { ChatBubble } from "@/components/ui/SpecialtyComponents";

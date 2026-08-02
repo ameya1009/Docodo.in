@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SectionLabel } from "@/components/ui/SectionElements";
@@ -11,7 +11,7 @@ import { HeroScene } from "@/components/3d/HeroScene";
 export const Hero = () => {
   const { eyebrow, headline, subheadline, trustTicker } = HERO_CONTENT;
 
-  const wordVariants = {
+  const wordVariants: Variants = {
     hidden: { opacity: 0, y: 40 },
     visible: (i: number) => ({
       opacity: 1,
@@ -19,7 +19,7 @@ export const Hero = () => {
       transition: {
         delay: i * 0.1,
         duration: 0.8,
-        ease: [0.16, 1, 0.3, 1],
+        ease: [0.16, 1, 0.3, 1] as const,
       },
     }),
   };

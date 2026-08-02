@@ -1,0 +1,237 @@
+"use server";
+
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+
+export async function getDashboardData() {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+  const userId = (session.user as any).id;
+
+  const business = await prisma.business.findFirst({
+    where: { ownerId: userId },
+    include: {
+      services: true,
+      staff: true,
+      bookings: {
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: { service: true, customer: true },
+      },
+    },
+  });
+
+  if (!business) return null;
+
+  const today = new Date().toISOString().split("T")[0];
+  const thisMonth = new Date().toISOString().slice(0, 7);
+
+  // Today's bookings
+  const todaysBookings = business.bookings.filter((b) => b.date === today);
+
+  // This month's revenue
+  const monthlyRevenue = await prisma.booking.aggregate({
+    where: {
+      businessId: business.id,
+      date: { startsWith: thisMonth },
+      status: { in: ["CONFIRMED", "COMPLETED"] },
+    },
+    _sum: { price: true },
+  });
+
+  // Total customers
+  const customerCount = await prisma.customer.count({
+    where: { businessId: business.id },
+  });
+
+  // Upcoming bookings (next 7 days)
+  const upcoming = await prisma.booking.findMany({
+    where: {
+      businessId: business.id,
+      date: { gte: today },
+      status: { in: ["CONFIRMED", "PENDING"] },
+    },
+    orderBy: [{ date: "asc" }, { startTime: "asc" }],
+    take: 5,
+    include: { service: true },
+  });
+
+  return {
+    business,
+    stats: {
+      todayBookings: todaysBookings.length,
+      monthlyRevenue: monthlyRevenue._sum.price ?? 0,
+      customers: customerCount,
+    },
+    upcomingBookings: upcoming,
+    recentBookings: business.bookings,
+  };
+}
+
+export async function createBooking(data: {
+  businessId: string;
+  serviceId?: string;
+  staffId?: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  date: string;
+  startTime: string;
+  notes?: string;
+}) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const service = data.serviceId
+    ? await prisma.service.findUnique({ where: { id: data.serviceId } })
+    : null;
+
+  const duration = service?.duration ?? 60;
+  const [h, m] = data.startTime.split(":").map(Number);
+  const endMinutes = h * 60 + m + duration;
+  const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+
+  // Upsert customer
+  let customer = null;
+  try {
+    customer = await prisma.customer.upsert({
+      where: {
+        businessId_phone: {
+          businessId: data.businessId,
+          phone: data.customerPhone,
+        },
+      },
+      update: {
+        name: data.customerName,
+        email: data.customerEmail,
+        visitCount: { increment: 1 },
+        lifetimeValue: { increment: service?.price ?? 0 },
+      },
+      create: {
+        businessId: data.businessId,
+        name: data.customerName,
+        phone: data.customerPhone,
+        email: data.customerEmail,
+        visitCount: 1,
+        lifetimeValue: service?.price ?? 0,
+        source: "BOOKING",
+      },
+    });
+  } catch {}
+
+  const booking = await prisma.booking.create({
+    data: {
+      businessId: data.businessId,
+      serviceId: data.serviceId,
+      staffId: data.staffId,
+      customerId: customer?.id,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      customerEmail: data.customerEmail,
+      date: data.date,
+      startTime: data.startTime,
+      endTime,
+      duration,
+      price: service?.price ?? 0,
+      notes: data.notes,
+      status: "CONFIRMED",
+    },
+  });
+
+  revalidatePath("/dashboard/bookings");
+  return booking;
+}
+
+export async function updateBookingStatus(
+  bookingId: string,
+  status: "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW"
+) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status },
+  });
+
+  revalidatePath("/dashboard/bookings");
+}
+
+export async function getBookings(businessId: string, date?: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const where: any = { businessId, status: { not: "CANCELLED" } };
+  if (date) where.date = date;
+
+  return prisma.booking.findMany({
+    where,
+    include: { service: true, staff: true, customer: true },
+    orderBy: [{ date: "asc" }, { startTime: "asc" }],
+  });
+}
+
+export async function getCustomers(businessId: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  return prisma.customer.findMany({
+    where: { businessId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      bookings: {
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        include: { service: true },
+      },
+    },
+  });
+}
+
+export async function generateAIPost(businessId: string, type: string) {
+  const session = await auth();
+  if (!session?.user) throw new Error("Unauthorized");
+
+  const business = await prisma.business.findUnique({ where: { id: businessId } });
+  if (!business) throw new Error("Business not found");
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  
+  const prompts: Record<string, string> = {
+    INSTAGRAM: `Create an engaging Instagram post for ${business.name}, a ${business.industry} business. Include emojis, a call-to-action, and 5-7 relevant hashtags. Keep it warm and professional for an Indian audience.`,
+    WHATSAPP: `Create a WhatsApp promotional message for ${business.name}, a ${business.industry}. Keep it concise, friendly, and add a clear call-to-action. Max 200 words.`,
+    BLOG: `Write a helpful blog article outline (300 words) for ${business.name} about tips related to ${business.industry}. Include an SEO-friendly title and 3-4 key sections.`,
+    FAQ: `Generate 5 common customer FAQs with answers for ${business.name}, a ${business.industry} business in India.`,
+    REVIEW_REPLY: `Write a professional, warm response to a 5-star Google review for ${business.name}. Thank the customer, mention specific service quality, and invite them back.`,
+  };
+
+  const content = prompts[type] ?? prompts.INSTAGRAM;
+
+  if (!apiKey) {
+    // Mock content
+    const mockContent: Record<string, string> = {
+      INSTAGRAM: `✨ A new day, a fresh start! Come experience the best ${business.industry} services at ${business.name}.\n\n🌟 Expert team | Affordable prices | Premium care\n📍 ${business.address || business.city}\n📞 Book now: ${business.phone}\n\n#${business.industry.toLowerCase()} #wellness #selfcare #${business.city?.toLowerCase().replace(/\s/g, '') || "india"} #beauty #health`,
+      WHATSAPP: `Hello! 👋\n\nThis is ${business.name}. We're excited to share that we have openings this week!\n\n✅ Professional service\n✅ Experienced team\n✅ Hygienic environment\n\nBook your slot now: ${business.phone}\n\nWe'd love to serve you! 🙏`,
+      BLOG: `**5 Tips for Better ${business.industry} Care**\n\n1. Regular appointments matter\n2. Always consult a professional\n3. Maintain your routine at home\n4. Stay consistent for best results\n5. Trust the experts at ${business.name}`,
+    };
+    
+    const result = await prisma.aIContent.create({
+      data: { businessId, type, content: mockContent[type] ?? content },
+    });
+    return result.content;
+  }
+
+  try {
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const result = await model.generateContent(content);
+    const text = result.response.text();
+    
+    await prisma.aIContent.create({ data: { businessId, type, content: text } });
+    return text;
+  } catch (err) {
+    throw new Error("AI generation failed. Please try again.");
+  }
+}

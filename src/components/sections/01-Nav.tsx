@@ -54,12 +54,12 @@ export const Nav = () => {
         {/* Right: CTAs */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-4">
-            <Link href="/audit">
-              <Button variant="secondary" size="sm">Free Audit</Button>
+            <Link href="/auth/login">
+              <Button variant="secondary" size="sm">Login</Button>
             </Link>
-            <Link href={WHATSAPP_LINK("I want to get started with Docodo")}>
+            <Link href="/auth/signup">
               <Button variant="primary" size="sm">
-                Get Started <ArrowRight size={14} className="ml-1" />
+                Start Free <ArrowRight size={14} className="ml-1" />
               </Button>
             </Link>
           </div>

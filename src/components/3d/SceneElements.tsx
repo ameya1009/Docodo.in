@@ -28,9 +28,7 @@ export const ParticleField = ({ count = 2500 }) => {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={count}
-          array={particles}
-          itemSize={3}
+          args={[particles, 3]}
         />
       </bufferGeometry>
       <pointsMaterial
@@ -72,7 +70,11 @@ export const GridPlane = () => (
     args={[100, 50, "#C8F135", "#141412"]} 
     position={[0, -5, 0]} 
     rotation={[0, 0, 0]} 
-    opacity={0.04}
-    transparent
+    onUpdate={(self) => {
+      if (self.material instanceof THREE.Material) {
+        self.material.transparent = true;
+        self.material.opacity = 0.04;
+      }
+    }}
   />
 );
