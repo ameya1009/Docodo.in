@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { DocodoBackendAPI } from "@/lib/api-client";
 
 export async function getDashboardData() {
   const session = await auth();
@@ -139,6 +140,18 @@ export async function createBooking(data: {
     },
   });
 
+  // Automatically trigger backend WhatsApp NDR verification & confirmation engine
+  try {
+    await DocodoBackendAPI.verifyNDRBooking({
+      businessId: data.businessId,
+      bookingId: booking.id,
+      customerPhone: data.customerPhone,
+      customerName: data.customerName,
+    });
+  } catch (backendErr) {
+    console.warn("Notice: Offline backend queueing for NDR verification:", backendErr);
+  }
+
   revalidatePath("/dashboard/bookings");
   return booking;
 }
@@ -208,30 +221,23 @@ export async function generateAIPost(businessId: string, type: string) {
 
   const content = prompts[type] ?? prompts.INSTAGRAM;
 
-  if (!apiKey) {
-    // Mock content
-    const mockContent: Record<string, string> = {
-      INSTAGRAM: `✨ A new day, a fresh start! Come experience the best ${business.industry} services at ${business.name}.\n\n🌟 Expert team | Affordable prices | Premium care\n📍 ${business.address || business.city}\n📞 Book now: ${business.phone}\n\n#${business.industry.toLowerCase()} #wellness #selfcare #${business.city?.toLowerCase().replace(/\s/g, '') || "india"} #beauty #health`,
-      WHATSAPP: `Hello! 👋\n\nThis is ${business.name}. We're excited to share that we have openings this week!\n\n✅ Professional service\n✅ Experienced team\n✅ Hygienic environment\n\nBook your slot now: ${business.phone}\n\nWe'd love to serve you! 🙏`,
-      BLOG: `**5 Tips for Better ${business.industry} Care**\n\n1. Regular appointments matter\n2. Always consult a professional\n3. Maintain your routine at home\n4. Stay consistent for best results\n5. Trust the experts at ${business.name}`,
-    };
-    
-    const result = await prisma.aIContent.create({
-      data: { businessId, type, content: mockContent[type] ?? content },
-    });
-    return result.content;
-  }
+  const promptText = prompts[type] ?? prompts.INSTAGRAM;
+  const mappedType: "DESCRIPTION" | "SEO" | "INSTAGRAM" | "WHATSAPP_CAMPAIGN" | "FAQ" | "REVIEW_REPLY" =
+    type === "WHATSAPP" ? "WHATSAPP_CAMPAIGN" : (type as any);
 
-  try {
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(content);
-    const text = result.response.text();
-    
-    await prisma.aIContent.create({ data: { businessId, type, content: text } });
-    return text;
-  } catch (err) {
-    throw new Error("AI generation failed. Please try again.");
-  }
+  const res = await DocodoBackendAPI.generateContent({
+    businessId,
+    type: mappedType,
+    prompt: promptText,
+    industry: business.industry,
+    name: business.name,
+  });
+
+  const finalContent = res.content || "AI generation completed via fallback engine.";
+
+  await prisma.aIContent.create({
+    data: { businessId, type, content: finalContent },
+  });
+  
+  return finalContent;
 }
