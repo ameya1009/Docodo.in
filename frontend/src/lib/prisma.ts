@@ -1,15 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { createClient } from "@libsql/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 function createPrismaClient() {
-  const dbUrl = process.env.DATABASE_URL ?? `file:${process.cwd()}/prisma/dev.db`;
-  const client = createClient({ url: dbUrl });
-  const adapter = new PrismaLibSql({ client, url: dbUrl } as any);
+  const dbUrl = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/docodo";
+  const adapter = new PrismaPg({ connectionString: dbUrl } as any);
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],

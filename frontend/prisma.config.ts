@@ -1,7 +1,6 @@
 import { defineConfig } from "prisma/config";
-import path from "node:path";
 
-const dbUrl = process.env.DATABASE_URL ?? `file:${path.join(process.cwd(), "prisma", "dev.db")}`;
+const dbUrl = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/docodo";
 
 export default defineConfig({
   schema: "./prisma/schema.prisma",
