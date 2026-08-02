@@ -23,6 +23,7 @@ const SECTION_LABELS = [
 
 export default function WebsiteClient({ business }: WebsiteClientProps) {
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const [sections, setSections] = useState<Record<string, boolean>>(
     Object.fromEntries(SECTION_LABELS.map((s) => [s.id, s.defaultOn]))
   );
@@ -76,7 +77,7 @@ export default function WebsiteClient({ business }: WebsiteClientProps) {
               <Link href={`/book/${business.slug}`} target="_blank" className="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold border border-[var(--border-default)] text-[var(--text-secondary)] rounded-xl hover:border-[var(--lime)]/30 hover:text-[var(--lime)] transition-all">
                 <Eye size={14} /> Preview
               </Link>
-              <button className="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold border border-[var(--border-default)] text-[var(--text-secondary)] rounded-xl hover:border-[var(--lime)]/30 hover:text-[var(--lime)] transition-all">
+              <button onClick={() => setShowQR(true)} className="flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold border border-[var(--border-default)] text-[var(--text-secondary)] rounded-xl hover:border-[var(--lime)]/30 hover:text-[var(--lime)] transition-all">
                 <QrCode size={14} /> QR Code
               </button>
             </div>
@@ -158,6 +159,28 @@ export default function WebsiteClient({ business }: WebsiteClientProps) {
           </div>
         </div>
       </div>
+
+      {/* Interactive QR Code Display Modal */}
+      {showQR && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl space-y-4">
+            <h3 className="text-lg font-black text-[var(--text-primary)]">Store Counter QR Code</h3>
+            <p className="text-xs text-[var(--text-secondary)]">Let walk-in clients scan and book instantly on WhatsApp & Web!</p>
+            <div className="flex justify-center p-4 bg-white rounded-2xl mx-auto w-fit shadow-inner">
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(bookingUrl)}`} alt="Store Booking QR Code" className="w-48 h-48 rounded-lg" />
+            </div>
+            <p className="text-[11px] font-mono text-[var(--lime)] break-all px-2 py-1 bg-[var(--bg-elevated)] rounded-lg">{bookingUrl}</p>
+            <div className="flex gap-2 pt-2">
+              <a href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(bookingUrl)}`} target="_blank" download="Docodo-QR.png" className="flex-1 py-2.5 bg-[var(--lime)] text-[var(--bg-void)] font-bold rounded-xl text-xs hover:bg-[var(--lime-hover)] transition-colors">
+                Download High-Res
+              </a>
+              <button onClick={() => setShowQR(false)} className="px-4 py-2.5 bg-[var(--bg-elevated)] text-[var(--text-primary)] font-semibold rounded-xl text-xs hover:bg-[var(--bg-deep)] transition-colors">
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

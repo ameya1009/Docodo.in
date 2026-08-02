@@ -91,8 +91,8 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
   const handleConfirmBooking = () => {
     startTransition(async () => {
       try {
-        const { createBooking } = await import("@/lib/actions/dashboard");
-        const result = await createBooking({
+        const { createPublicBooking } = await import("@/lib/actions/booking");
+        const result = await createPublicBooking({
           businessId: business.id,
           serviceId: selectedService?.id,
           staffId: selectedStaff?.id,
@@ -105,8 +105,9 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
         });
         setBookingResult(result);
         setStep("success");
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        console.error("Booking verification failed:", err);
+        alert(err.message || "We could not process your booking at this time. Please try another slot or refresh.");
       }
     });
   };

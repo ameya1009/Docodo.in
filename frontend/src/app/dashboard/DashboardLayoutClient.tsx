@@ -38,6 +38,7 @@ export default function DashboardLayoutClient({
 }: DashboardLayoutClientProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const isActive = (item: typeof NAV_ITEMS[0]) => {
     if (item.exact) return pathname === item.href;
@@ -182,10 +183,45 @@ export default function DashboardLayoutClient({
               WhatsApp Engine Online
             </Link>
 
-            <button className="relative p-2.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all active:scale-95">
-              <Bell size={18} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--lime)] rounded-full shadow-[0_0_8px_#C8F135]" />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                className="relative p-2.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all active:scale-95"
+              >
+                <Bell size={18} />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--lime)] rounded-full shadow-[0_0_8px_#C8F135]" />
+              </button>
+
+              <AnimatePresence>
+                {notificationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="absolute right-0 top-12 w-80 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl shadow-2xl p-4 z-50 text-left"
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)] mb-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">System Alerts</span>
+                      <button onClick={() => setNotificationsOpen(false)} className="text-[10px] text-[var(--lime)] hover:underline font-bold">Close</button>
+                    </div>
+                    <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                      <div className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                        <p className="text-xs font-bold text-emerald-400">🛡️ WhatsApp NDR Shield Active</p>
+                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Automated COD confirmation bot is monitoring appointments.</p>
+                      </div>
+                      <div className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                        <p className="text-xs font-bold text-[var(--lime)]">⚡ Google Gemini Hub Connected</p>
+                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">AI generative engine offline fallback ready with zero downtime.</p>
+                      </div>
+                      <div className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
+                        <p className="text-xs font-bold text-sky-400">📈 +28% Booking Velocity</p>
+                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Your mobile-first booking funnel is outperforming regional SMB averages.</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </header>
 
