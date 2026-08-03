@@ -41,7 +41,7 @@ whatsappRouter.post("/broadcast", async (req: Request, res: Response): Promise<v
       externalId: `WA-CLOUD-${Math.floor(Math.random() * 8999999 + 1000000)}`,
     }));
 
-    await prisma.whatsappLog.createMany({
+    await prisma.whatsAppLog.createMany({
       data: logEntries,
     });
 
@@ -73,7 +73,7 @@ whatsappRouter.post("/ndr-verify", async (req: Request, res: Response): Promise<
     const verifyContent = `Hi ${customerName || "Valued Customer"}, we noticed your reservation at Docodo Studio via Cash-on-Delivery. Please click below or reply YES to confirm your appointment and secure your slot!`;
 
     // Record the message and initiate an NDR Dispute monitoring state
-    await prisma.whatsappLog.create({
+    await prisma.whatsAppLog.create({
       data: {
         businessId,
         recipient: customerPhone,
@@ -83,7 +83,7 @@ whatsappRouter.post("/ndr-verify", async (req: Request, res: Response): Promise<
       },
     });
 
-    await prisma.ndrDispute.upsert({
+    await prisma.nDRDispute.upsert({
       where: { bookingId },
       update: { status: "UNDER_AI_REVIEW", aiResolution: "Sent interactive WhatsApp COD verification check" },
       create: {
@@ -113,8 +113,8 @@ whatsappRouter.post("/ndr-verify", async (req: Request, res: Response): Promise<
 whatsappRouter.get("/logs/:businessId", async (req: Request, res: Response): Promise<void> => {
   try {
     const { businessId } = req.params;
-    const logs = await prisma.whatsappLog.findMany({
-      where: { businessId },
+    const logs = await prisma.whatsAppLog.findMany({
+      where: { businessId: String(businessId) },
       orderBy: { timestamp: "desc" },
       take: 20,
     });

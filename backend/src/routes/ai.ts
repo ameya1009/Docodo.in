@@ -54,7 +54,7 @@ aiRouter.post("/generate", async (req: Request, res: Response): Promise<void> =>
     // Persist generation history in database if businessId is supplied
     if (businessId) {
       try {
-        await prisma.aiContent.create({
+        await prisma.aIContent.create({
           data: {
             businessId,
             type,

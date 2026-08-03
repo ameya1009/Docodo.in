@@ -16,7 +16,7 @@ ledgerRouter.post("/record", async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const entry = await prisma.codLedger.create({
+    const entry = await prisma.cODLedger.create({
       data: {
         businessId,
         bookingId: bookingId || null,
@@ -45,8 +45,8 @@ ledgerRouter.post("/record", async (req: Request, res: Response): Promise<void> 
 ledgerRouter.get("/:businessId", async (req: Request, res: Response): Promise<void> => {
   try {
     const { businessId } = req.params;
-    const records = await prisma.codLedger.findMany({
-      where: { businessId },
+    const records = await prisma.cODLedger.findMany({
+      where: { businessId: String(businessId) },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
