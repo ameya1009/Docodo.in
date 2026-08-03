@@ -6,11 +6,12 @@ import {
   MapPin, Phone, Clock, Star, CheckCircle2, ArrowRight, ArrowLeft, Loader2,
   Calendar, User, Mail, MessageSquare, ChevronLeft, ChevronRight
 } from "lucide-react";
-import { cn, formatCurrency, timeToMinutes, minutesToTime } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+import { generateAvailableTimeSlots } from "@/lib/engines/booking-engine";
 
 interface BookingPageClientProps {
   business: any;
-  bookedSlots: Array<{ date: string; startTime: string; endTime: string; staffId: string | null }>;
+  bookedSlots: Array<{ date: string; startTime: string; endTime: string; staffId: string | null; status?: string }>;
 }
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -18,17 +19,6 @@ const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov
 const DAY_MAP: Record<string, number> = { SUN:0, MON:1, TUE:2, WED:3, THU:4, FRI:5, SAT:6 };
 
 type Step = "service" | "datetime" | "details" | "confirm" | "success";
-
-function generateTimeSlots(openTime: string, closeTime: string, duration: number): string[] {
-  const slots: string[] = [];
-  let current = timeToMinutes(openTime);
-  const end = timeToMinutes(closeTime) - duration;
-  while (current <= end) {
-    slots.push(minutesToTime(current));
-    current += duration;
-  }
-  return slots;
-}
 
 export default function BookingPageClient({ business, bookedSlots }: BookingPageClientProps) {
   const [step, setStep] = useState<Step>("service");
@@ -64,19 +54,17 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
     const wh = business.workingHours?.find((h: any) => h.day === dayKey);
     if (!wh?.isOpen) return [];
 
-    const allSlots = generateTimeSlots(wh.openTime, wh.closeTime, selectedService.duration);
+    const existingOnDate = bookedSlots
+      .filter((b) => b.date === dateStr)
+      .map((b) => ({ startTime: b.startTime, endTime: b.endTime, status: b.status || "CONFIRMED" }));
 
-    // Filter out booked slots
-    return allSlots.filter((slot) => {
-      const slotStart = timeToMinutes(slot);
-      const slotEnd = slotStart + selectedService.duration;
-      return !bookedSlots.some((b) => {
-        if (b.date !== dateStr) return false;
-        const bStart = timeToMinutes(b.startTime);
-        const bEnd = timeToMinutes(b.endTime);
-        return slotStart < bEnd && slotEnd > bStart;
-      });
-    });
+    return generateAvailableTimeSlots(
+      wh.openTime,
+      wh.closeTime,
+      selectedService.duration,
+      30,
+      existingOnDate
+    );
   };
 
   const validateDetails = () => {

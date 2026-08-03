@@ -102,6 +102,7 @@ model Business {
   // SEO Optimization
   seoTitle    String?
   seoDesc     String?
+  websiteConfig String? @default("{\"hero\":true,\"services\":true,\"about\":true,\"gallery\":true,\"testimonials\":true,\"faq\":false,\"contact\":true,\"booking_cta\":true}")
   
   // Onboarding Wizard Telemetry
   onboardingStep     Int      @default(4)

@@ -3,10 +3,20 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { DocodoBackendAPI } from "@/lib/api-client";
+import {
+  CreateBookingSchema,
+  GetAvailableSlotsSchema,
+  UpdateBookingStatusSchema,
+} from "@/lib/validations/booking";
+import {
+  calculateEndTime,
+  hasTimeSlotConflict,
+  generateAvailableTimeSlots,
+} from "@/lib/engines/booking-engine";
 
-export async function createPublicBooking(data: {
+export async function createPublicBooking(rawInput: {
   businessId: string;
-  serviceId?: string;
+  serviceId: string;
   staffId?: string;
   customerName: string;
   customerPhone: string;
@@ -14,46 +24,37 @@ export async function createPublicBooking(data: {
   date: string;
   startTime: string;
   notes?: string;
+  paymentMethod?: "UPI" | "CASH_ON_DELIVERY" | "CARDS" | "NETBANKING";
 }) {
-  if (!data.businessId || !data.customerName || !data.customerPhone || !data.date || !data.startTime) {
-    throw new Error("Missing required booking verification fields.");
-  }
+  const data = CreateBookingSchema.parse(rawInput);
 
   // Verify business exists and is publicly active
   const business = await prisma.business.findFirst({
     where: { id: data.businessId, isPublished: true },
-    select: { id: true, name: true },
+    select: { id: true, name: true, slug: true },
   });
 
   if (!business) {
     throw new Error("Business is currently not receiving online appointments.");
   }
 
-  const service = data.serviceId
-    ? await prisma.service.findUnique({ where: { id: data.serviceId } })
-    : null;
-
+  const service = await prisma.service.findUnique({ where: { id: data.serviceId } });
   const duration = service?.duration ?? 60;
-  const [h, m] = data.startTime.split(":").map(Number);
-  const endMinutes = h * 60 + m + duration;
-  const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
+  const endTime = calculateEndTime(data.startTime, duration);
 
-  // Check for scheduling conflict / double booking protection
-  const existingConflicted = await prisma.booking.findFirst({
+  // Retrieve existing bookings on that date for conflict checking
+  const existingBookings = await prisma.booking.findMany({
     where: {
       businessId: data.businessId,
       date: data.date,
-      status: { in: ["CONFIRMED", "PENDING"] },
-      AND: [
-        { startTime: { lt: endTime } },
-        { endTime: { gt: data.startTime } },
-      ],
+      status: { in: ["CONFIRMED", "PENDING", "NDR_HOLD"] },
       ...(data.staffId ? { staffId: data.staffId } : {}),
     },
+    select: { startTime: true, endTime: true, status: true },
   });
 
-  if (existingConflicted && data.staffId) {
-    throw new Error("This timeslot was just booked by another customer. Please select another slot.");
+  if (hasTimeSlotConflict(data.startTime, endTime, existingBookings)) {
+    throw new Error("This timeslot was just booked by another customer. Please select another available time.");
   }
 
   // Securely register or update Customer CRM profile without exposing auth credentials
@@ -90,8 +91,8 @@ export async function createPublicBooking(data: {
     data: {
       businessId: data.businessId,
       serviceId: data.serviceId,
-      staffId: data.staffId,
-      customerId: customer?.id,
+      staffId: data.staffId || null,
+      customerId: customer?.id || null,
       customerName: data.customerName,
       customerPhone: data.customerPhone,
       customerEmail: data.customerEmail || null,
@@ -102,6 +103,7 @@ export async function createPublicBooking(data: {
       price: service?.price ?? 0,
       notes: data.notes || null,
       status: "CONFIRMED",
+      paymentMethod: data.paymentMethod,
     },
     include: {
       service: true,
@@ -120,7 +122,65 @@ export async function createPublicBooking(data: {
     console.warn("Notice: Offline backup queue for WhatsApp NDR check activated:", backendError);
   }
 
-  revalidatePath(`/book/${business.name}`);
+  revalidatePath(`/book/${business.slug}`);
   revalidatePath("/dashboard/bookings");
   return booking;
+}
+
+export async function getAvailableSlotsAction(rawInput: {
+  businessId: string;
+  serviceId: string;
+  date: string;
+}) {
+  const { businessId, serviceId, date } = GetAvailableSlotsSchema.parse(rawInput);
+
+  const [service, workingHours, existingBookings] = await Promise.all([
+    prisma.service.findUnique({ where: { id: serviceId } }),
+    prisma.workingHours.findMany({ where: { businessId } }),
+    prisma.booking.findMany({
+      where: { businessId, date, status: { notIn: ["CANCELLED", "NO_SHOW"] } },
+      select: { startTime: true, endTime: true, status: true },
+    }),
+  ]);
+
+  if (!service) throw new Error("Selected service not found.");
+
+  // Determine weekday from date string (0=Sun, 1=Mon...)
+  const dayIndex = new Date(date).getDay();
+  const daysMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const dayStr = daysMap[dayIndex];
+
+  const todayHours = workingHours.find((w) => w.day === dayStr);
+  if (!todayHours || !todayHours.isOpen) {
+    return { slots: [], isClosed: true, reason: "Business is closed on this day of the week." };
+  }
+
+  const slots = generateAvailableTimeSlots(
+    todayHours.openTime,
+    todayHours.closeTime,
+    service.duration,
+    30,
+    existingBookings
+  );
+
+  return { slots, isClosed: false };
+}
+
+export async function updateBookingStatusAction(rawInput: {
+  bookingId: string;
+  status: "CONFIRMED" | "PENDING" | "COMPLETED" | "CANCELLED" | "NO_SHOW" | "NDR_HOLD";
+  internalNotes?: string;
+}) {
+  const validated = UpdateBookingStatusSchema.parse(rawInput);
+  const updated = await prisma.booking.update({
+    where: { id: validated.bookingId },
+    data: {
+      status: validated.status,
+      ...(validated.internalNotes !== undefined ? { internalNotes: validated.internalNotes } : {}),
+    },
+  });
+
+  revalidatePath("/dashboard/bookings");
+  revalidatePath("/dashboard");
+  return updated;
 }

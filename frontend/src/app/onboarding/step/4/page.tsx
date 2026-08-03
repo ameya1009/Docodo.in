@@ -3,17 +3,16 @@
 import React, { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, CheckCircle2, Globe, Calendar, Users, Search, BarChart2, Sparkles, ArrowRight } from "lucide-react";
+import { Loader2, CheckCircle2, Globe, Calendar, Users, Search, BarChart2, Sparkles, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
 import { useOnboardingStore } from "@/store/onboarding";
-import { completeOnboarding } from "@/lib/actions/onboarding";
 
 const GENERATION_STEPS = [
-  { id: 1, label: "Creating your website", icon: Globe, duration: 1500 },
-  { id: 2, label: "Setting up booking system", icon: Calendar, duration: 2000 },
-  { id: 3, label: "Building your CRM", icon: Users, duration: 1500 },
-  { id: 4, label: "Generating SEO metadata", icon: Search, duration: 1000 },
-  { id: 5, label: "Writing AI content", icon: Sparkles, duration: 2500 },
-  { id: 6, label: "Configuring analytics", icon: BarChart2, duration: 1000 },
+  { id: 1, label: "Initializing persistent website configuration", icon: Globe },
+  { id: 2, label: "Seeding service catalog & time slots in DB", icon: Calendar },
+  { id: 3, label: "Registering CRM owner profile & lead engine", icon: Users },
+  { id: 4, label: "Optimizing regional search SEO metadata", icon: Search },
+  { id: 5, label: "Synthesizing AI marketing copywriting", icon: Sparkles },
+  { id: 6, label: "Finalizing live production deployment", icon: BarChart2 },
 ];
 
 export default function OnboardingStep4() {
@@ -22,35 +21,83 @@ export default function OnboardingStep4() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [allDone, setAllDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const runRealLaunchSequence = async (isCancelled: () => boolean) => {
+    if (!store.businessId) {
+      setError("Missing active business record. Please complete step 1.");
+      return;
+    }
+
+    setError(null);
+    setCompletedSteps([]);
+    setAllDone(false);
+
+    try {
+      const {
+        launchStep1_Website,
+        launchStep2_BookingSystem,
+        launchStep3_CRM,
+        launchStep4_SEOMetadata,
+        launchStep5_AIContent,
+        launchStep6_Analytics,
+      } = await import("@/lib/actions/onboarding");
+
+      // Execute Step 1: Website Config
+      setCurrentStep(1);
+      await launchStep1_Website(store.businessId);
+      if (isCancelled()) return;
+      setCompletedSteps((prev) => [...prev, 1]);
+
+      // Execute Step 2: Booking System & Services Seeder
+      setCurrentStep(2);
+      await launchStep2_BookingSystem(store.businessId);
+      if (isCancelled()) return;
+      setCompletedSteps((prev) => [...prev, 2]);
+
+      // Execute Step 3: CRM Engine Initialization
+      setCurrentStep(3);
+      await launchStep3_CRM(store.businessId);
+      if (isCancelled()) return;
+      setCompletedSteps((prev) => [...prev, 3]);
+
+      // Execute Step 4: SEO Metadata Creation
+      setCurrentStep(4);
+      await launchStep4_SEOMetadata(store.businessId);
+      if (isCancelled()) return;
+      setCompletedSteps((prev) => [...prev, 4]);
+
+      // Execute Step 5: AI Marketing Synthesis
+      setCurrentStep(5);
+      await launchStep5_AIContent(store.businessId);
+      if (isCancelled()) return;
+      setCompletedSteps((prev) => [...prev, 5]);
+
+      // Execute Step 6: Finalize & Publish
+      setCurrentStep(6);
+      await launchStep6_Analytics(store.businessId);
+      if (isCancelled()) return;
+      setCompletedSteps((prev) => [...prev, 6]);
+
+      setAllDone(true);
+    } catch (err: any) {
+      if (isCancelled()) return;
+      console.error("Real launch sequence failure:", err);
+      setError(err.message || "An error occurred while configuring your business in the database.");
+    }
+  };
+
   useEffect(() => {
-    let cumulativeDelay = 800;
-    GENERATION_STEPS.forEach((step, i) => {
-      setTimeout(() => {
-        setCurrentStep(i + 1);
-        setTimeout(() => {
-          setCompletedSteps((prev) => [...prev, step.id]);
-          if (i === GENERATION_STEPS.length - 1) {
-            setTimeout(() => setAllDone(true), 600);
-          }
-        }, step.duration);
-      }, cumulativeDelay);
-      cumulativeDelay += step.duration + 400;
-    });
-  }, []);
+    let cancelled = false;
+    runRealLaunchSequence(() => cancelled);
+    return () => { cancelled = true; };
+  }, [store.businessId]);
 
   const handleGoToDashboard = () => {
-    if (!store.businessId) return;
-    startTransition(async () => {
-      try {
-        await completeOnboarding(store.businessId!);
-        store.reset();
-        router.push("/dashboard");
-      } catch (err) {
-        console.error(err);
-        router.push("/dashboard");
-      }
+    startTransition(() => {
+      store.reset();
+      router.push("/dashboard");
     });
   };
 
@@ -62,22 +109,40 @@ export default function OnboardingStep4() {
           <Sparkles size={32} />
         </div>
         <h1 className="text-3xl font-black text-[var(--text-primary)] mb-3">
-          {allDone ? "Your business is live! 🎉" : "Building your AI business..."}
+          {allDone ? "Your business is live! 🎉" : error ? "Launch Interrupted" : "Executing Real-Time Business Launch..."}
         </h1>
         <p className="text-[var(--text-secondary)]">
           {allDone
-            ? `${store.name} is ready to receive bookings.`
-            : "AI is setting everything up. This takes about 15 seconds."}
+            ? `${store.name || "Your business"} is ready to receive real bookings online.`
+            : error
+            ? "We encountered a database error during configuration."
+            : "Communicating with PostgreSQL database and Gemini AI hub in real-time..."}
         </p>
       </motion.div>
 
-      {/* Steps */}
+      {/* Real-Time Database Progression Box */}
       <div className="glass rounded-2xl p-8 border border-[var(--border-default)] mb-8 text-left">
+        {error && (
+          <div className="p-4 bg-[var(--danger)]/10 border border-[var(--danger)]/30 rounded-xl mb-6 text-[var(--danger)] text-sm flex items-start gap-3">
+            <AlertCircle size={20} className="shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-bold">Configuration Failed</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1">{error}</p>
+              <button
+                onClick={() => runRealLaunchSequence(() => false)}
+                className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-[var(--danger)] text-[var(--bg-void)] text-xs font-bold rounded-lg hover:opacity-90 transition-opacity"
+              >
+                <RefreshCw size={13} /> Retry Real Sequence
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
           {GENERATION_STEPS.map((step, i) => {
             const Icon = step.icon;
             const isComplete = completedSteps.includes(step.id);
-            const isCurrent = currentStep === step.id && !isComplete;
+            const isCurrent = currentStep === step.id && !isComplete && !error;
             const isPending = currentStep < step.id;
 
             return (
@@ -122,7 +187,7 @@ export default function OnboardingStep4() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="ml-auto text-xs font-bold text-[var(--success)]"
                   >
-                    ✓ Done
+                    ✓ Verified DB
                   </motion.span>
                 )}
               </motion.div>
@@ -130,16 +195,16 @@ export default function OnboardingStep4() {
           })}
         </div>
 
-        {/* Progress bar */}
+        {/* Real Progress Bar */}
         <div className="mt-8 h-2 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-[var(--lime)] rounded-full"
             animate={{ width: `${(completedSteps.length / GENERATION_STEPS.length) * 100}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           />
         </div>
         <p className="text-xs text-[var(--text-muted)] mt-2 text-right">
-          {completedSteps.length}/{GENERATION_STEPS.length} complete
+          {completedSteps.length}/{GENERATION_STEPS.length} DB steps confirmed
         </p>
       </div>
 
@@ -163,7 +228,7 @@ export default function OnboardingStep4() {
               )}
             </button>
             <p className="text-sm text-[var(--text-muted)] mt-4">
-              Your booking page is live at{" "}
+              Your live production booking engine is verified at{" "}
               <span className="text-[var(--lime)] font-mono">docodo.in/book/{store.slug || "your-business"}</span>
             </p>
           </motion.div>

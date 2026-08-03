@@ -1,16 +1,11 @@
-// Server Actions — Auth
+// Server Actions — Auth with production Zod validation & sanitization
 "use server";
 
 import { signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 import { AuthError } from "next-auth";
-
-const signUpSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6),
-});
+import { SignUpSchema, LoginSchema } from "@/lib/validations/auth";
+import { sanitizeEmail } from "@/lib/engines/auth-engine";
 
 export async function signUpAction(formData: FormData) {
   const raw = {
@@ -19,12 +14,13 @@ export async function signUpAction(formData: FormData) {
     password: formData.get("password") as string,
   };
 
-  const parsed = signUpSchema.safeParse(raw);
+  const parsed = SignUpSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
 
-  const { name, email, password } = parsed.data;
+  const { name, password } = parsed.data;
+  const email = sanitizeEmail(parsed.data.email);
 
   const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) return { error: "An account with this email already exists." };
@@ -46,8 +42,18 @@ export async function signUpAction(formData: FormData) {
 }
 
 export async function loginAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const raw = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
+  const parsed = LoginSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const email = sanitizeEmail(parsed.data.email);
+  const { password } = parsed.data;
 
   try {
     await signIn("credentials", {
