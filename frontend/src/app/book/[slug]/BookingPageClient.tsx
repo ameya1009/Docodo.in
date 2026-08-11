@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
+import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Phone, Clock, Star, CheckCircle2, ArrowRight, ArrowLeft, Loader2,
@@ -80,7 +81,9 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
     startTransition(async () => {
       try {
         const { createPublicBooking } = await import("@/lib/actions/booking");
-        const result = await createPublicBooking({
+        const { createCheckoutOrder, verifyPayment } = await import("@/lib/actions/checkout");
+        
+        const booking = await createPublicBooking({
           businessId: business.id,
           serviceId: selectedService?.id,
           staffId: selectedStaff?.id,
@@ -91,8 +94,53 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           startTime: selectedTime,
           notes: form.notes || undefined,
         });
-        setBookingResult(result);
-        setStep("success");
+
+        if (booking.price > 0) {
+          // Trigger Razorpay
+          const checkoutOrder = await createCheckoutOrder(booking.id);
+          
+          const options = {
+            key: checkoutOrder.keyId,
+            amount: checkoutOrder.amount,
+            currency: checkoutOrder.currency,
+            name: checkoutOrder.businessName,
+            description: `Payment for ${selectedService.name}`,
+            order_id: checkoutOrder.orderId,
+            handler: async function (response: any) {
+              try {
+                await verifyPayment(
+                  booking.id,
+                  response.razorpay_payment_id,
+                  response.razorpay_order_id,
+                  response.razorpay_signature
+                );
+                setBookingResult(booking);
+                setStep("success");
+              } catch (verifyErr: any) {
+                console.error("Payment verification failed", verifyErr);
+                alert("Payment verification failed. If money was deducted, please contact the business.");
+              }
+            },
+            prefill: {
+              name: checkoutOrder.customerName,
+              email: checkoutOrder.customerEmail,
+              contact: checkoutOrder.customerPhone,
+            },
+            theme: {
+              color: primaryColor,
+            },
+          };
+
+          const rzp = new (window as any).Razorpay(options);
+          rzp.on('payment.failed', function (response: any){
+             alert(`Payment Failed: ${response.error.description}`);
+          });
+          rzp.open();
+        } else {
+          // Free booking
+          setBookingResult(booking);
+          setStep("success");
+        }
       } catch (err: any) {
         console.error("Booking verification failed:", err);
         alert(err.message || "We could not process your booking at this time. Please try another slot or refresh.");
@@ -107,6 +155,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
       className="min-h-screen"
       style={{ backgroundColor: "#F8FAFC", fontFamily: business.fontBody ?? "Inter, sans-serif" }}
     >
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       {/* Business Header */}
       <div className="shadow-sm" style={{ backgroundColor: primaryColor }}>
         <div className="max-w-2xl mx-auto px-4 py-6 text-white">

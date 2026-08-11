@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/FeedbackElements";
 import { Button } from "@/components/ui/Button";
 import { ChatBubble } from "@/components/ui/SpecialtyComponents";
-import { WHATSAPP_DEMO, CONTACT } from "@/lib/constants";
+import { simulateWhatsAppMessage } from "@/lib/actions/ai";
 
 export const WhatsAppDemo = () => {
   const [messages, setMessages] = useState([
@@ -28,27 +28,32 @@ export const WhatsAppDemo = () => {
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputValue.trim()) return;
 
     const userMsg = { text: inputValue, type: "in", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    const currentHistory = [...messages];
     setMessages((prev) => [...prev, userMsg]);
     setInputValue("");
-
-    // Simulate AI response
     setIsTyping(true);
-    setTimeout(() => {
-      const response = WHATSAPP_DEMO.responses.find(r => 
-        inputValue.toLowerCase().includes(r.trigger)
-      )?.response || WHATSAPP_DEMO.fallback;
 
+    const result = await simulateWhatsAppMessage(inputValue, currentHistory.map(m => ({ role: m.type, text: m.text })));
+    
+    if (result.response) {
       setMessages((prev) => [...prev, { 
-        text: response, 
+        text: result.response, 
         type: "out", 
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
       }]);
-      setIsTyping(false);
-    }, 2000);
+    } else {
+      setMessages((prev) => [...prev, { 
+        text: "Sorry, I'm having trouble connecting to my brain right now.", 
+        type: "out", 
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      }]);
+    }
+    
+    setIsTyping(false);
   };
 
   useEffect(() => {

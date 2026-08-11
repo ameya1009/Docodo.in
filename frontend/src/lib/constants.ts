@@ -20,12 +20,12 @@ export const NAVIGATION = [
 ];
 
 export const HERO_CONTENT = {
-  eyebrow: "AI Growth OS · Pune, India · Now Live Globally",
+  eyebrow: "The All-in-One Operating System for Local Services",
   headline: {
-    line1: "Turn Your Business",
-    line2: "Into an AI Machine",
+    line1: "Your Digital Business,",
+    line2: "Ready in 15 Minutes.",
   },
-  subheadline: "WhatsApp AI that replies at 3am. Content that writes itself. Reports that auto-send. Care Plans from ₹2,499/mo. No lock-in.",
+  subheadline: "Equip your local service business with a live, AI-powered booking page, CRM, and payment engine. Setup takes under 15 minutes.",
   trustTicker: [
     "47 Pune Businesses",
     "₹23L+ Revenue Generated",

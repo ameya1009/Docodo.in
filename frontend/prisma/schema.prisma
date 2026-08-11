@@ -104,10 +104,15 @@ model Business {
   seoDesc     String?
   websiteConfig String? @default("{\"hero\":true,\"services\":true,\"about\":true,\"gallery\":true,\"testimonials\":true,\"faq\":false,\"contact\":true,\"booking_cta\":true}")
   
-  // Onboarding Wizard Telemetry
+  // Onboarding & Business Discovery Telemetry
   onboardingStep     Int      @default(4)
   onboardingComplete Boolean  @default(true)
-  
+  discoveryQuery     String?
+  discoveredProfile  String?  // JSON string of AI discovered/synthesized business details
+  activationScore    Int      @default(20) // Starts at 20% upon website generation
+  activatedAt        DateTime?
+  timeToFirstBooking Int?     // Duration in seconds from account creation to first booking
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -204,6 +209,9 @@ model Booking {
   
   reminderSent  Boolean  @default(false)
   reviewSent    Boolean  @default(false)
+  
+  razorpayOrderId   String?
+  razorpayPaymentId String?
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

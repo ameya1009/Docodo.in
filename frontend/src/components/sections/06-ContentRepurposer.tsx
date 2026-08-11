@@ -16,6 +16,7 @@ import { SectionHeading } from "@/components/ui/SectionElements";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/FeedbackElements";
+import { repurposeContent } from "@/lib/actions/ai";
 
 const ASSETS = [
   { 
@@ -59,23 +60,33 @@ export const ContentRepurposer = () => {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState<"idle" | "processing" | "completed">("idle");
   const [progress, setProgress] = useState(0);
+  const [generatedAssets, setGeneratedAssets] = useState<any[]>([]);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!url) return;
     
     setStatus("processing");
-    setProgress(0);
+    setProgress(15);
     
+    // Simulate slow transcription progress while waiting for API
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setStatus("completed");
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 40);
+      setProgress((prev) => (prev < 90 ? prev + 2 : prev));
+    }, 200);
+
+    const result = await repurposeContent(url);
+    clearInterval(interval);
+    
+    if (result.assets) {
+      // Map string icons to Lucide components
+      const iconMap: any = { FileText, Video, Layers, Mail, MessageSquare };
+      const formatted = result.assets.map((a: any) => ({ ...a, icon: iconMap[a.icon] || FileText }));
+      setGeneratedAssets(formatted);
+      setProgress(100);
+      setStatus("completed");
+    } else {
+      setStatus("idle");
+      alert(result.error || "Failed to generate assets.");
+    }
   };
 
   return (
@@ -143,7 +154,7 @@ export const ContentRepurposer = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 relative min-h-[400px]">
             <AnimatePresence>
               {status === "completed" ? (
-                ASSETS.map((asset, i) => (
+                generatedAssets.map((asset, i) => (
                   <motion.div
                     key={asset.id}
                     initial={{ opacity: 0, scale: 0.8, y: 20 }}

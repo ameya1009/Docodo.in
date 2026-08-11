@@ -102,7 +102,8 @@ export async function createPublicBooking(rawInput: {
       duration,
       price: service?.price ?? 0,
       notes: data.notes || null,
-      status: "CONFIRMED",
+      status: (service?.price ?? 0) > 0 ? "PENDING" : "CONFIRMED",
+      paymentStatus: (service?.price ?? 0) > 0 ? "UNPAID" : "PAID",
       paymentMethod: data.paymentMethod,
     },
     include: {
