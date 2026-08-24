@@ -141,7 +141,7 @@ export async function createPublicBooking(rawInput: {
     }
   );
 
-  // Non-blocking: trigger WhatsApp confirmation — failure must not affect booking.
+  // Non-blocking: trigger WhatsApp & Email confirmation — failure must not affect booking.
   DocodoBackendAPI.verifyNDRBooking({
     businessId: data.businessId,
     bookingId: booking.booking.id,
@@ -150,6 +150,21 @@ export async function createPublicBooking(rawInput: {
   }).catch((err) => {
     console.warn("[NDR] Backend notification failed (non-critical):", err);
   });
+
+  if (data.customerEmail) {
+    import("@/lib/notifications").then(({ sendBookingConfirmationEmail }) => {
+      sendBookingConfirmationEmail({
+        toEmail: data.customerEmail!,
+        customerName: data.customerName,
+        businessName: booking.booking.service?.name ? `Docodo Partner` : "Docodo Partner",
+        serviceName: booking.booking.service?.name || "Appointment",
+        date: data.date,
+        startTime: data.startTime,
+        price: booking.booking.price,
+        paymentMethod: data.paymentMethod,
+      }).catch((err) => console.warn("[Email Notification] Failed:", err));
+    });
+  }
 
   revalidatePath(`/book/${booking.businessSlug}`);
   revalidatePath("/dashboard/bookings");

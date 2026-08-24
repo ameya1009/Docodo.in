@@ -88,8 +88,23 @@ export async function verifyPayment(
       razorpayPaymentId,
       paidAmount: booking.price,
     },
-    include: { business: true },
+    include: { business: true, service: true },
   });
+
+  if (updatedBooking.customerEmail) {
+    import("@/lib/notifications").then(({ sendBookingConfirmationEmail }) => {
+      sendBookingConfirmationEmail({
+        toEmail: updatedBooking.customerEmail!,
+        customerName: updatedBooking.customerName,
+        businessName: updatedBooking.business.name,
+        serviceName: updatedBooking.service?.name || "Appointment",
+        date: updatedBooking.date,
+        startTime: updatedBooking.startTime,
+        price: updatedBooking.price,
+        paymentMethod: updatedBooking.paymentMethod || "Online / UPI",
+      }).catch((err) => console.warn("[Email Notification] Failed:", err));
+    });
+  }
 
   revalidatePath(`/book/${updatedBooking.business.slug}`);
   revalidatePath("/dashboard/bookings");

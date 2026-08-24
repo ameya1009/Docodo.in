@@ -6,17 +6,16 @@ import DashboardLayoutClient from "./DashboardLayoutClient";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user) redirect("/auth/login");
+  if (!session?.user?.id) redirect("/auth/login");
 
-  const userId = (session.user as any).id;
   const business = await prisma.business.findFirst({
-    where: { ownerId: userId },
+    where: { ownerId: session.user.id },
     select: { name: true, slug: true, onboardingComplete: true },
   });
 
   // Redirect to onboarding if no business setup
   if (!business || !business.onboardingComplete) {
-    redirect("/onboarding/step/1");
+    redirect("/onboarding");
   }
 
   return (
