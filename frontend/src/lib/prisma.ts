@@ -1,19 +1,34 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+declare global {
+  // eslint-disable-next-line no-var
+  var __prisma: PrismaClient | undefined;
+}
 
-function createPrismaClient() {
-  const dbUrl = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/docodo";
-  const adapter = new PrismaPg({ connectionString: dbUrl } as any);
+function createPrismaClient(): PrismaClient {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) {
+    throw new Error(
+      "DATABASE_URL environment variable is not set. " +
+      "Please create a .env.local file with a valid PostgreSQL connection string. " +
+      "See .env.example for reference."
+    );
+  }
+
+  const adapter = new PrismaPg({ connectionString: dbUrl });
   return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["error", "warn"]
+        : ["error"],
   });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+export const prisma: PrismaClient =
+  globalThis.__prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalThis.__prisma = prisma;
+}

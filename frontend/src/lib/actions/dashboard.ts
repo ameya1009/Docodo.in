@@ -13,12 +13,60 @@ import {
   aggregateRevenueByDate,
 } from "@/lib/engines/dashboard-engine";
 
+/**
+ * Resolves the authenticated user's business.
+ * Throws if the session is invalid or the user has no business.
+ * This is the single source of truth for tenant resolution.
+ */
+async function requireAuthBusiness() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized: you must be logged in.");
+  }
+
+  const business = await prisma.business.findFirst({
+    where: { ownerId: session.user.id },
+    select: { id: true, slug: true, name: true, ownerId: true },
+  });
+
+  if (!business) {
+    throw new Error("No business found for this account.");
+  }
+
+  return { session, business };
+}
+
+/**
+ * Verifies that a booking belongs to the authenticated user's business.
+ * Prevents IDOR: a user from Business A modifying Business B's bookings.
+ */
+async function requireBookingOwnership(bookingId: string): Promise<string> {
+  const { business } = await requireAuthBusiness();
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    select: { id: true, businessId: true },
+  });
+
+  if (!booking) {
+    throw new Error("Booking not found.");
+  }
+
+  if (booking.businessId !== business.id) {
+    throw new Error("Forbidden: you do not have access to this booking.");
+  }
+
+  return booking.id;
+}
+
 export async function getDashboardData() {
   const session = await auth();
   if (!session?.user?.id && !session?.user?.email) return null;
 
   const user = await prisma.user.findFirst({
-    where: session.user.id ? { id: session.user.id } : { email: session.user.email! },
+    where: session.user.id
+      ? { id: session.user.id }
+      : { email: session.user.email! },
     include: {
       businesses: {
         include: {
@@ -44,7 +92,14 @@ export async function getDashboardData() {
   const [bookings, customerCount, upcomingBookings] = await Promise.all([
     prisma.booking.findMany({
       where: { businessId: business.id },
-      select: { id: true, price: true, status: true, date: true, startTime: true, customerName: true },
+      select: {
+        id: true,
+        price: true,
+        status: true,
+        date: true,
+        startTime: true,
+        customerName: true,
+      },
       orderBy: { createdAt: "desc" },
     }),
     prisma.customer.count({ where: { businessId: business.id } }),
@@ -77,9 +132,10 @@ export async function getDashboardData() {
   const todayStr = new Date().toISOString().split("T")[0];
   const todayBookingsCount = bookings.filter((b) => b.date === todayStr).length;
 
-  // Calculate this month's revenue
   const currentMonthStr = todayStr.slice(0, 7);
-  const monthlyRecords = records.filter((r) => r.date && r.date.startsWith(currentMonthStr));
+  const monthlyRecords = records.filter(
+    (r) => r.date && r.date.startsWith(currentMonthStr)
+  );
   const monthlyRevenue = calculateTotalRevenue(monthlyRecords);
 
   return {
@@ -102,17 +158,29 @@ export async function getDashboardData() {
 
 export async function getDashboardStatsAction(rawInput: {
   businessId: string;
-  dateFilter?: { period?: "TODAY" | "WEEK" | "MONTH" | "ALL"; startDate?: string; endDate?: string };
+  dateFilter?: {
+    period?: "TODAY" | "WEEK" | "MONTH" | "ALL";
+    startDate?: string;
+    endDate?: string;
+  };
 }) {
-  const { businessId } = GetDashboardStatsSchema.parse(rawInput);
+  // SECURITY: Ignore the businessId from client — always resolve from session.
+  GetDashboardStatsSchema.parse(rawInput);
+  const { business } = await requireAuthBusiness();
 
   const [bookings, customerCount, servicesCount] = await Promise.all([
     prisma.booking.findMany({
-      where: { businessId },
-      select: { price: true, status: true, date: true, startTime: true, customerName: true },
+      where: { businessId: business.id },
+      select: {
+        price: true,
+        status: true,
+        date: true,
+        startTime: true,
+        customerName: true,
+      },
     }),
-    prisma.customer.count({ where: { businessId } }),
-    prisma.service.count({ where: { businessId } }),
+    prisma.customer.count({ where: { businessId: business.id } }),
+    prisma.service.count({ where: { businessId: business.id } }),
   ]);
 
   const records = bookings.map((b) => ({
@@ -143,7 +211,6 @@ export async function getDashboardStatsAction(rawInput: {
 }
 
 export async function createBooking(data: {
-  businessId: string;
   serviceId?: string;
   staffId?: string;
   customerName: string;
@@ -153,49 +220,55 @@ export async function createBooking(data: {
   startTime: string;
   notes?: string;
 }) {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+  // SECURITY: businessId comes from session, never from client input.
+  const { business } = await requireAuthBusiness();
 
   const service = data.serviceId
     ? await prisma.service.findUnique({ where: { id: data.serviceId } })
     : null;
 
+  // Verify service belongs to this business
+  if (service && service.businessId !== business.id) {
+    throw new Error("Forbidden: service does not belong to your business.");
+  }
+
   const duration = service?.duration ?? 60;
   const [h, m] = data.startTime.split(":").map(Number);
-  const endMinutes = h * 60 + m + duration;
+  const endMinutes = (h ?? 0) * 60 + (m ?? 0) + duration;
   const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 
-  // Upsert customer
   let customer = null;
   try {
     customer = await prisma.customer.upsert({
       where: {
         businessId_phone: {
-          businessId: data.businessId,
+          businessId: business.id,
           phone: data.customerPhone,
         },
       },
       update: {
         name: data.customerName,
-        email: data.customerEmail,
+        ...(data.customerEmail ? { email: data.customerEmail } : {}),
         visitCount: { increment: 1 },
         lifetimeValue: { increment: service?.price ?? 0 },
       },
       create: {
-        businessId: data.businessId,
+        businessId: business.id,
         name: data.customerName,
         phone: data.customerPhone,
-        email: data.customerEmail,
+        email: data.customerEmail || null,
         visitCount: 1,
         lifetimeValue: service?.price ?? 0,
         source: "BOOKING",
       },
     });
-  } catch {}
+  } catch (crmErr) {
+    console.warn("[CRM] Customer upsert failed, booking will proceed:", crmErr);
+  }
 
   const booking = await prisma.booking.create({
     data: {
-      businessId: data.businessId,
+      businessId: business.id,
       serviceId: data.serviceId,
       staffId: data.staffId,
       customerId: customer?.id,
@@ -212,17 +285,15 @@ export async function createBooking(data: {
     },
   });
 
-  // Automatically trigger backend WhatsApp NDR verification & confirmation engine
-  try {
-    await DocodoBackendAPI.verifyNDRBooking({
-      businessId: data.businessId,
-      bookingId: booking.id,
-      customerPhone: data.customerPhone,
-      customerName: data.customerName,
-    });
-  } catch (backendErr) {
-    console.warn("Notice: Offline backend queueing for NDR verification:", backendErr);
-  }
+  // Non-blocking: backend WhatsApp/NDR trigger — failure must not break booking
+  DocodoBackendAPI.verifyNDRBooking({
+    businessId: business.id,
+    bookingId: booking.id,
+    customerPhone: data.customerPhone,
+    customerName: data.customerName,
+  }).catch((err) => {
+    console.warn("[NDR] Backend notification failed:", err);
+  });
 
   revalidatePath("/dashboard/bookings");
   return booking;
@@ -232,8 +303,8 @@ export async function updateBookingStatus(
   bookingId: string,
   status: "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW"
 ) {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+  // SECURITY: Verify this booking belongs to the authenticated user's business.
+  await requireBookingOwnership(bookingId);
 
   await prisma.booking.update({
     where: { id: bookingId },
@@ -243,11 +314,16 @@ export async function updateBookingStatus(
   revalidatePath("/dashboard/bookings");
 }
 
-export async function getBookings(businessId: string, date?: string) {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+export async function getBookings(date?: string) {
+  // SECURITY: businessId resolved from session — never from client.
+  const { business } = await requireAuthBusiness();
 
-  const where: any = { businessId, status: { not: "CANCELLED" } };
+  const where: {
+    businessId: string;
+    status: { not: string };
+    date?: string;
+  } = { businessId: business.id, status: { not: "CANCELLED" } };
+
   if (date) where.date = date;
 
   return prisma.booking.findMany({
@@ -257,12 +333,12 @@ export async function getBookings(businessId: string, date?: string) {
   });
 }
 
-export async function getCustomers(businessId: string) {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+export async function getCustomers() {
+  // SECURITY: businessId resolved from session — never from client.
+  const { business } = await requireAuthBusiness();
 
   return prisma.customer.findMany({
-    where: { businessId },
+    where: { businessId: business.id },
     orderBy: { createdAt: "desc" },
     include: {
       bookings: {
@@ -274,38 +350,54 @@ export async function getCustomers(businessId: string) {
   });
 }
 
-export async function generateAIPost(businessId: string, type: string) {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+export async function generateAIPost(type: string) {
+  // SECURITY: businessId resolved from session — never from client.
+  const { business } = await requireAuthBusiness();
 
-  const business = await prisma.business.findUnique({ where: { id: businessId } });
-  if (!business) throw new Error("Business not found");
+  const businessData = await prisma.business.findUnique({
+    where: { id: business.id },
+  });
+  if (!businessData) throw new Error("Business not found");
 
   const prompts: Record<string, string> = {
-    INSTAGRAM: `Create an engaging Instagram post for ${business.name}, a ${business.industry} business. Include emojis, a call-to-action, and 5-7 relevant hashtags. Keep it warm and professional for an Indian audience.`,
-    WHATSAPP: `Create a WhatsApp promotional message for ${business.name}, a ${business.industry}. Keep it concise, friendly, and add a clear call-to-action. Max 200 words.`,
-    BLOG: `Write a helpful blog article outline (300 words) for ${business.name} about tips related to ${business.industry}. Include an SEO-friendly title and 3-4 key sections.`,
-    FAQ: `Generate 5 common customer FAQs with answers for ${business.name}, a ${business.industry} business in India.`,
-    REVIEW_REPLY: `Write a professional, warm response to a 5-star Google review for ${business.name}. Thank the customer, mention specific service quality, and invite them back.`,
+    INSTAGRAM: `Create an engaging Instagram post for ${businessData.name}, a ${businessData.industry} business. Include emojis, a call-to-action, and 5-7 relevant hashtags. Keep it warm and professional for an Indian audience.`,
+    WHATSAPP: `Create a WhatsApp promotional message for ${businessData.name}, a ${businessData.industry}. Keep it concise, friendly, and add a clear call-to-action. Max 200 words.`,
+    BLOG: `Write a helpful blog article outline (300 words) for ${businessData.name} about tips related to ${businessData.industry}. Include an SEO-friendly title and 3-4 key sections.`,
+    FAQ: `Generate 5 common customer FAQs with answers for ${businessData.name}, a ${businessData.industry} business in India.`,
+    REVIEW_REPLY: `Write a professional, warm response to a 5-star Google review for ${businessData.name}. Thank the customer, mention specific service quality, and invite them back.`,
   };
 
-  const promptText = prompts[type] ?? prompts.INSTAGRAM;
-  const mappedType: "DESCRIPTION" | "SEO" | "INSTAGRAM" | "WHATSAPP_CAMPAIGN" | "FAQ" | "REVIEW_REPLY" =
-    type === "WHATSAPP" ? "WHATSAPP_CAMPAIGN" : (type as any);
+  const promptText = prompts[type] ?? prompts["INSTAGRAM"]!;
+
+  const validTypes = [
+    "DESCRIPTION",
+    "SEO",
+    "INSTAGRAM",
+    "WHATSAPP_CAMPAIGN",
+    "FAQ",
+    "REVIEW_REPLY",
+  ] as const;
+  type AIContentType = (typeof validTypes)[number];
+  const mappedType: AIContentType =
+    type === "WHATSAPP"
+      ? "WHATSAPP_CAMPAIGN"
+      : validTypes.includes(type as AIContentType)
+      ? (type as AIContentType)
+      : "INSTAGRAM";
 
   const res = await DocodoBackendAPI.generateContent({
-    businessId,
+    businessId: business.id,
     type: mappedType,
     prompt: promptText,
-    industry: business.industry,
-    name: business.name,
+    industry: businessData.industry,
+    name: businessData.name,
   });
 
   const finalContent = res.content || "AI generation completed via fallback engine.";
 
   await prisma.aIContent.create({
-    data: { businessId, type, content: finalContent },
+    data: { businessId: business.id, type, content: finalContent },
   });
-  
+
   return finalContent;
 }

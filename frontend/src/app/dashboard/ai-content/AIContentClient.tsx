@@ -29,7 +29,7 @@ export default function AIContentClient({ business, existingContent }: AIContent
   const handleGenerate = () => {
     startTransition(async () => {
       try {
-        const content = await generateAIPost(business.id, selectedType.id);
+        const content = await generateAIPost(selectedType.id);
         setGeneratedContent(content);
         setHistory((prev) => [
           { id: Date.now().toString(), type: selectedType.id, content, createdAt: new Date() },

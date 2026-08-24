@@ -37,30 +37,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name, image: user.image };
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
+      if (user?.id) {
         token.id = user.id;
         const business = await prisma.business.findFirst({
-          where: { ownerId: user.id as string },
+          where: { ownerId: user.id },
           select: { id: true, slug: true, onboardingComplete: true },
         });
-        token.businessId = business?.id;
-        token.businessSlug = business?.slug;
+        token.businessId = business?.id ?? undefined;
+        token.businessSlug = business?.slug ?? undefined;
         token.onboardingComplete = business?.onboardingComplete ?? false;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = token.id as string;
-        (session.user as any).businessId = token.businessId as string;
-        (session.user as any).businessSlug = token.businessSlug as string;
-        (session.user as any).onboardingComplete = token.onboardingComplete as boolean;
+        if (typeof token.id === "string") session.user.id = token.id;
+        if (typeof token.businessId === "string") session.user.businessId = token.businessId;
+        if (typeof token.businessSlug === "string") session.user.businessSlug = token.businessSlug;
+        if (typeof token.onboardingComplete === "boolean") session.user.onboardingComplete = token.onboardingComplete;
       }
       return session;
     },
