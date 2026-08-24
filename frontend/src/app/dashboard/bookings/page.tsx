@@ -6,14 +6,13 @@ import BookingsClient from "./BookingsClient";
 
 export default async function BookingsPage() {
   const session = await auth();
-  if (!session?.user) redirect("/auth/login");
-  const userId = (session.user as any).id;
+  if (!session?.user?.id) redirect("/auth/login");
 
   const business = await prisma.business.findFirst({
-    where: { ownerId: userId },
+    where: { ownerId: session.user.id },
     include: { services: true, staff: true },
   });
-  if (!business) redirect("/onboarding/step/1");
+  if (!business) redirect("/onboarding");
 
   const today = new Date().toISOString().split("T")[0];
   const bookings = await prisma.booking.findMany({

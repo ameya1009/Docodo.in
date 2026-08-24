@@ -6,14 +6,13 @@ import CustomersClient from "./CustomersClient";
 
 export default async function CustomersPage() {
   const session = await auth();
-  if (!session?.user) redirect("/auth/login");
-  const userId = (session.user as any).id;
+  if (!session?.user?.id) redirect("/auth/login");
 
   const business = await prisma.business.findFirst({
-    where: { ownerId: userId },
+    where: { ownerId: session.user.id },
     select: { id: true, name: true },
   });
-  if (!business) redirect("/onboarding/step/1");
+  if (!business) redirect("/onboarding");
 
   const customers = await prisma.customer.findMany({
     where: { businessId: business.id },

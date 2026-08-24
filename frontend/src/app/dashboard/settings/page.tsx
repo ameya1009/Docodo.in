@@ -6,18 +6,17 @@ import SettingsClient from "./SettingsClient";
 
 export default async function SettingsPage() {
   const session = await auth();
-  if (!session?.user) redirect("/auth/login");
-  const userId = (session.user as any).id;
+  if (!session?.user?.id) redirect("/auth/login");
 
   const business = await prisma.business.findFirst({
-    where: { ownerId: userId },
+    where: { ownerId: session.user.id },
     include: {
       services: { orderBy: { order: "asc" } },
       staff: { orderBy: { createdAt: "asc" } },
       workingHours: { orderBy: { day: "asc" } },
     },
   });
-  if (!business) redirect("/onboarding/step/1");
+  if (!business) redirect("/onboarding");
 
   return <SettingsClient business={JSON.parse(JSON.stringify(business))} />;
 }
