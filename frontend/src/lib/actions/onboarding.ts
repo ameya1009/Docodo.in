@@ -31,10 +31,10 @@ export async function saveBusinessInfo(rawInput: {
   whatsapp?: string;
 }) {
   const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
 
   const data = BusinessInfoSchema.parse(rawInput);
-  const userId = (session.user as any).id;
+  const userId = session.user.id;
   let slug = generateSlug(data.name);
 
   // Ensure slug uniqueness in Postgres
