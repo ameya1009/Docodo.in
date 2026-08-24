@@ -160,7 +160,7 @@ export async function confirmDiscoveredBusinessAction(
         price: svc.price,
         duration: svc.duration,
         description: svc.description || null,
-        isAvailable: true,
+        isActive: true,
       })),
     });
 
