@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    let { amount, currency = "INR", receipt, notes = {}, bookingId } = body;
+    const { currency = "INR", bookingId } = body;
+    let { amount, receipt, notes = {} } = body;
 
     // If bookingId is provided, look up booking details
     let booking = null;

@@ -23,29 +23,27 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings, mobileNav: false },
 ];
 
-interface DashboardLayoutClientProps {
-  children: React.ReactNode;
+interface SidebarContentProps {
   user: { name?: string | null; email?: string | null; image?: string | null };
   businessName?: string;
   businessSlug?: string;
+  pathname: string;
+  onClose?: () => void;
 }
 
-export default function DashboardLayoutClient({
-  children,
+function SidebarContent({
   user,
   businessName,
   businessSlug,
-}: DashboardLayoutClientProps) {
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  const isActive = (item: typeof NAV_ITEMS[0]) => {
+  pathname,
+  onClose,
+}: SidebarContentProps) {
+  const isActive = (item: (typeof NAV_ITEMS)[0]) => {
     if (item.exact) return pathname === item.href;
     return pathname.startsWith(item.href);
   };
 
-  const SidebarContent = () => (
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
@@ -66,7 +64,7 @@ export default function DashboardLayoutClient({
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setSidebarOpen(false)}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all active:scale-[0.98]",
                 active
@@ -117,12 +115,35 @@ export default function DashboardLayoutClient({
       </div>
     </div>
   );
+}
+
+interface DashboardLayoutClientProps {
+  children: React.ReactNode;
+  user: { name?: string | null; email?: string | null; image?: string | null };
+  businessName?: string;
+  businessSlug?: string;
+}
+
+export default function DashboardLayoutClient({
+  children,
+  user,
+  businessName,
+  businessSlug,
+}: DashboardLayoutClientProps) {
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[var(--bg-void)] flex flex-col lg:flex-row text-[var(--text-primary)]">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] fixed inset-y-0 left-0 z-30">
-        <SidebarContent />
+        <SidebarContent
+          user={user}
+          businessName={businessName}
+          businessSlug={businessSlug}
+          pathname={pathname}
+        />
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -151,7 +172,13 @@ export default function DashboardLayoutClient({
               >
                 <X size={18} />
               </button>
-              <SidebarContent />
+              <SidebarContent
+                user={user}
+                businessName={businessName}
+                businessSlug={businessSlug}
+                pathname={pathname}
+                onClose={() => setSidebarOpen(false)}
+              />
             </motion.aside>
           </>
         )}
@@ -164,94 +191,86 @@ export default function DashboardLayoutClient({
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 -ml-1 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all active:scale-95"
+              className="lg:hidden p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               aria-label="Open menu"
             >
               <Menu size={20} />
             </button>
-            <div className="lg:hidden font-display font-black text-lg text-[var(--text-primary)] flex items-center gap-2">
-              <span className="text-[var(--lime)]">●</span> Docodo
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="text-sm font-extrabold text-[var(--text-primary)] font-display">
+                {NAV_ITEMS.find((item) =>
+                  item.exact ? pathname === item.href : pathname.startsWith(item.href)
+                )?.label ?? "Dashboard"}
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="/dashboard/whatsapp"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              WhatsApp Engine Online
-            </Link>
+          <div className="flex items-center gap-3">
+            {/* Quick Actions */}
+            {businessSlug && (
+              <Link
+                href={`/book/${businessSlug}`}
+                target="_blank"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--lime)] transition-colors shadow-sm"
+              >
+                <ExternalLink size={13} />
+                <span>View Booking Page</span>
+              </Link>
+            )}
 
+            {/* Notifications Dropdown Toggle */}
             <div className="relative">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all active:scale-95"
+                className="p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors relative"
+                aria-label="Notifications"
               >
                 <Bell size={18} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--lime)] rounded-full shadow-[0_0_8px_#C8F135]" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--lime)] animate-pulse" />
               </button>
 
-              <AnimatePresence>
-                {notificationsOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="absolute right-0 top-12 w-80 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl shadow-2xl p-4 z-50 text-left"
-                  >
-                    <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)] mb-2">
-                      <span className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">System Alerts</span>
-                      <button onClick={() => setNotificationsOpen(false)} className="text-[10px] text-[var(--lime)] hover:underline font-bold">Close</button>
-                    </div>
-                    <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-                      <div className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-                        <p className="text-xs font-bold text-emerald-400">🛡️ WhatsApp NDR Shield Active</p>
-                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Automated COD confirmation bot is monitoring appointments.</p>
-                      </div>
-                      <div className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-                        <p className="text-xs font-bold text-[var(--lime)]">⚡ Google Gemini Hub Connected</p>
-                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">AI generative engine offline fallback ready with zero downtime.</p>
-                      </div>
-                      <div className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-                        <p className="text-xs font-bold text-sky-400">📈 +28% Booking Velocity</p>
-                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Your mobile-first booking funnel is outperforming regional SMB averages.</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl p-4 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
+                    <span className="text-xs font-bold uppercase text-[var(--text-primary)]">System Alerts</span>
+                    <span className="text-[10px] font-bold text-[var(--lime)] bg-[var(--lime-ghost)] px-2 py-0.5 rounded">All Clear</span>
+                  </div>
+                  <div className="py-3 text-xs text-[var(--text-secondary)] space-y-2">
+                    <p className="text-[11px] text-[var(--text-muted)]">No active dispute alerts or server warnings.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
 
-        {/* Page Content with added bottom padding for mobile bottom nav */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8 overflow-x-hidden">
+        {/* Page body */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-20 lg:pb-8">
           {children}
         </main>
+      </div>
 
-        {/* Mobile Bottom Navigation Bar (Persistent Thumb Ergonomics) */}
-        <nav className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-[var(--bg-surface)]/95 backdrop-blur-lg border-t border-[var(--border-default)] px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-          {NAV_ITEMS.filter(i => i.mobileNav).map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center justify-center min-w-[62px] py-1 px-2 rounded-xl text-[11px] font-medium transition-all active:scale-90",
-                  active
-                    ? "text-[var(--lime)] font-bold bg-[var(--lime-ghost)] border border-[var(--lime)]/20"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                )}
-              >
-                <Icon size={18} className={cn("mb-1", active && "text-[var(--lime)] filter drop-shadow-[0_0_6px_rgba(200,241,53,0.5)]")} />
-                <span className="truncate max-w-[60px]">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 bg-[var(--bg-surface)]/95 backdrop-blur-lg border-t border-[var(--border-subtle)] z-30 px-2 py-1.5 flex items-center justify-around">
+        {NAV_ITEMS.filter((item) => item.mobileNav).map((item) => {
+          const Icon = item.icon;
+          const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex flex-col items-center justify-center p-2 rounded-xl text-[10px] font-bold transition-all min-w-[56px]",
+                active
+                  ? "text-[var(--lime)] bg-[var(--lime-ghost)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              )}
+            >
+              <Icon size={18} className="mb-0.5" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
