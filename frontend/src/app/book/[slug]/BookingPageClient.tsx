@@ -104,7 +104,8 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
             amount: checkoutOrder.amount,
             currency: checkoutOrder.currency,
             name: checkoutOrder.businessName,
-            description: `Payment for ${selectedService.name}`,
+            description: `Appointment: ${selectedService.name}`,
+            image: business.logo || undefined,
             order_id: checkoutOrder.orderId,
             handler: async function (response: any) {
               try {
@@ -126,14 +127,27 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               email: checkoutOrder.customerEmail,
               contact: checkoutOrder.customerPhone,
             },
+            notes: {
+              bookingId: booking.id,
+              businessSlug: business.slug,
+              serviceName: selectedService.name,
+            },
             theme: {
               color: primaryColor,
+            },
+            modal: {
+              escape: true,
+              backdropclose: false,
+              ondismiss: function () {
+                console.log("Customer closed payment modal without completing transaction.");
+              },
             },
           };
 
           const rzp = new (window as any).Razorpay(options);
-          rzp.on('payment.failed', function (response: any){
-             alert(`Payment Failed: ${response.error.description}`);
+          rzp.on("payment.failed", function (response: any) {
+            console.error("Payment failed:", response.error);
+            alert(`Payment Failed: ${response.error.description || "Transaction could not be completed."}`);
           });
           rzp.open();
         } else {
