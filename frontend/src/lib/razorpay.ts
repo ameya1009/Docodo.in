@@ -1,6 +1,9 @@
 import Razorpay from "razorpay";
 
+const key_id = process.env.RAZORPAY_KEY_ID;
+const key_secret = process.env.RAZORPAY_KEY_SECRET;
+
 export const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_dummy",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy_secret",
+  key_id: key_id || "rzp_test_placeholder",
+  key_secret: key_secret || "placeholder_secret",
 });
