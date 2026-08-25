@@ -538,22 +538,33 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto mt-5">
+              <div className="flex flex-col gap-2.5 max-w-sm mx-auto mt-5">
+                <div className="flex gap-2.5">
+                  <a
+                    href={`https://wa.me/${(business.whatsapp || business.phone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${business.name}, I just booked ${selectedService?.name} for ${selectedDate} at ${selectedTime}.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors shadow-sm"
+                  >
+                    <MessageSquare size={16} /> WhatsApp Us
+                  </a>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.name} ${business.city || ""}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 px-4 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold text-xs flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+                  >
+                    <MapPin size={16} className="text-red-500" /> View on Maps
+                  </a>
+                </div>
+
                 <a
-                  href={`https://wa.me/${(business.whatsapp || business.phone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${business.name}, I just booked ${selectedService?.name} for ${selectedDate} at ${selectedTime}.`)}`}
+                  href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`${business.name} — ${selectedService?.name || "Appointment"}`)}&details=${encodeURIComponent(`Appointment with ${business.name}. Contact: ${business.phone}`)}&location=${encodeURIComponent(business.address ?? business.city ?? "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors shadow-sm"
+                  className="w-full py-2.5 px-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors"
                 >
-                  <MessageSquare size={16} /> WhatsApp Us
-                </a>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.name} ${business.city || ""}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-3 px-4 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold text-xs flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
-                >
-                  <MapPin size={16} className="text-red-500" /> View on Maps
+                  <Calendar size={15} /> Add to Google Calendar
                 </a>
               </div>
 
