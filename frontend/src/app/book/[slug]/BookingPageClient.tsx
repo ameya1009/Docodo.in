@@ -33,7 +33,13 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [isPending, startTransition] = useTransition();
 
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   const primaryColor = business.primaryColor ?? "#2563EB";
+
+  const activeServices = (business.services ?? []).filter(
+    (s: any) => s.isActive !== false && s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Calendar: show 14 days starting from today + offset
   const calendarDays = Array.from({ length: 14 }, (_, i) => {
@@ -219,38 +225,60 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           {/* Step 1: Select Service */}
           {step === "service" && (
             <motion.div key="service" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <h2 className="text-xl font-black text-gray-900 mb-2">Choose a Service</h2>
-              <p className="text-sm text-gray-500 mb-6">Select what you'd like to book</p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div>
+                  <h2 className="text-xl font-black text-gray-900">Choose a Service</h2>
+                  <p className="text-sm text-gray-500">Select what you'd like to book</p>
+                </div>
+                {business.services?.length > 3 && (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search services..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full sm:w-52 px-3.5 py-2 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-3">
-                {business.services.map((service: any) => (
-                  <button
-                    key={service.id}
-                    onClick={() => { setSelectedService(service); setStep("datetime"); }}
-                    className={cn(
-                      "w-full text-left p-4 rounded-2xl border-2 transition-all hover:shadow-md",
-                      selectedService?.id === service.id ? "border-2" : "border border-gray-200 bg-white hover:border-gray-300"
-                    )}
-                    style={selectedService?.id === service.id ? { borderColor: primaryColor, backgroundColor: `${primaryColor}08` } : {}}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-bold text-gray-900">{service.name}</p>
-                        {service.description && <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>}
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs text-gray-400 flex items-center gap-1">
-                            <Clock size={12} /> {service.duration} min
-                          </span>
+                {activeServices.length === 0 ? (
+                  <div className="text-center py-10 text-gray-400 bg-white rounded-2xl border border-gray-100 p-6">
+                    <p className="text-sm font-medium">No matching services found.</p>
+                  </div>
+                ) : (
+                  activeServices.map((service: any) => (
+                    <button
+                      key={service.id}
+                      onClick={() => { setSelectedService(service); setStep("datetime"); }}
+                      className={cn(
+                        "w-full text-left p-4 rounded-2xl border transition-all hover:shadow-md active:scale-[0.99]",
+                        selectedService?.id === service.id ? "border-2 bg-white" : "border-gray-200 bg-white hover:border-gray-300"
+                      )}
+                      style={selectedService?.id === service.id ? { borderColor: primaryColor, backgroundColor: `${primaryColor}08` } : {}}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-gray-900">{service.name}</p>
+                          {service.description && <p className="text-sm text-gray-500 mt-0.5">{service.description}</p>}
+                          <div className="flex items-center gap-3 mt-2">
+                            <span className="text-xs text-gray-400 flex items-center gap-1">
+                              <Clock size={12} /> {service.duration} min
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right ml-4 shrink-0">
+                          <p className="font-black text-lg" style={{ color: primaryColor }}>
+                            {service.price > 0 ? formatCurrency(service.price) : "Free"}
+                          </p>
+                          <ArrowRight size={18} className="ml-auto mt-1 text-gray-400" />
                         </div>
                       </div>
-                      <div className="text-right ml-4">
-                        <p className="font-black text-lg" style={{ color: primaryColor }}>
-                          {service.price > 0 ? formatCurrency(service.price) : "Free"}
-                        </p>
-                        <ArrowRight size={18} className="ml-auto mt-1 text-gray-400" />
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  ))
+                )}
               </div>
 
               {business.staff?.length > 0 && (
@@ -493,7 +521,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               <h2 className="text-2xl font-black text-gray-900 mb-2">Booking Confirmed! 🎉</h2>
               <p className="text-gray-500 mb-6">Your appointment at {business.name} is confirmed.</p>
 
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 text-left space-y-3 max-w-sm mx-auto">
+              <div className="bg-white rounded-2xl border border-gray-200 p-5 text-left space-y-3 max-w-sm mx-auto shadow-sm">
                 <p className="font-bold text-center text-gray-700 mb-2 text-sm uppercase tracking-wider">Booking Details</p>
                 {[
                   { label: "Service", value: selectedService?.name },
@@ -509,8 +537,28 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                 ))}
               </div>
 
-              <p className="text-sm text-gray-400 mt-6">
-                Please save this confirmation. For changes, contact {business.name} directly at{" "}
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto mt-5">
+                <a
+                  href={`https://wa.me/${(business.whatsapp || business.phone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${business.name}, I just booked ${selectedService?.name} for ${selectedDate} at ${selectedTime}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors shadow-sm"
+                >
+                  <MessageSquare size={16} /> WhatsApp Us
+                </a>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.name} ${business.city || ""}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3 px-4 rounded-xl bg-white border border-gray-200 text-gray-800 font-bold text-xs flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+                >
+                  <MapPin size={16} className="text-red-500" /> View on Maps
+                </a>
+              </div>
+
+              <p className="text-xs text-gray-400 mt-6">
+                Please save this confirmation. For changes or queries, contact {business.name} directly at{" "}
                 <a href={`tel:${business.phone}`} className="font-semibold" style={{ color: primaryColor }}>{business.phone}</a>.
               </p>
             </motion.div>
