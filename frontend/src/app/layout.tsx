@@ -4,6 +4,7 @@ import "./globals.css";
 import { defaultMetadata, jsonLd } from "@/lib/metadata";
 import { ScrollProgress, PageTransition } from "@/components/layout/LayoutEffects";
 import { LayoutProvider } from "@/components/layout/LayoutProvider";
+import { OfflineDetector } from "@/components/ui/OfflineDetector";
 
 const unbounded = Unbounded({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${unbounded.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}>
+        <OfflineDetector />
         <LayoutProvider>
           <ScrollProgress />
           <PageTransition>

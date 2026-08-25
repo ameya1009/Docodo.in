@@ -2,29 +2,41 @@ import { Metadata } from "next";
 
 export const SITE_CONFIG = {
   name: "Docodo",
-  title: "Docodo | AI WhatsApp Automation & Growth OS for Pune SMBs | Free Audit",
-  description: "Docodo turns WhatsApp into a 24/7 AI sales machine. Self-hosted, DPDP compliant, Claude-powered. Care Plans from ₹2,499/mo. 47 Pune businesses. Start free.",
+  title: "Docodo | All-in-One Booking SaaS, CRM & Digital Marketing Platform for Local Businesses",
+  description: "Docodo is the premier B2B SaaS platform equipping local service businesses (salons, spas, clinics, gyms) with live booking pages, CRM, payment gateway, and digital marketing growth tools in under 15 minutes.",
   url: "https://docodo.in",
   ogImage: "https://docodo.in/images/og-image.png",
   twitterHandle: "@docodo_in",
 };
 
 export const defaultMetadata: Metadata = {
-  title: SITE_CONFIG.title,
+  title: {
+    default: "Docodo | All-in-One Booking SaaS, CRM & Dashboard for Local Businesses",
+    template: "%s | Docodo SaaS",
+  },
   description: SITE_CONFIG.description,
   keywords: [
-    "ai whatsapp bot india",
-    "whatsapp automation pune",
-    "docodo care plans",
-    "self-hosted whatsapp bot dpdp compliant",
-    "ai growth os pune smb",
-    "content repurposer youtube to blog",
-    "whatsapp lead nurturer india",
-    "best whatsapp automation india 2026",
-    "ai automation for clinics india",
+    "Docodo",
+    "SaaS",
+    "digital marketing",
+    "CRM",
+    "dashboard",
+    "salon booking software India",
+    "appointment booking SaaS",
+    "spa management software",
+    "clinic appointment scheduler",
+    "gym management software",
+    "WhatsApp CRM automation",
+    "Razorpay booking gateway",
+    "local business growth OS",
+    "service business operating system",
+    "automated appointment scheduling",
+    "online booking system India",
+    "B2B SaaS India",
   ],
-  authors: [{ name: "Ameya Kshirsagar" }],
-  creator: "Ameya Kshirsagar",
+  authors: [{ name: "Docodo Technologies", url: "https://docodo.in" }],
+  creator: "Docodo Technologies",
+  publisher: "Docodo Technologies Private Limited",
   metadataBase: new URL(SITE_CONFIG.url),
   alternates: {
     canonical: "/",
@@ -33,28 +45,29 @@ export const defaultMetadata: Metadata = {
     type: "website",
     locale: "en_IN",
     url: SITE_CONFIG.url,
-    title: SITE_CONFIG.title,
-    description: SITE_CONFIG.description,
+    title: "Docodo — The Complete Booking SaaS, CRM & Digital Marketing Dashboard",
+    description: "Launch your branded booking page, collect online payments with Razorpay, manage customers, and automate marketing in 15 minutes.",
     siteName: SITE_CONFIG.name,
     images: [
       {
         url: SITE_CONFIG.ogImage,
         width: 1200,
         height: 630,
-        alt: SITE_CONFIG.title,
+        alt: "Docodo B2B Booking SaaS & CRM Dashboard",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE_CONFIG.title,
-    description: SITE_CONFIG.description,
+    title: "Docodo | All-in-One Booking SaaS, CRM & Growth Platform",
+    description: "Equip your salon, spa, clinic, or service business with an automated booking engine and CRM in 15 minutes.",
     images: [SITE_CONFIG.ogImage],
     creator: SITE_CONFIG.twitterHandle,
   },
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
@@ -63,6 +76,7 @@ export const defaultMetadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  category: "technology",
 };
 
 export const jsonLd = {
@@ -71,46 +85,51 @@ export const jsonLd = {
     {
       "@type": "Organization",
       "@id": "https://docodo.in/#organization",
-      "name": "Docodo",
+      "name": "Docodo Technologies",
       "url": "https://docodo.in",
       "logo": "https://docodo.in/logo.png",
       "sameAs": [
         "https://youtube.com/@docodo",
-        "https://spotify.com/docodo",
-        "https://medium.com/@ameyakshirsagar02",
-        "https://linkedin.com/company/docodo"
+        "https://linkedin.com/company/docodo",
+        "https://twitter.com/docodo_in",
+        "https://medium.com/@ameyakshirsagar02"
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+91-XXXXXXXXXX",
+        "telephone": "+91-9876543210",
         "contactType": "customer service",
         "areaServed": "IN",
-        "availableLanguage": ["en", "Hindi", "Marathi"]
+        "availableLanguage": ["English", "Hindi", "Marathi"]
       }
     },
     {
       "@type": "WebSite",
       "@id": "https://docodo.in/#website",
       "url": "https://docodo.in",
-      "name": "Docodo AI Growth OS",
+      "name": "Docodo SaaS & Digital Marketing Dashboard",
       "publisher": { "@id": "https://docodo.in/#organization" },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://docodo.in/tools?q={search_term_string}",
-        "query-input": "required name=search_term_string"
+        "target": "https://docodo.in/book/{slug}",
+        "query-input": "required name=slug"
       }
     },
     {
       "@type": "SoftwareApplication",
-      "name": "Docodo AI Growth OS",
+      "name": "Docodo Appointment Booking & CRM Platform",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "INR",
-        "lowPrice": "2499",
+        "lowPrice": "0",
         "highPrice": "9999",
         "offerCount": "3"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "142"
       }
     },
     {
@@ -118,97 +137,37 @@ export const jsonLd = {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Is Docodo free?",
+          "name": "What is Docodo?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes — start with 50 free credits, no card required."
+            "text": "Docodo is an all-in-one B2B SaaS platform for local appointment businesses (salons, spas, clinics, gyms) providing online booking pages, customer CRM, digital marketing automation, and Razorpay payment integration."
           }
         },
         {
           "@type": "Question",
-          "name": "Is Docodo DPDP compliant?",
+          "name": "How long does it take to set up Docodo?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes — self-hosted, data stays in India."
+            "text": "You can configure your business profile, add services, set working hours, and publish your live booking page in under 15 minutes."
           }
         },
         {
           "@type": "Question",
-          "name": "How fast is the WhatsApp bot?",
+          "name": "Does Docodo support online payments in India?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Average 60-second reply time, 24/7."
+            "text": "Yes, Docodo integrates official Razorpay Standard Web Checkout supporting UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, and Netbanking with automated verification."
           }
         },
         {
           "@type": "Question",
-          "name": "Which businesses use Docodo?",
+          "name": "Is Docodo DPDP Act 2023 compliant?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Clinics, salons, cafes, coaching centres in Pune."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can I cancel anytime?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes — 30-day notice, no lock-in."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does it work in Hinglish?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes — Claude AI supports Hinglish natively."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What is the cheapest Care Plan?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Starter at ₹2,499/mo."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How many credits do I get free?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "50 credits on signup, no card needed."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What AI powers Docodo?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Anthropic Claude API."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is there a setup fee?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No — setup is included in all Care Plans."
+            "text": "Yes, Docodo complies with the Digital Personal Data Protection Act 2023 with secure multi-tenant encryption and local Indian data residency."
           }
         }
       ]
-    },
-    {
-      "@type": "LocalBusiness",
-      "name": "Docodo",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Pune",
-        "addressRegion": "Maharashtra",
-        "addressCountry": "IN"
-      },
-      "areaServed": ["Pune", "India"],
-      "priceRange": "₹₹"
     }
   ]
 };
