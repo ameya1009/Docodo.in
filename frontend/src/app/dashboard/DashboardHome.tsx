@@ -23,10 +23,13 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function DashboardHome({ data }: DashboardHomeProps) {
   const { business, stats, upcomingBookings } = data;
+  const [copied, setCopied] = React.useState(false);
   const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/book/${business.slug}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(bookingUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const STAT_CARDS = [
@@ -196,8 +199,13 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
               <span className="text-xs text-[var(--text-secondary)] truncate flex-1 font-mono">
                 {bookingUrl.replace("https://", "")}
               </span>
-              <button onClick={handleCopy} className="shrink-0 p-1.5 text-[var(--text-muted)] hover:text-[var(--lime)] transition-colors">
-                <Copy size={15} />
+              <button
+                onClick={handleCopy}
+                className="shrink-0 p-1.5 text-[var(--text-muted)] hover:text-[var(--lime)] transition-colors flex items-center gap-1"
+                title="Copy Link"
+              >
+                {copied ? <CheckCircle2 size={15} className="text-[var(--lime)]" /> : <Copy size={15} />}
+                {copied && <span className="text-[10px] text-[var(--lime)] font-bold">Copied!</span>}
               </button>
             </div>
             <Link href={`/book/${business.slug}`} target="_blank" className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-[var(--lime)] border border-[var(--lime)]/30 rounded-xl hover:bg-[var(--lime)]/10 transition-colors">

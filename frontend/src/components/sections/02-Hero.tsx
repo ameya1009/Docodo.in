@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, ExternalLink, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SectionLabel } from "@/components/ui/SectionElements";
-import { HERO_CONTENT, WHATSAPP_LINK } from "@/lib/constants";
+import { HERO_CONTENT } from "@/lib/constants";
 import { HeroScene } from "@/components/3d/HeroScene";
 
 export const Hero = () => {
@@ -25,7 +26,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative h-[100svh] w-full overflow-hidden flex flex-col items-center justify-center pt-20">
+    <section className="relative min-h-[90vh] md:h-[100svh] w-full overflow-hidden flex flex-col items-center justify-center pt-24 pb-12">
       {/* Layer 1: 3D Background */}
       <HeroScene />
 
@@ -35,12 +36,12 @@ export const Hero = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="mb-6"
         >
           <SectionLabel dot>{eyebrow}</SectionLabel>
         </motion.div>
 
-        <h1 className="font-display font-black text-5xl md:text-7xl lg:text-8xl leading-[1.05] tracking-tight mb-8 max-w-5xl">
+        <h1 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.08] tracking-tight mb-6 max-w-5xl">
           <span className="block text-[var(--text-primary)]">
             {headline.line1.split(" ").map((word, i) => (
               <motion.span
@@ -74,8 +75,8 @@ export const Hero = () => {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="text-[var(--text-secondary)] text-lg md:text-xl max-w-2xl mb-12 leading-relaxed"
+          transition={{ delay: 0.6, duration: 0.8 }}
+          className="text-[var(--text-secondary)] text-base sm:text-lg md:text-xl max-w-2xl mb-10 leading-relaxed"
         >
           {subheadline}
         </motion.p>
@@ -83,24 +84,28 @@ export const Hero = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          className="flex flex-wrap items-center justify-center gap-4 mb-20"
+          transition={{ delay: 0.8, duration: 0.8 }}
+          className="flex flex-wrap items-center justify-center gap-4 mb-16"
         >
-          <Button variant="primary" size="lg" className="shadow-[var(--lime-glow-md)]">
-            Claim 50 Free Credits <ArrowRight size={18} className="ml-2" />
-          </Button>
-          <Button variant="secondary" size="lg">
-            <Play size={18} className="mr-2 fill-current" /> Watch 43-sec Demo
-          </Button>
-          <Button variant="ghost" size="lg" onClick={() => {
-            document.querySelector("#care-plans")?.scrollIntoView({ behavior: "smooth" });
-          }}>
-            See Plans
-          </Button>
+          <Link href="/auth/signup">
+            <Button variant="primary" size="lg" className="shadow-[var(--lime-glow-md)]">
+              Launch in 15 Minutes <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </Link>
+          <Link href="/book/docodo-wellness-mumbai" target="_blank">
+            <Button variant="secondary" size="lg">
+              <Calendar size={18} className="mr-2 text-[var(--lime)]" /> View Live Booking Demo <ExternalLink size={14} className="ml-1 opacity-70" />
+            </Button>
+          </Link>
+          <Link href="/care-plans">
+            <Button variant="ghost" size="lg">
+              Pricing Plans
+            </Button>
+          </Link>
         </motion.div>
 
         {/* Trust Marquee */}
-        <div className="w-full overflow-hidden border-y border-[var(--border-subtle)] py-4">
+        <div className="w-full overflow-hidden border-y border-[var(--border-subtle)] py-3.5">
           <div className="flex animate-[marquee_30s_linear_infinite] whitespace-nowrap gap-12 items-center hover:[animation-play-state:paused] cursor-default">
             {[...trustTicker, ...trustTicker].map((item, i) => (
               <div key={i} className="flex items-center gap-4 text-[10px] md:text-[12px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
@@ -116,16 +121,16 @@ export const Hero = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.6 }}
-        transition={{ delay: 2, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        transition={{ delay: 1.5, duration: 1 }}
+        className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 flex-col items-center gap-2"
       >
-        <div className="w-[1px] h-10 bg-[var(--lime)] opacity-40"></div>
+        <div className="w-[1px] h-8 bg-[var(--lime)] opacity-40"></div>
         <motion.div
-          animate={{ y: [0, 5, 0] }}
+          animate={{ y: [0, 4, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
           className="text-[var(--lime)]"
         >
-          <ArrowRight size={16} className="rotate-90" />
+          <ArrowRight size={14} className="rotate-90" />
         </motion.div>
       </motion.div>
     </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Check, CheckCheck } from "lucide-react";
@@ -111,43 +112,47 @@ export const PlanCard = ({
       ))}
     </div>
 
-    <button className={cn(
-      "w-full py-4 rounded-[var(--radius-sm)] font-bold text-sm uppercase tracking-widest transition-all",
-      popular ? "bg-[var(--lime)] text-black hover:brightness-110" : "bg-transparent border border-[var(--border-strong)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
-    )}>
-      {cta}
-    </button>
+    <Link href="/auth/signup" className="block w-full">
+      <button className={cn(
+        "w-full py-4 rounded-[var(--radius-sm)] font-bold text-sm uppercase tracking-widest transition-all cursor-pointer",
+        popular ? "bg-[var(--lime)] text-black hover:brightness-110 shadow-[var(--lime-glow-sm)]" : "bg-transparent border border-[var(--border-strong)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+      )}>
+        {cta || "Get Started in 15 Min"}
+      </button>
+    </Link>
   </motion.div>
 );
 
 export const ToolCard = ({ name, description, badge, stat, icon: Icon, href }: any) => (
-  <motion.div
-    whileHover={{ rotateX: 2, rotateY: -2, translateZ: 5 }}
-    className="group relative p-8 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] hover:border-[var(--lime)]/30 hover:shadow-[var(--lime-glow-sm)] transition-all"
-    style={{ perspective: "1000px" }}
-  >
-    {badge && (
-      <div className="absolute top-6 right-6 px-2 py-0.5 bg-[var(--bg-elevated)] border border-white/5 text-[10px] font-bold text-[var(--text-muted)] uppercase rounded-xs">
-        {badge}
+  <Link href={href || "/tools"} className="block h-full">
+    <motion.div
+      whileHover={{ rotateX: 2, rotateY: -2, translateZ: 5 }}
+      className="group relative h-full flex flex-col p-8 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] hover:border-[var(--lime)]/30 hover:shadow-[var(--lime-glow-sm)] transition-all cursor-pointer"
+      style={{ perspective: "1000px" }}
+    >
+      {badge && (
+        <div className="absolute top-6 right-6 px-2 py-0.5 bg-[var(--bg-elevated)] border border-white/5 text-[10px] font-bold text-[var(--text-muted)] uppercase rounded-xs">
+          {badge}
+        </div>
+      )}
+      
+      <div className="mb-6 w-12 h-12 flex items-center justify-center rounded-[var(--radius-md)] bg-[var(--lime-ghost)] text-[var(--lime)] group-hover:scale-110 transition-transform">
+        <Icon size={24} />
       </div>
-    )}
-    
-    <div className="mb-6 w-12 h-12 flex items-center justify-center rounded-[var(--radius-md)] bg-[var(--lime-ghost)] text-[var(--lime)] group-hover:scale-110 transition-transform">
-      <Icon size={24} />
-    </div>
 
-    <h3 className="text-xl mb-3">{name}</h3>
-    <p className="text-sm text-[var(--text-secondary)] mb-6 leading-relaxed">
-      {description}
-    </p>
+      <h3 className="text-xl mb-3 text-white font-bold">{name}</h3>
+      <p className="text-sm text-[var(--text-secondary)] mb-6 leading-relaxed flex-grow">
+        {description}
+      </p>
 
-    <div className="flex items-center justify-between pt-6 border-top border-[var(--border-subtle)]">
-      <span className="text-xs font-bold text-[var(--lime)] uppercase tracking-widest">{stat}</span>
-      <span className="text-xs font-medium text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
-        Learn More →
-      </span>
-    </div>
-  </motion.div>
+      <div className="flex items-center justify-between pt-6 border-t border-[var(--border-subtle)]">
+        <span className="text-xs font-bold text-[var(--lime)] uppercase tracking-widest">{stat}</span>
+        <span className="text-xs font-medium text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
+          Open Tool →
+        </span>
+      </div>
+    </motion.div>
+  </Link>
 );
 
 interface TestimonialCardProps {
