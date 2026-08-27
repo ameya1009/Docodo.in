@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { generateAvailableTimeSlots } from "@/lib/engines/booking-engine";
+import { createPublicEnquiry } from "@/lib/actions/enquiry";
 
 interface BookingPageClientProps {
   business: any;
@@ -22,6 +23,7 @@ const DAY_MAP: Record<string, number> = { SUN:0, MON:1, TUE:2, WED:3, THU:4, FRI
 type Step = "service" | "datetime" | "details" | "confirm" | "success";
 
 export default function BookingPageClient({ business, bookedSlots }: BookingPageClientProps) {
+  const [activeTab, setActiveTab] = useState<"book" | "enquire">("book");
   const [step, setStep] = useState<Step>("service");
   const [selectedService, setSelectedService] = useState<any>(null);
   const [selectedStaff, setSelectedStaff] = useState<any>(null);
@@ -32,6 +34,11 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Enquiry Form State
+  const [enquiryForm, setEnquiryForm] = useState({ name: "", phone: "", serviceName: "", message: "" });
+  const [enquirySent, setEnquirySent] = useState(false);
+  const [enquiryError, setEnquiryError] = useState("");
 
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -192,11 +199,53 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                 </div>
               )}
             </div>
+
+            {/* Direct WhatsApp CTA Button */}
+            <div className="ml-auto">
+              <a
+                href={`https://wa.me/${(business.whatsapp || business.phone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${business.name}, I have an enquiry regarding your services.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+              >
+                <MessageSquare size={14} /> Chat on WhatsApp
+              </a>
+            </div>
           </div>
+
+          {/* Mode Switcher Tabs */}
+          {step !== "success" && (
+            <div className="flex gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setActiveTab("book")}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                  activeTab === "book"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "bg-white/20 text-white hover:bg-white/30"
+                )}
+              >
+                📅 Book Appointment
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("enquire")}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                  activeTab === "enquire"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "bg-white/20 text-white hover:bg-white/30"
+                )}
+              >
+                💬 Have a Question / Enquire
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Progress Steps */}
-        {step !== "success" && (
+        {/* Progress Steps for Booking */}
+        {activeTab === "book" && step !== "success" && (
           <div className="max-w-2xl mx-auto px-4 pb-4">
             <div className="flex items-center gap-2">
               {["Select Service", "Date & Time", "Your Details", "Confirm"].map((label, i) => (
@@ -221,6 +270,145 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6">
+        {activeTab === "enquire" ? (
+          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+            <h2 className="text-xl font-black text-gray-900 mb-1">Send an Enquiry 💬</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Have questions about pricing, availability, or custom packages? Leave a message and {business.name} will get back to you immediately.
+            </p>
+
+            {enquirySent ? (
+              <div className="text-center py-8 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                  <CheckCircle2 size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Enquiry Received!</h3>
+                <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                  Thank you! {business.name} has received your enquiry and will contact you via WhatsApp/Phone shortly.
+                </p>
+                <div className="flex justify-center gap-3 pt-2">
+                  <a
+                    href={`https://wa.me/${(business.whatsapp || business.phone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${business.name}, I just submitted an enquiry: ${enquiryForm.message || "regarding appointments"}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center gap-2 hover:bg-emerald-700 transition-colors shadow-sm"
+                  >
+                    <MessageSquare size={16} /> Chat on WhatsApp Now
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEnquirySent(false);
+                      setEnquiryForm({ name: "", phone: "", serviceName: "", message: "" });
+                    }}
+                    className="px-4 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50"
+                  >
+                    Send Another
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!enquiryForm.name.trim() || !enquiryForm.phone.trim()) {
+                    setEnquiryError("Please provide your Name and Phone number.");
+                    return;
+                  }
+                  setEnquiryError("");
+                  startTransition(async () => {
+                    try {
+                      await createPublicEnquiry({
+                        businessId: business.id,
+                        name: enquiryForm.name,
+                        phone: enquiryForm.phone,
+                        serviceName: enquiryForm.serviceName || undefined,
+                        message: enquiryForm.message || undefined,
+                      });
+                      setEnquirySent(true);
+                    } catch (err: any) {
+                      setEnquiryError(err.message || "Failed to submit enquiry.");
+                    }
+                  });
+                }}
+                className="space-y-4"
+              >
+                {enquiryError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl">
+                    {enquiryError}
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                    Your Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={enquiryForm.name}
+                    onChange={(e) => setEnquiryForm({ ...enquiryForm, name: e.target.value })}
+                    placeholder="e.g. Priya Sharma"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                    WhatsApp / Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={enquiryForm.phone}
+                    onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                    Service Interested In (Optional)
+                  </label>
+                  <select
+                    value={enquiryForm.serviceName}
+                    onChange={(e) => setEnquiryForm({ ...enquiryForm, serviceName: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 bg-white"
+                  >
+                    <option value="">Select a service...</option>
+                    {activeServices.map((s: any) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name} ({formatCurrency(s.price)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                    Your Message / Question
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={enquiryForm.message}
+                    onChange={(e) => setEnquiryForm({ ...enquiryForm, message: e.target.value })}
+                    placeholder="e.g. Do you have slots available this Saturday afternoon?"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full py-4 rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-95 transition-opacity disabled:opacity-50"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  {isPending ? <Loader2 size={18} className="animate-spin" /> : "Send Enquiry to Business"}
+                </button>
+              </form>
+            )}
+          </div>
+        ) : (
         <AnimatePresence mode="wait">
           {/* Step 1: Select Service */}
           {step === "service" && (
@@ -587,6 +775,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
             </motion.div>
           )}
         </AnimatePresence>
+        )}
       </div>
 
       {/* Footer */}

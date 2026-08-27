@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Calendar, Users, TrendingUp, Globe, ArrowRight, Clock,
-  CheckCircle2, AlertCircle, Sparkles, Copy, ExternalLink, Activity, Award
+  CheckCircle2, AlertCircle, Sparkles, Copy, ExternalLink, Activity, Award, MessageSquare, Phone
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function DashboardHome({ data }: DashboardHomeProps) {
-  const { business, stats, upcomingBookings } = data;
+  const { business, stats, upcomingBookings, recentEnquiries = [] } = data;
   const [copied, setCopied] = React.useState(false);
   const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/book/${business.slug}`;
 
@@ -161,6 +161,65 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
                 </div>
               ))
             )}
+          </div>
+
+          {/* Recent Customer Enquiries */}
+          <div className="border-t border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]/30">
+              <h2 className="font-bold text-[var(--text-primary)] flex items-center gap-2 text-sm">
+                <MessageSquare size={15} className="text-[var(--lime)]" />
+                Recent Customer Enquiries ({recentEnquiries.length})
+              </h2>
+            </div>
+
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {recentEnquiries.length === 0 ? (
+                <div className="px-6 py-6 text-center text-xs text-[var(--text-muted)]">
+                  No direct customer enquiries received yet.
+                </div>
+              ) : (
+                recentEnquiries.map((enq: any) => (
+                  <div key={enq.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 px-6 hover:bg-[var(--bg-elevated)] transition-colors gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-[var(--text-primary)]">{enq.name}</span>
+                        {enq.serviceName && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--lime)]/10 text-[var(--lime)] font-bold">
+                            {enq.serviceName}
+                          </span>
+                        )}
+                        <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">
+                          {enq.status}
+                        </span>
+                      </div>
+                      {enq.message && (
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-1 italic">
+                          &ldquo;{enq.message}&rdquo;
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <a
+                        href={`https://wa.me/${enq.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi ${enq.name}, thank you for reaching out to ${business.name}!`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                      >
+                        <MessageSquare size={13} /> WhatsApp
+                      </a>
+                      <a
+                        href={`tel:${enq.phone}`}
+                        className="p-1.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-white border border-[var(--border-subtle)] transition-colors"
+                        title="Call Customer"
+                      >
+                        <Phone size={13} />
+                      </a>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 

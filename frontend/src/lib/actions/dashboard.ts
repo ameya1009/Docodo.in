@@ -89,7 +89,7 @@ export async function getDashboardData() {
 
   const business = user.businesses[0];
 
-  const [bookings, customerCount, upcomingBookings] = await Promise.all([
+  const [bookings, customerCount, upcomingBookings, recentEnquiries] = await Promise.all([
     prisma.booking.findMany({
       where: { businessId: business.id },
       select: {
@@ -111,6 +111,11 @@ export async function getDashboardData() {
       orderBy: [{ date: "asc" }, { startTime: "asc" }],
       take: 8,
       include: { service: true, staff: true },
+    }),
+    prisma.enquiry.findMany({
+      where: { businessId: business.id },
+      orderBy: { createdAt: "desc" },
+      take: 6,
     }),
   ]);
 
@@ -142,6 +147,7 @@ export async function getDashboardData() {
     business,
     upcomingBookings,
     recentBookings: business.bookings,
+    recentEnquiries: recentEnquiries || [],
     stats: {
       todayBookings: todayBookingsCount,
       monthlyRevenue,

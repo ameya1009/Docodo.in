@@ -105,13 +105,16 @@ model Business {
   websiteConfig String? @default("{\"hero\":true,\"services\":true,\"about\":true,\"gallery\":true,\"testimonials\":true,\"faq\":false,\"contact\":true,\"booking_cta\":true}")
   
   // Onboarding & Business Discovery Telemetry
-  onboardingStep     Int      @default(4)
-  onboardingComplete Boolean  @default(true)
+  onboardingStep     Int       @default(4)
+  onboardingComplete Boolean   @default(true)
+  onboardingStartedAt DateTime?
+  onboardingCompletedAt DateTime?
+  setupTimeMinutes   Int?      // Setup duration in minutes from start to publish
   discoveryQuery     String?
-  discoveredProfile  String?  // JSON string of AI discovered/synthesized business details
-  activationScore    Int      @default(20) // Starts at 20% upon website generation
+  discoveredProfile  String?   // JSON string of AI discovered/synthesized business details
+  activationScore    Int       @default(20) // Starts at 20% upon website generation
   activatedAt        DateTime?
-  timeToFirstBooking Int?     // Duration in seconds from account creation to first booking
+  timeToFirstBooking Int?      // Duration in seconds from account creation to first booking
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -124,6 +127,7 @@ model Business {
   staff        Staff[]
   bookings     Booking[]
   customers    Customer[]
+  enquiries    Enquiry[]
   aiContents   AIContent[]
   whatsappLogs WhatsAppLog[]
   codLedgers   CODLedger[]
@@ -322,4 +326,22 @@ model NDRDispute {
   booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
+}
+
+// ─── CUSTOMER ENQUIRY & LEAD CAPTURE SYSTEM ──────────────────────────────────
+
+model Enquiry {
+  id          String   @id @default(cuid())
+  businessId  String
+  name        String
+  phone       String
+  serviceName String?
+  message     String?
+  status      String   @default("NEW") // NEW | CONTACTED | BOOKED | LOST
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, status])
 }

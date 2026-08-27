@@ -17,6 +17,132 @@ import {
   getFallbackAIContent,
 } from "@/lib/engines/business-launch";
 
+/**
+ * 15-MINUTE PROMISE CORE ONBOARDING ACTION
+ * Saves business essentials, services, and operating schedule in one atomic transaction,
+ * calculating setupTimeMinutes and publishing the booking page immediately.
+ */
+export async function save15MinuteOnboardingAction(payload: {
+  name: string;
+  category: string;
+  phone: string;
+  whatsapp?: string;
+  address?: string;
+  city: string;
+  instagram?: string;
+  googleBusinessUrl?: string;
+  services: Array<{ name: string; price: number; duration: number }>;
+  workingHours: Array<{ day: string; isOpen: boolean; openTime: string; closeTime: string }>;
+  startedAt?: string;
+}) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized: please sign in first");
+
+  const userId = session.user.id;
+  const startedAtDate = payload.startedAt ? new Date(payload.startedAt) : new Date();
+  const completedAtDate = new Date();
+  const diffMs = completedAtDate.getTime() - startedAtDate.getTime();
+  const setupTimeMinutes = Math.max(1, Math.round(diffMs / 60000));
+
+  // Determine base slug
+  let slug = generateSlug(payload.name);
+  const slugConflict = await prisma.business.findUnique({ where: { slug } });
+  if (slugConflict && slugConflict.ownerId !== userId) {
+    slug = `${slug}-${Date.now().toString(36)}`;
+  }
+
+  const existingBusiness = await prisma.business.findFirst({
+    where: { ownerId: userId },
+    select: { id: true, slug: true },
+  });
+
+  const result = await prisma.$transaction(async (tx) => {
+    let businessId: string;
+    let finalSlug: string;
+
+    if (existingBusiness) {
+      businessId = existingBusiness.id;
+      finalSlug = existingBusiness.slug;
+      await tx.business.update({
+        where: { id: businessId },
+        data: {
+          name: payload.name.trim(),
+          industry: payload.category.trim(),
+          phone: payload.phone.trim(),
+          whatsapp: payload.whatsapp?.trim() || payload.phone.trim(),
+          address: payload.address?.trim() || null,
+          city: payload.city.trim(),
+          instagram: payload.instagram?.trim() || null,
+          isPublished: true,
+          onboardingComplete: true,
+          onboardingStep: 5,
+          onboardingStartedAt: startedAtDate,
+          onboardingCompletedAt: completedAtDate,
+          setupTimeMinutes,
+        },
+      });
+    } else {
+      finalSlug = slug;
+      const created = await tx.business.create({
+        data: {
+          ownerId: userId,
+          name: payload.name.trim(),
+          slug: finalSlug,
+          industry: payload.category.trim(),
+          phone: payload.phone.trim(),
+          whatsapp: payload.whatsapp?.trim() || payload.phone.trim(),
+          address: payload.address?.trim() || null,
+          city: payload.city.trim(),
+          instagram: payload.instagram?.trim() || null,
+          isPublished: true,
+          onboardingComplete: true,
+          onboardingStep: 5,
+          onboardingStartedAt: startedAtDate,
+          onboardingCompletedAt: completedAtDate,
+          setupTimeMinutes,
+        },
+      });
+      businessId = created.id;
+    }
+
+    // Replace services with the custom user services
+    if (payload.services && payload.services.length > 0) {
+      await tx.service.deleteMany({ where: { businessId } });
+      await tx.service.createMany({
+        data: payload.services.map((svc, idx) => ({
+          businessId,
+          name: svc.name.trim(),
+          price: Number(svc.price) || 0,
+          duration: Number(svc.duration) || 60,
+          order: idx,
+          isActive: true,
+        })),
+      });
+    }
+
+    // Replace working hours with the custom user schedule
+    if (payload.workingHours && payload.workingHours.length > 0) {
+      await tx.workingHours.deleteMany({ where: { businessId } });
+      await tx.workingHours.createMany({
+        data: payload.workingHours.map((wh) => ({
+          businessId,
+          day: wh.day,
+          isOpen: wh.isOpen,
+          openTime: wh.openTime || "09:00",
+          closeTime: wh.closeTime || "19:00",
+        })),
+      });
+    }
+
+    return { businessId, slug: finalSlug, setupTimeMinutes };
+  });
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/book/${result.slug}`);
+
+  return { success: true, ...result };
+}
+
 // Step 1: Save business info with strict Zod validation
 export async function saveBusinessInfo(rawInput: {
   name: string;
