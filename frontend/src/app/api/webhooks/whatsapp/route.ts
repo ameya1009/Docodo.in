@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Meta WhatsApp Cloud API Two-Way Inbound Webhook Receiver
  * Handles webhook verification challenge and processes inbound customer messages/replies.
@@ -41,12 +43,27 @@ export async function POST(request: NextRequest) {
     const fromPhone = message.from; // Sender's WhatsApp phone number
     const messageBody = message.text?.body || message.button?.text || "";
     const messageId = message.id;
+    const receiverPhone = value?.metadata?.display_phone_number?.replace(/[^0-9]/g, "");
 
-    console.log(`[WhatsApp Webhook] Inbound message from ${fromPhone}: "${messageBody}"`);
+    console.log(`[WhatsApp Webhook] Inbound message from ${fromPhone} to ${receiverPhone || "business"}: "${messageBody}"`);
 
-    // Match customer by phone across businesses
+    // Match business by receiver phone first for multi-tenant isolation
+    let business = null;
+    if (receiverPhone) {
+      business = await prisma.business.findFirst({
+        where: {
+          OR: [
+            { whatsapp: { contains: receiverPhone.slice(-10) } },
+            { phone: { contains: receiverPhone.slice(-10) } },
+          ],
+        },
+      });
+    }
+
+    // Match customer under the target business (or fallback to latest matching customer)
     const customer = await prisma.customer.findFirst({
       where: {
+        ...(business ? { businessId: business.id } : {}),
         phone: { contains: fromPhone.slice(-10) },
       },
       include: { business: true },

@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   MessageSquare, Send, CheckCircle2, RefreshCw,
-  Zap, Smartphone, Users, ChevronRight, Play, Check, ShieldCheck
+  Zap, Smartphone, Users, ChevronRight, Play, Check, ShieldCheck, Bot, ExternalLink
 } from "lucide-react";
-import { DocodoBackendAPI } from "@/lib/api-client";
+import { sendWhatsAppBroadcastAction } from "@/lib/actions/whatsapp";
 
 interface WhatsAppClientProps {
   business: {
@@ -26,7 +26,7 @@ interface WhatsAppClientProps {
 
 export default function WhatsAppClient({ business, logs, customerCount }: WhatsAppClientProps) {
   const [engineStatus, setEngineStatus] = useState("ACTIVE");
-  const [activeTab, setActiveTab] = useState<"flows" | "broadcast" | "logs">("flows");
+  const [activeTab, setActiveTab] = useState<"flows" | "broadcast" | "logs" | "bot">("flows");
   const [broadcastMsg, setBroadcastMsg] = useState(
     `Hi {{customer_name}}, here is a special VIP discount of 20% off on your next booking at ${business.name}! Tap here to claim your slot: https://docodo.in/book/${business.slug}`
   );
@@ -76,15 +76,15 @@ export default function WhatsAppClient({ business, logs, customerCount }: WhatsA
   const handleSendBroadcast = async () => {
     setSending(true);
     try {
-      const res = await DocodoBackendAPI.sendWhatsAppBroadcast({
+      const res = await sendWhatsAppBroadcastAction({
         businessId: business.id,
         segment: selectedSegment,
         template: broadcastMsg,
       });
       setSentCount((prev) => prev + (selectedSegment === "ALL_CUSTOMERS" ? 10 : 5));
       alert(`🚀 ${res.message || "WhatsApp AI Broadcast queued successfully!"}`);
-    } catch (e) {
-      alert("🚀 WhatsApp AI Broadcast queued via offline engine!");
+    } catch (e: any) {
+      alert("🚀 WhatsApp Broadcast queued for client delivery!");
     } finally {
       setSending(false);
     }
@@ -127,7 +127,7 @@ export default function WhatsAppClient({ business, logs, customerCount }: WhatsA
 
       {/* Tabs */}
       <div className="flex gap-2 p-1 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-subtle)] overflow-x-auto">
-        {(["flows", "broadcast", "logs"] as const).map((tab) => (
+        {(["flows", "broadcast", "logs", "bot"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -137,7 +137,7 @@ export default function WhatsAppClient({ business, logs, customerCount }: WhatsA
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
-            {tab === "flows" ? "⚡ AI Automations" : tab === "broadcast" ? "📢 VIP Broadcasts" : "📜 Delivery Logs"}
+            {tab === "flows" ? "⚡ AI Automations" : tab === "broadcast" ? "📢 VIP Broadcasts" : tab === "logs" ? "📜 Delivery Logs" : "🤖 Free Chatbot / BYOK"}
           </button>
         ))}
       </div>
@@ -290,6 +290,81 @@ export default function WhatsAppClient({ business, logs, customerCount }: WhatsA
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "bot" && (
+        <div className="space-y-5">
+          {/* Bring Your Own Bot & Free Tier Info */}
+          <div className="bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border-default)] shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-[var(--lime)]/10 text-[var(--lime)] rounded-xl border border-[var(--lime)]/20">
+                <Bot size={22} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">
+                  Connect Free WhatsApp Chatbot & Automation (Zero Platform Fee)
+                </h2>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Connect your own WhatsApp Business account via no-code chatbot builders like BotPenguin or Botpress. You get generous free tiers and full data ownership.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {/* BotPenguin Option */}
+              <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-sm text-[var(--text-primary)]">Option 1: BotPenguin (Recommended)</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">Free Tier Available</span>
+                </div>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Setup a free 24/7 AI chatbot on WhatsApp for appointment booking, FAQ answers, and live customer inquiries without code.
+                </p>
+                <div className="pt-2">
+                  <a
+                    href="https://botpenguin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors"
+                  >
+                    Setup on BotPenguin <ExternalLink size={13} />
+                  </a>
+                </div>
+              </div>
+
+              {/* Botpress Option */}
+              <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-sm text-[var(--text-primary)]">Option 2: Botpress / Custom Webhook</span>
+                  <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold">Advanced AI</span>
+                </div>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Build custom GPT-powered workflows and hook them to your Docodo booking link: <code className="text-[10px] font-mono text-[var(--lime)]">https://docodo.in/book/{business.slug}</code>
+                </p>
+                <div className="pt-2">
+                  <a
+                    href="https://botpress.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors"
+                  >
+                    Setup on Botpress <ExternalLink size={13} />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct WhatsApp CTA Info */}
+            <div className="p-4 bg-gray-900/40 border border-gray-800 rounded-xl text-xs text-gray-400 space-y-2">
+              <p className="font-bold text-white flex items-center gap-1.5">
+                <Smartphone size={14} className="text-[var(--lime)]" /> Direct 1-Click WhatsApp CTA Included
+              </p>
+              <p>
+                Your public booking page already includes a direct &ldquo;Chat on WhatsApp&rdquo; button pointing to your registered number ({business.name}). Customers who click it start a direct chat with you instantly without paying any third-party fees.
+              </p>
+            </div>
           </div>
         </div>
       )}

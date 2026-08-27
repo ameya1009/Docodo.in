@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { DocodoBackendAPI } from "@/lib/api-client";
 import { sendBookingConfirmationEmail } from "@/lib/notifications";
 
+export const dynamic = "force-dynamic";
+
 /**
  * 24-Hour Pre-Appointment Automated Reminder Cron Worker
  * Triggered daily via Vercel Cron or QStash.
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
       const waContent = `⏰ Reminder: You have an appointment for *${serviceName}* with *${bizName}* tomorrow at *${timeStr}*. Address: ${booking.business.address || booking.business.city || "Clinic / Salon"}. Reply 'RESCHEDULE' if you need changes.`;
       
       try {
-        await DocodoBackendAPI.sendWhatsAppMessage({
+        await DocodoBackendAPI.dispatchWhatsAppMessage({
           businessId: booking.businessId,
           recipientPhone: phone,
           messageType: "REMINDER_24HR",
@@ -62,15 +64,14 @@ export async function GET(request: NextRequest) {
       if (booking.customerEmail) {
         try {
           await sendBookingConfirmationEmail({
-            to: booking.customerEmail,
+            toEmail: booking.customerEmail,
             customerName: booking.customerName,
             businessName: bizName,
             serviceName,
             date: booking.date,
             startTime: booking.startTime,
             price: booking.price,
-            businessPhone: booking.business.phone || undefined,
-            businessAddress: booking.business.address || undefined,
+            paymentMethod: "Pre-appointment Reminder",
           });
         } catch (emailErr) {
           console.warn(`[Cron] Email reminder warning for ${booking.id}:`, emailErr);
