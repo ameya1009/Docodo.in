@@ -18,13 +18,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing signature" }, { status: 400 });
     }
 
-    // Verify webhook signature
+    // Verify webhook signature with timing-safe comparison
     const expectedSignature = crypto
       .createHmac("sha256", webhookSecret)
       .update(rawBody)
       .digest("hex");
 
-    if (expectedSignature !== signature) {
+    const expectedBuf = Buffer.from(expectedSignature, "utf-8");
+    const signatureBuf = Buffer.from(signature, "utf-8");
+
+    const isValidSignature =
+      expectedBuf.length === signatureBuf.length &&
+      crypto.timingSafeEqual(expectedBuf, signatureBuf);
+
+    if (!isValidSignature) {
       console.error("[Razorpay Webhook] Invalid signature received");
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }

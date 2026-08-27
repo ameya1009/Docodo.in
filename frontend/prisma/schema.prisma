@@ -163,6 +163,8 @@ model Service {
   
   business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   bookings    Booking[]
+
+  @@index([businessId])
 }
 
 model Staff {
@@ -179,6 +181,8 @@ model Staff {
   
   business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   bookings   Booking[]
+
+  @@index([businessId])
 }
 
 // ─── BOOKINGS & TRANSACTION LEDGER ───────────────────────────────────────────
@@ -210,7 +214,7 @@ model Booking {
   reminderSent  Boolean  @default(false)
   reviewSent    Boolean  @default(false)
   
-  razorpayOrderId   String?
+  razorpayOrderId   String?  @unique
   razorpayPaymentId String?
   
   createdAt     DateTime @default(now())
@@ -221,6 +225,10 @@ model Booking {
   staff         Staff?    @relation(fields: [staffId], references: [id])
   customer      Customer? @relation(fields: [customerId], references: [id])
   ndrDispute    NDRDispute?
+
+  @@index([businessId, date, status])
+  @@index([customerId])
+  @@index([businessId, createdAt])
 }
 
 // ─── CRM (CUSTOMER RELATIONSHIP MANAGEMENT) ──────────────────────────────────
@@ -244,6 +252,7 @@ model Customer {
   bookings      Booking[]
 
   @@unique([businessId, phone])
+  @@index([businessId])
 }
 
 // ─── AI ENGINE STORAGE & HISTORY ─────────────────────────────────────────────
@@ -258,6 +267,8 @@ model AIContent {
   createdAt  DateTime @default(now())
   
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
 }
 
 // ─── WHATSAPP AUTOMATION ENGINE LOGS ─────────────────────────────────────────
@@ -273,6 +284,8 @@ model WhatsAppLog {
   timestamp   DateTime @default(now())
   
   business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
 }
 
 // ─── CASH ON DELIVERY & PAYMENT RECONCILIATION LEDGER ────────────────────────
@@ -289,6 +302,8 @@ model CODLedger {
   updatedAt     DateTime @updatedAt
   
   business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
 }
 
 // ─── NON-DELIVERY REPORT (NDR) & DISPUTE DEFENSE SYSTEM ──────────────────────
@@ -305,4 +320,6 @@ model NDRDispute {
   
   business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
 }

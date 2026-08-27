@@ -82,7 +82,7 @@ export async function createServiceAction(rawInput: {
 
   const service = await prisma.service.create({
     data: {
-      businessId,
+      businessId: business.id,
       name: name.trim(),
       description: description?.trim() || null,
       duration: Number(duration),

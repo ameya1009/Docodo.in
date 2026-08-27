@@ -40,11 +40,13 @@ export async function POST(req: NextRequest) {
       .update(`${finalOrderId}|${razorpay_payment_id}`)
       .digest("hex");
 
-    // Secure timing-safe or direct signature comparison
-    const isAuthentic = crypto.timingSafeEqual(
-      Buffer.from(expectedSignature, "utf-8"),
-      Buffer.from(razorpay_signature, "utf-8")
-    );
+    // Secure timing-safe signature comparison with length guard
+    const expectedBuf = Buffer.from(expectedSignature, "utf-8");
+    const receivedBuf = Buffer.from(razorpay_signature || "", "utf-8");
+
+    const isAuthentic =
+      expectedBuf.length === receivedBuf.length &&
+      crypto.timingSafeEqual(expectedBuf, receivedBuf);
 
     if (!isAuthentic) {
       console.error("[Razorpay Verify] Signature mismatch detected! Possible tampered transaction.");

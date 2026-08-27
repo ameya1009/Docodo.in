@@ -559,7 +559,19 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                 </div>
 
                 <a
-                  href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`${business.name} — ${selectedService?.name || "Appointment"}`)}&details=${encodeURIComponent(`Appointment with ${business.name}. Contact: ${business.phone}`)}&location=${encodeURIComponent(business.address ?? business.city ?? "")}`}
+                  href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`${business.name} — ${selectedService?.name || "Appointment"}`)}&details=${encodeURIComponent(`Appointment with ${business.name}. Contact: ${business.phone}`)}&location=${encodeURIComponent(business.address ?? business.city ?? "")}${(() => {
+                    if (!selectedDate || !selectedTime) return "";
+                    try {
+                      const start = new Date(`${selectedDate}T${selectedTime}:00`);
+                      const durationMins = selectedService?.duration || 60;
+                      const end = new Date(start.getTime() + durationMins * 60 * 1000);
+                      const startStr = start.toISOString().replace(/-|:|\.\d\d\d/g, "");
+                      const endStr = end.toISOString().replace(/-|:|\.\d\d\d/g, "");
+                      return `&dates=${startStr}/${endStr}`;
+                    } catch {
+                      return "";
+                    }
+                  })()}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-2.5 px-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors"

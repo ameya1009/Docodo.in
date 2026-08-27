@@ -47,16 +47,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user?.id) {
         token.id = user.id;
+      }
+
+      if (trigger === "update" && session?.businessId) {
+        token.businessId = session.businessId;
+        token.businessSlug = session.businessSlug;
+        token.onboardingComplete = session.onboardingComplete ?? true;
+      }
+
+      // If businessId is not yet on the token, dynamically resolve it from the database
+      const userId = (token.id as string) || (user?.id as string);
+      if (userId && (!token.businessId || token.onboardingComplete === false)) {
         const business = await prisma.business.findFirst({
-          where: { ownerId: user.id },
+          where: { ownerId: userId },
           select: { id: true, slug: true, onboardingComplete: true },
         });
-        token.businessId = business?.id ?? undefined;
-        token.businessSlug = business?.slug ?? undefined;
-        token.onboardingComplete = business?.onboardingComplete ?? false;
+        if (business) {
+          token.businessId = business.id;
+          token.businessSlug = business.slug;
+          token.onboardingComplete = business.onboardingComplete;
+        }
       }
       return token;
     },

@@ -62,11 +62,16 @@ export async function createPublicBooking(rawInput: {
       const endTime = calculateEndTime(data.startTime, service.duration);
 
       // 4. Check for conflicts inside the transaction (atomic read-check-write).
+      // We enforce a 15-minute lock window on PENDING bookings to prevent ghost locks.
+      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
       const existingBookings = await tx.booking.findMany({
         where: {
           businessId: data.businessId,
           date: data.date,
-          status: { in: ["CONFIRMED", "PENDING", "NDR_HOLD"] },
+          OR: [
+            { status: { in: ["CONFIRMED", "NDR_HOLD"] } },
+            { status: "PENDING", createdAt: { gte: fifteenMinutesAgo } },
+          ],
           ...(data.staffId ? { staffId: data.staffId } : {}),
         },
         select: { startTime: true, endTime: true, status: true },
@@ -183,6 +188,7 @@ export async function getAvailableSlotsAction(rawInput: {
 }) {
   const { businessId, serviceId, date } = GetAvailableSlotsSchema.parse(rawInput);
 
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
   const [service, workingHours, existingBookings] = await Promise.all([
     prisma.service.findUnique({ where: { id: serviceId } }),
     prisma.workingHours.findMany({ where: { businessId } }),
@@ -190,7 +196,10 @@ export async function getAvailableSlotsAction(rawInput: {
       where: {
         businessId,
         date,
-        status: { notIn: ["CANCELLED", "NO_SHOW"] },
+        OR: [
+          { status: { in: ["CONFIRMED", "NDR_HOLD"] } },
+          { status: "PENDING", createdAt: { gte: fifteenMinutesAgo } },
+        ],
       },
       select: { startTime: true, endTime: true, status: true },
     }),

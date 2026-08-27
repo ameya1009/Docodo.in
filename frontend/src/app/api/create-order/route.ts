@@ -30,10 +30,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Booking not found" }, { status: 404 });
       }
 
-      // Convert booking price (INR) to paise if amount not explicitly provided
-      if (!amount) {
-        amount = Math.round(booking.price * 100);
-      }
+      // Enforce server-side price from booking record to prevent client-side tampering
+      amount = Math.round(booking.price * 100);
 
       receipt = receipt || `receipt_${booking.id.slice(0, 30)}`;
       notes = {

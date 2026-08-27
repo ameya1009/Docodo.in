@@ -35,48 +35,58 @@ export async function saveBusinessInfo(rawInput: {
 
   const data = BusinessInfoSchema.parse(rawInput);
   const userId = session.user.id;
-  let slug = generateSlug(data.name);
+  const existingBusiness = await prisma.business.findFirst({
+    where: { ownerId: userId },
+  });
 
-  // Ensure slug uniqueness in Postgres
-  const existing = await prisma.business.findUnique({ where: { slug } });
-  if (existing && existing.ownerId !== userId) {
+  // Ensure slug uniqueness across other tenants
+  let slug = generateSlug(data.name);
+  const slugConflict = await prisma.business.findUnique({ where: { slug } });
+  if (slugConflict && slugConflict.ownerId !== userId) {
     slug = `${slug}-${Date.now().toString(36)}`;
   }
 
-  const business = await prisma.business.upsert({
-    where: { slug },
-    update: {
-      name: data.name,
-      industry: data.industry,
-      phone: data.phone,
-      email: data.email || null,
-      address: data.address || null,
-      city: data.city || null,
-      description: data.about || null,
-      instagram: data.instagram || null,
-      facebook: data.facebook || null,
-      whatsapp: data.whatsapp || data.phone,
-      onboardingStep: 2,
-    },
-    create: {
-      name: data.name,
-      slug,
-      industry: data.industry,
-      phone: data.phone,
-      email: data.email || null,
-      address: data.address || null,
-      city: data.city || null,
-      description: data.about || null,
-      instagram: data.instagram || null,
-      facebook: data.facebook || null,
-      whatsapp: data.whatsapp || data.phone,
-      ownerId: userId,
-      onboardingStep: 2,
-      workingHours: {
-        create: getDefaultWorkingHours(),
+  let business;
+  if (existingBusiness) {
+    business = await prisma.business.update({
+      where: { id: existingBusiness.id },
+      data: {
+        name: data.name,
+        slug,
+        industry: data.industry,
+        phone: data.phone,
+        email: data.email || null,
+        address: data.address || null,
+        city: data.city || null,
+        description: data.about || null,
+        instagram: data.instagram || null,
+        facebook: data.facebook || null,
+        whatsapp: data.whatsapp || data.phone,
+        onboardingStep: 2,
       },
-    },
-  });
+    });
+  } else {
+    business = await prisma.business.create({
+      data: {
+        name: data.name,
+        slug,
+        industry: data.industry,
+        phone: data.phone,
+        email: data.email || null,
+        address: data.address || null,
+        city: data.city || null,
+        description: data.about || null,
+        instagram: data.instagram || null,
+        facebook: data.facebook || null,
+        whatsapp: data.whatsapp || data.phone,
+        ownerId: userId,
+        onboardingStep: 2,
+        workingHours: {
+          create: getDefaultWorkingHours(),
+        },
+      },
+    });
+  }
 
   return { businessId: business.id, slug: business.slug };
 }
@@ -233,7 +243,7 @@ export async function launchStep5_AIContent(rawBusinessId: string) {
     try {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
       const prompt = `You are a professional marketing expert for Indian local service businesses. Generate high-converting copywriting for:
 Business Name: ${business.name}
