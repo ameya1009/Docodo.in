@@ -7,6 +7,16 @@ import { AuthError } from "next-auth";
 import { SignUpSchema, LoginSchema } from "@/lib/validations/auth";
 import { sanitizeEmail } from "@/lib/engines/auth-engine";
 
+function isNextRedirect(error: any): boolean {
+  return (
+    error &&
+    typeof error === "object" &&
+    "digest" in error &&
+    typeof error.digest === "string" &&
+    error.digest.startsWith("NEXT_REDIRECT")
+  );
+}
+
 export async function signUpAction(formData: FormData) {
   const raw = {
     name: formData.get("name") as string,
@@ -23,7 +33,7 @@ export async function signUpAction(formData: FormData) {
   const email = sanitizeEmail(parsed.data.email);
 
   const exists = await prisma.user.findUnique({ where: { email } });
-  if (exists) return { error: "An account with this email already exists." };
+  if (exists) return { error: "An account with this email already exists. Please sign in instead." };
 
   const bcrypt = await import("bcryptjs");
   const hashed = await bcrypt.hash(password, 12);
@@ -35,8 +45,12 @@ export async function signUpAction(formData: FormData) {
   // Auto sign-in after signup
   try {
     await signIn("credentials", { email, password, redirectTo: "/onboarding" });
+    return { success: true };
   } catch (err) {
-    if (err instanceof AuthError) return { error: "Signup succeeded but login failed. Please log in." };
+    if (isNextRedirect(err)) throw err;
+    if (err instanceof AuthError) {
+      return { error: "Account created successfully. Please sign in on the login page." };
+    }
     throw err;
   }
 }
@@ -61,13 +75,15 @@ export async function loginAction(formData: FormData) {
       password,
       redirectTo: "/dashboard",
     });
+    return { success: true };
   } catch (err) {
+    if (isNextRedirect(err)) throw err;
     if (err instanceof AuthError) {
       switch (err.type) {
         case "CredentialsSignin":
           return { error: "Invalid email or password." };
         default:
-          return { error: "Something went wrong. Please try again." };
+          return { error: "Authentication failed. Please verify your credentials and try again." };
       }
     }
     throw err;

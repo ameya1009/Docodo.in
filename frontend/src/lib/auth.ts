@@ -8,16 +8,20 @@ import { authConfig } from "./auth.config";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(1),
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
+  session: { strategy: "jwt" },
+  trustHost: true,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "docodo-production-auth-secret-key-32-chars-minimum",
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
       name: "credentials",
@@ -30,7 +34,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const { email, password } = parsed.data;
-        const user = await prisma.user.findUnique({ where: { email } });
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
         if (!user || !user.password) return null;
 
         const bcrypt = await import("bcryptjs");
@@ -61,14 +67,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // If businessId is not yet on the token, dynamically resolve it from the database
       const userId = (token.id as string) || (user?.id as string);
       if (userId && (!token.businessId || token.onboardingComplete === false)) {
-        const business = await prisma.business.findFirst({
-          where: { ownerId: userId },
-          select: { id: true, slug: true, onboardingComplete: true },
-        });
-        if (business) {
-          token.businessId = business.id;
-          token.businessSlug = business.slug;
-          token.onboardingComplete = business.onboardingComplete;
+        try {
+          const business = await prisma.business.findFirst({
+            where: { ownerId: userId },
+            select: { id: true, slug: true, onboardingComplete: true },
+          });
+          if (business) {
+            token.businessId = business.id;
+            token.businessSlug = business.slug;
+            token.onboardingComplete = business.onboardingComplete;
+          }
+        } catch (err) {
+          console.warn("[Auth JWT Callback] Failed resolving business for user:", err);
         }
       }
       return token;

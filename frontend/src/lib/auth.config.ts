@@ -2,6 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 import { NextResponse } from "next/server";
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "docodo-production-auth-secret-key-32-chars-minimum",
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/login",
