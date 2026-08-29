@@ -110,6 +110,26 @@ export function getAvailableAIProviders(): AIProviderConfig[] {
     });
   }
 
+  // 5. Meta AI / Llama OpenCode Keys
+  const metaKeys = [
+    process.env.META_AI_API_KEY,
+    process.env.LLAMA_API_KEY,
+    process.env.OPENCODE_API_KEY,
+    process.env.LLM_API_KEY,
+  ]
+    .filter(Boolean)
+    .map((k) => k!.trim())
+    .filter(isCooledDown);
+
+  for (const key of metaKeys) {
+    providers.push({
+      name: "OPENROUTER", // OpenAI-compatible schema
+      apiKey: key,
+      model: "meta-llama/llama-3.3-70b-instruct",
+      baseUrl: "https://openrouter.ai/api/v1/chat/completions",
+    });
+  }
+
   return providers;
 }
 
