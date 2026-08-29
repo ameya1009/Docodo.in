@@ -15,6 +15,8 @@ import {
   generateAvailableTimeSlots,
 } from "@/lib/engines/booking-engine";
 
+import { checkRateLimit } from "@/lib/rate-limit";
+
 /**
  * PUBLIC booking creation — used by the /book/[slug] page.
  * businessId is validated against isPublished — not trusted from client.
@@ -33,6 +35,15 @@ export async function createPublicBooking(rawInput: {
   paymentMethod?: "UPI" | "CASH_ON_DELIVERY" | "CARDS" | "NETBANKING";
 }) {
   const data = CreateBookingSchema.parse(rawInput);
+
+  // Rate-limit by phone and business to prevent slot-hoarding attacks
+  const rateLimit = checkRateLimit(`booking:${data.businessId}:${data.customerPhone}`, {
+    maxTokens: 6,
+    intervalMs: 60_000,
+  });
+  if (!rateLimit.allowed) {
+    throw new Error("Too many booking attempts. Please wait a minute before submitting again.");
+  }
 
   // Use a serializable transaction to prevent TOCTOU race conditions.
   // Both the conflict check and the insert happen atomically.

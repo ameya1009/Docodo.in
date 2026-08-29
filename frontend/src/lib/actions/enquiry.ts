@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
+import { checkRateLimit } from "@/lib/rate-limit";
+
 export async function createPublicEnquiry(rawInput: {
   businessId: string;
   name: string;
@@ -15,6 +17,14 @@ export async function createPublicEnquiry(rawInput: {
 
   if (!businessId || !name?.trim() || !phone?.trim()) {
     throw new Error("Name and Phone are required to send an enquiry.");
+  }
+
+  const rateLimit = checkRateLimit(`enquiry:${businessId}:${phone.trim()}`, {
+    maxTokens: 5,
+    intervalMs: 60_000,
+  });
+  if (!rateLimit.allowed) {
+    throw new Error("Too many enquiry submissions. Please wait a minute before submitting again.");
   }
 
   const business = await prisma.business.findUnique({

@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { generateAIResponse } from "@/lib/engines/ai-engine";
+import { DocodoBackendAPI } from "@/lib/api-client";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Meta WhatsApp Cloud API Two-Way Inbound Webhook Receiver
- * Handles webhook verification challenge and processes inbound customer messages/replies.
+ * Meta WhatsApp Cloud API Two-Way Inbound Webhook Receiver & AI Auto-Responder
+ * Handles webhook verification handshake and processes inbound customer messages/replies
+ * with zero-cost multilingual AI fallback, live conversation threads, and human handoff.
  */
 
 // 1. GET: Webhook verification handshake with Meta Cloud Graph API
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ error: "Verification token mismatch" }, { status: 403 });
 }
 
-// 2. POST: Inbound customer message processing
+// 2. POST: Inbound customer message processing & AI response pipeline
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -57,52 +60,167 @@ export async function POST(request: NextRequest) {
             { phone: { contains: receiverPhone.slice(-10) } },
           ],
         },
-      });
-    }
-
-    // Match customer under the target business (or fallback to latest matching customer)
-    const customer = await prisma.customer.findFirst({
-      where: {
-        ...(business ? { businessId: business.id } : {}),
-        phone: { contains: fromPhone.slice(-10) },
-      },
-      include: { business: true },
-    });
-
-    if (customer) {
-      // Record incoming interaction log
-      await prisma.whatsAppLog.create({
-        data: {
-          businessId: customer.businessId,
-          recipient: fromPhone,
-          messageType: "INBOUND_REPLY",
-          content: messageBody,
-          status: "READ",
-          externalId: messageId,
+        include: {
+          services: { where: { isActive: true } },
+          workingHours: true,
+          knowledgeBases: { where: { isActive: true } },
         },
       });
-
-      // If customer asks to cancel or reschedule, handle intent gracefully
-      const lower = messageBody.toLowerCase();
-      if (lower.includes("cancel") || lower.includes("reschedule")) {
-        const latestBooking = await prisma.booking.findFirst({
-          where: {
-            customerId: customer.id,
-            status: "CONFIRMED",
-          },
-          orderBy: { createdAt: "desc" },
-        });
-
-        if (latestBooking && lower.includes("cancel")) {
-          await prisma.booking.update({
-            where: { id: latestBooking.id },
-            data: { status: "CANCELLED" },
-          });
-        }
-      }
     }
 
-    return NextResponse.json({ status: "EVENT_RECEIVED" }, { status: 200 });
+    // If business not found by receiver phone, find customer's associated business
+    if (!business) {
+      const existingCustomer = await prisma.customer.findFirst({
+        where: { phone: { contains: fromPhone.slice(-10) } },
+        include: {
+          business: {
+            include: {
+              services: { where: { isActive: true } },
+              workingHours: true,
+              knowledgeBases: { where: { isActive: true } },
+            },
+          },
+        },
+      });
+      business = existingCustomer?.business || null;
+    }
+
+    if (!business) {
+      console.warn("[WhatsApp Webhook] No registered business matched for phone:", fromPhone);
+      return NextResponse.json({ status: "UNMATCHED_BUSINESS" }, { status: 200 });
+    }
+
+    // 1. Upsert Conversation Thread
+    const conversation = await prisma.conversation.upsert({
+      where: {
+        businessId_customerPhone: {
+          businessId: business.id,
+          customerPhone: fromPhone,
+        },
+      },
+      update: {
+        lastMessageAt: new Date(),
+        unreadCount: { increment: 1 },
+      },
+      create: {
+        businessId: business.id,
+        customerPhone: fromPhone,
+        lastMessageAt: new Date(),
+        unreadCount: 1,
+      },
+    });
+
+    // 2. Save Customer's Incoming Message
+    await prisma.chatMessage.create({
+      data: {
+        conversationId: conversation.id,
+        sender: "CUSTOMER",
+        text: messageBody,
+        externalId: messageId,
+        status: "DELIVERED",
+      },
+    });
+
+    // 3. Log interaction in WhatsAppLog
+    await prisma.whatsAppLog.create({
+      data: {
+        businessId: business.id,
+        recipient: fromPhone,
+        messageType: "INBOUND_REPLY",
+        content: messageBody,
+        status: "READ",
+        externalId: messageId,
+      },
+    });
+
+    // 4. Human Handoff Check: Has staff paused the bot?
+    const lowerMessage = messageBody.toLowerCase();
+    const isHumanRequest =
+      lowerMessage.includes("human") ||
+      lowerMessage.includes("doctor") ||
+      lowerMessage.includes("staff") ||
+      lowerMessage.includes("reception") ||
+      lowerMessage.includes("baat karni hai") ||
+      lowerMessage.includes("call me");
+
+    if (isHumanRequest && !conversation.isBotPaused) {
+      // Pause bot for human takeover
+      await prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { isBotPaused: true },
+      });
+    }
+
+    // If bot is currently paused by staff, do NOT auto-reply
+    if (conversation.isBotPaused && !isHumanRequest) {
+      console.log(`[WhatsApp Webhook] Bot paused for conversation ${conversation.id}. Awaiting staff reply.`);
+      return NextResponse.json({ status: "BOT_PAUSED_STAFF_TAKEOVER" }, { status: 200 });
+    }
+
+    // 5. Generate Multilingual AI Reply
+    const chatHistory = await prisma.chatMessage.findMany({
+      where: { conversationId: conversation.id },
+      orderBy: { timestamp: "desc" },
+      take: 4,
+    });
+
+    const formattedHistory = chatHistory
+      .reverse()
+      .map((m) => ({
+        role: (m.sender === "CUSTOMER" ? "user" : "assistant") as "user" | "assistant",
+        content: m.text,
+      }));
+
+    const aiResult = await generateAIResponse(
+      messageBody,
+      {
+        businessName: business.name,
+        industry: business.industry,
+        address: business.address,
+        city: business.city,
+        services: business.services.map((s) => ({
+          name: s.name,
+          price: s.price,
+          duration: s.duration,
+          description: s.description,
+        })),
+        workingHours: business.workingHours.map((h) => ({
+          day: h.day,
+          openTime: h.openTime,
+          closeTime: h.closeTime,
+          isOpen: h.isOpen,
+        })),
+        knowledgeBase: business.knowledgeBases.map((k) => ({
+          question: k.question,
+          answer: k.answer,
+          category: k.category,
+        })),
+        bookingSlug: business.slug,
+      },
+      formattedHistory
+    );
+
+    // 6. Save Bot Reply to Thread
+    await prisma.chatMessage.create({
+      data: {
+        conversationId: conversation.id,
+        sender: "BOT",
+        text: aiResult.text,
+        status: "SENT",
+      },
+    });
+
+    // 7. Dispatch Outbound Message to Customer
+    await DocodoBackendAPI.dispatchWhatsAppMessage({
+      businessId: business.id,
+      recipientPhone: fromPhone,
+      messageType: "BROADCAST",
+      customMessage: aiResult.text,
+    }).catch((err) => {
+      console.warn("[WhatsApp Webhook] Outbound message dispatch notice:", err);
+    });
+
+    return NextResponse.json({ status: "AI_REPLY_SENT", provider: aiResult.providerUsed }, { status: 200 });
   } catch (error: any) {
     console.error("[WhatsApp Webhook Error]", error);
     return NextResponse.json({ status: "ERROR", error: error.message }, { status: 200 });

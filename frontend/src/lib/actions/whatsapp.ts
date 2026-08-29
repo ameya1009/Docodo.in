@@ -39,7 +39,7 @@ export async function saveWhatsAppConfigAction(rawInput: {
   businessId: string;
   whatsappPhone?: string;
   whatsappApiKey?: string;
-  botWebhookUrl?: string; // Botpress / BotPenguin / Custom Webhook integration
+  botWebhookUrl?: string;
 }) {
   const business = await requireBusinessOwnership(rawInput.businessId);
 
@@ -63,4 +63,107 @@ export async function getWhatsAppLogsAction(businessId: string) {
     orderBy: { timestamp: "desc" },
     take: 50,
   });
+}
+
+// ─── LIVE CONVERSATION & HUMAN HANDOFF ACTIONS ───────────────────────────────
+
+export async function getConversationsAction(businessId: string) {
+  await requireBusinessOwnership(businessId);
+
+  return prisma.conversation.findMany({
+    where: { businessId },
+    include: {
+      messages: {
+        orderBy: { timestamp: "desc" },
+        take: 1,
+      },
+    },
+    orderBy: { lastMessageAt: "desc" },
+    take: 30,
+  });
+}
+
+export async function getConversationMessagesAction(conversationId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    include: { business: true },
+  });
+
+  if (!conversation || conversation.business.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  // Mark unread count as 0
+  await prisma.conversation.update({
+    where: { id: conversationId },
+    data: { unreadCount: 0 },
+  });
+
+  return prisma.chatMessage.findMany({
+    where: { conversationId },
+    orderBy: { timestamp: "asc" },
+    take: 50,
+  });
+}
+
+export async function toggleBotPauseAction(conversationId: string, pause: boolean) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    include: { business: true },
+  });
+
+  if (!conversation || conversation.business.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  const updated = await prisma.conversation.update({
+    where: { id: conversationId },
+    data: { isBotPaused: pause },
+  });
+
+  revalidatePath("/dashboard/whatsapp");
+  return updated;
+}
+
+export async function sendStaffReplyAction(conversationId: string, text: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    include: { business: true },
+  });
+
+  if (!conversation || conversation.business.ownerId !== session.user.id) {
+    throw new Error("Forbidden");
+  }
+
+  // Save staff message to thread
+  const message = await prisma.chatMessage.create({
+    data: {
+      conversationId,
+      sender: "STAFF",
+      text: text.trim(),
+      status: "SENT",
+    },
+  });
+
+  // Dispatch message via Meta API / Backend
+  await DocodoBackendAPI.dispatchWhatsAppMessage({
+    businessId: conversation.businessId,
+    recipientPhone: conversation.customerPhone,
+    messageType: "BROADCAST",
+    customMessage: text.trim(),
+  }).catch((err) => {
+    console.warn("[Staff Reply Dispatch Notice]", err);
+  });
+
+  revalidatePath("/dashboard/whatsapp");
+  return message;
 }

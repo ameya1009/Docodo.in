@@ -10,11 +10,11 @@ export default async function WhatsAppPage() {
 
   const business = await prisma.business.findFirst({
     where: { ownerId: session.user.id },
-    select: { id: true, name: true, slug: true },
+    select: { id: true, name: true, slug: true, phone: true, whatsapp: true },
   });
   if (!business) redirect("/onboarding");
 
-  const [logs, customerCount] = await Promise.all([
+  const [logs, customerCount, conversations, knowledgeBases] = await Promise.all([
     prisma.whatsAppLog.findMany({
       where: { businessId: business.id },
       orderBy: { timestamp: "desc" },
@@ -23,6 +23,21 @@ export default async function WhatsAppPage() {
     prisma.customer.count({
       where: { businessId: business.id },
     }),
+    prisma.conversation.findMany({
+      where: { businessId: business.id },
+      include: {
+        messages: {
+          orderBy: { timestamp: "desc" },
+          take: 1,
+        },
+      },
+      orderBy: { lastMessageAt: "desc" },
+      take: 20,
+    }),
+    prisma.knowledgeBase.findMany({
+      where: { businessId: business.id },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
 
   return (
@@ -30,6 +45,8 @@ export default async function WhatsAppPage() {
       business={business}
       logs={logs}
       customerCount={customerCount}
+      initialConversations={conversations}
+      initialKnowledgeBases={knowledgeBases}
     />
   );
 }

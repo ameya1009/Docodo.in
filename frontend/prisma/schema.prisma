@@ -132,6 +132,8 @@ model Business {
   whatsappLogs WhatsAppLog[]
   codLedgers   CODLedger[]
   ndrDisputes  NDRDispute[]
+  knowledgeBases KnowledgeBase[]
+  conversations  Conversation[]
 }
 
 model WorkingHours {
@@ -345,3 +347,73 @@ model Enquiry {
 
   @@index([businessId, status])
 }
+
+// ─── KNOWLEDGE BASE FOR CONTEXTUAL AI ASSISTANT ──────────────────────────────
+
+model KnowledgeBase {
+  id          String   @id @default(cuid())
+  businessId  String
+  category    String   // SERVICES | TIMINGS | PRICING | LOCATION | FAQ | SAFETY
+  question    String
+  answer      String
+  tags        String?  // Stored as JSON string e.g. ["hindi", "fees"]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, category])
+}
+
+// ─── LIVE WHATSAPP CONVERSATIONS & HUMAN HANDOFF ──────────────────────────────
+
+model Conversation {
+  id              String    @id @default(cuid())
+  businessId      String
+  customerId      String?
+  customerPhone   String
+  customerName    String?
+  language        String    @default("hinglish") // en | hi | mr | hinglish
+  isBotPaused     Boolean   @default(false)      // Staff takeover flag
+  pausedUntil     DateTime?
+  lastMessageAt   DateTime  @default(now())
+  unreadCount     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  messages        ChatMessage[]
+
+  @@unique([businessId, customerPhone])
+  @@index([businessId, isBotPaused])
+}
+
+model ChatMessage {
+  id              String       @id @default(cuid())
+  conversationId  String
+  sender          String       // CUSTOMER | BOT | STAFF
+  text            String
+  externalId      String?      // Meta WhatsApp message ID
+  status          String       @default("DELIVERED") // SENT | DELIVERED | READ | FAILED
+  timestamp       DateTime     @default(now())
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, timestamp])
+}
+
+// ─── ZERO-COST AI KEY POOLS & ROTATION TELEMETRY ─────────────────────────────
+
+model AIKeyPool {
+  id            String    @id @default(cuid())
+  provider      String    // GROQ | GEMINI | OPENROUTER | CEREBRAS
+  maskedKey     String
+  encryptedKey  String
+  isActive      Boolean   @default(true)
+  cooldownUntil DateTime?
+  totalCalls    Int       @default(0)
+  failedCalls   Int       @default(0)
+  createdAt     DateTime  @default(now())
+}
+
