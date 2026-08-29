@@ -11,7 +11,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const business = await prisma.business.findUnique({
-    where: { slug, isPublished: true },
+    where: { slug },
     select: { name: true, industry: true, city: true, seoDesc: true, description: true },
   });
 
@@ -31,7 +31,7 @@ export default async function BookingPage({ params }: Props) {
   const { slug } = await params;
 
   const business = await prisma.business.findUnique({
-    where: { slug, isPublished: true },
+    where: { slug },
     include: {
       services: { where: { isActive: true }, orderBy: { order: "asc" } },
       staff: { where: { isActive: true } },

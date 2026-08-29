@@ -50,8 +50,8 @@ export default function BookingsClient({ business, bookings: initialBookings, to
       try {
         const res = await createBooking(payload);
         if (res && res.id) {
+          setBookings((prev) => [res, ...prev]);
           setShowCreateModal(false);
-          // Optimistically refresh or rely on server action revalidate
         }
       } catch (err) {
         console.error(err);
