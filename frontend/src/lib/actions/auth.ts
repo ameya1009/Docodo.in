@@ -4,7 +4,7 @@
 import { signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AuthError } from "next-auth";
-import { SignUpSchema, LoginSchema } from "@/lib/validations/auth";
+import { SignUpSchema, LoginSchema, ResetPasswordSchema } from "@/lib/validations/auth";
 import { sanitizeEmail } from "@/lib/engines/auth-engine";
 
 function isNextRedirect(error: any): boolean {
@@ -87,5 +87,30 @@ export async function loginAction(formData: FormData) {
       }
     }
     throw err;
+  }
+}
+
+export async function requestPasswordResetAction(formData: FormData) {
+  const raw = {
+    email: formData.get("email") as string,
+  };
+
+  const parsed = ResetPasswordSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const email = sanitizeEmail(parsed.data.email);
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    // In production, generate secure reset token and send transactional email.
+    // For anti-enumeration defense, return standard success message regardless of existence.
+    return {
+      success: true,
+      message: "If an account exists with this email address, password reset instructions have been sent.",
+    };
+  } catch (err: any) {
+    return { error: "Unable to process password reset request at this time. Please try again later." };
   }
 }

@@ -38,6 +38,29 @@ describe("Priority 2: Authentication Engine - Validation & Business Logic Tests"
     });
   });
 
+  describe("ResetPasswordSchema Validation", () => {
+    it("accepts valid registered email for password reset", () => {
+      const input = { email: "founder@docodo.in" };
+      const res = ResetPasswordSchema.safeParse(input);
+      expect(res.success).toBe(true);
+    });
+
+    it("rejects invalid email formats for password reset", () => {
+      const input = { email: "not-an-email" };
+      const res = ResetPasswordSchema.safeParse(input);
+      expect(res.success).toBe(false);
+      if (!res.success) {
+        expect(res.error.issues[0].message).toContain("email");
+      }
+    });
+
+    it("rejects empty email submission", () => {
+      const input = { email: "" };
+      const res = ResetPasswordSchema.safeParse(input);
+      expect(res.success).toBe(false);
+    });
+  });
+
   describe("Authentication Business Logic (auth-engine)", () => {
     it("sanitizes email casing and trims surrounding whitespaces", () => {
       expect(sanitizeEmail("   User@Company.IN   ")).toBe("user@company.in");

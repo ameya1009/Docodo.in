@@ -157,6 +157,12 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
             },
           };
 
+          if (typeof window === "undefined" || !(window as any).Razorpay) {
+            console.error("Razorpay SDK is not loaded.");
+            alert("Payment gateway is temporarily unavailable. Please check your internet connection or reload the page.");
+            return;
+          }
+
           const rzp = new (window as any).Razorpay(options);
           rzp.on("payment.failed", function (response: any) {
             console.error("Payment failed:", response.error);
@@ -313,7 +319,6 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                   e.preventDefault();
                   if (!enquiryForm.name.trim() || !enquiryForm.phone.trim()) {
                     setEnquiryError("Please provide your Name and Phone number.");
-                    return;
                   }
                   setEnquiryError("");
                   startTransition(async () => {

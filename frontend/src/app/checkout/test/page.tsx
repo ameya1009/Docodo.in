@@ -100,6 +100,12 @@ export default function RazorpayTestCheckoutPage() {
         },
       };
 
+      if (typeof window === "undefined" || !(window as any).Razorpay) {
+        setLoading(false);
+        setErrorMessage("Razorpay SDK failed to load. Please check your internet connection or reload the page.");
+        return;
+      }
+
       const rzp = new (window as any).Razorpay(options);
 
       rzp.on("payment.failed", function (response: any) {
