@@ -144,23 +144,24 @@ export async function getDashboardData() {
   const monthlyRevenue = calculateTotalRevenue(monthlyRecords);
 
   return {
-    business,
-    upcomingBookings,
-    recentBookings: business.bookings,
+    business: business || {},
+    upcomingBookings: upcomingBookings || [],
+    recentBookings: (business && business.bookings) || [],
     recentEnquiries: recentEnquiries || [],
     stats: {
-      todayBookings: todayBookingsCount,
-      monthlyRevenue,
-      totalRevenue,
-      customers: customerCount,
-      activeServices: business.services.length,
-      completionRate,
-      averageOrderValue,
-      statusBreakdown,
-      revenueByDate,
+      todayBookings: todayBookingsCount || 0,
+      monthlyRevenue: monthlyRevenue || 0,
+      totalRevenue: totalRevenue || 0,
+      customers: customerCount || 0,
+      activeServices: (business?.services || []).length,
+      completionRate: completionRate || 0,
+      averageOrderValue: averageOrderValue || 0,
+      statusBreakdown: statusBreakdown || {},
+      revenueByDate: revenueByDate || [],
     },
   };
 }
+
 
 export async function getDashboardStatsAction(rawInput: {
   businessId: string;

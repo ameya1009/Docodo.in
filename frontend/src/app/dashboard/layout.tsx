@@ -21,10 +21,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <DashboardLayoutClient
       user={session.user}
-      businessName={business.name}
-      businessSlug={business.slug}
+      businessName={business?.name || "My Business"}
+      businessSlug={business?.slug || "my-business"}
     >
       {children}
     </DashboardLayoutClient>
   );
 }
+
