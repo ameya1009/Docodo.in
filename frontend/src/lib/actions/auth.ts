@@ -1,4 +1,4 @@
-// Server Actions — Auth with production Zod validation & sanitization
+// Server Actions — Auth with production Zod validation, Supabase & database error resiliency
 "use server";
 
 import { signIn } from "@/lib/auth";
@@ -32,24 +32,49 @@ export async function signUpAction(formData: FormData) {
   const { name, password } = parsed.data;
   const email = sanitizeEmail(parsed.data.email);
 
-  const exists = await prisma.user.findUnique({ where: { email } });
-  if (exists) return { error: "An account with this email already exists. Please sign in instead." };
+  let exists = null;
+  try {
+    exists = await prisma.user.findUnique({ where: { email } });
+  } catch (dbErr: any) {
+    console.error("[SignUpAction] DB Lookup Error:", dbErr);
+    if (dbErr?.message?.includes("P1001") || dbErr?.message?.includes("Can't reach database")) {
+      return { 
+        error: "Cannot connect to database. Please make sure your Supabase PostgreSQL DATABASE_URL is configured in .env.local." 
+      };
+    }
+    return { error: "Database service error. Please check your connection." };
+  }
+
+  if (exists) {
+    return { error: "An account with this email already exists. Please sign in instead." };
+  }
 
   const bcrypt = await import("bcryptjs");
   const hashed = await bcrypt.hash(password, 12);
 
-  await prisma.user.create({
-    data: { name, email, password: hashed },
-  });
+  try {
+    await prisma.user.create({
+      data: { name, email, password: hashed },
+    });
+  } catch (dbErr: any) {
+    console.error("[SignUpAction] DB Create Error:", dbErr);
+    return {
+      error: "Failed to create user in database. Please check database permissions."
+    };
+  }
 
   // Auto sign-in after signup
   try {
-    await signIn("credentials", { email, password, redirectTo: "/onboarding" });
-    return { success: true };
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/onboarding",
+    });
+    return { success: true, redirectTo: "/onboarding" };
   } catch (err) {
     if (isNextRedirect(err)) throw err;
     if (err instanceof AuthError) {
-      return { error: "Account created successfully. Please sign in on the login page." };
+      return { success: true, redirectTo: "/auth/login", message: "Account created! Please sign in." };
     }
     throw err;
   }
@@ -75,8 +100,8 @@ export async function loginAction(formData: FormData) {
       password,
       redirectTo: "/dashboard",
     });
-    return { success: true };
-  } catch (err) {
+    return { success: true, redirectTo: "/dashboard" };
+  } catch (err: any) {
     if (isNextRedirect(err)) throw err;
     if (err instanceof AuthError) {
       switch (err.type) {
@@ -85,6 +110,9 @@ export async function loginAction(formData: FormData) {
         default:
           return { error: "Authentication failed. Please verify your credentials and try again." };
       }
+    }
+    if (err?.message?.includes("P1001") || err?.message?.includes("Can't reach database") || err?.message?.includes("connect")) {
+      return { error: "Cannot reach database server. Please check your DATABASE_URL in .env.local." };
     }
     throw err;
   }
@@ -103,9 +131,7 @@ export async function requestPasswordResetAction(formData: FormData) {
   const email = sanitizeEmail(parsed.data.email);
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    // In production, generate secure reset token and send transactional email.
-    // For anti-enumeration defense, return standard success message regardless of existence.
+    await prisma.user.findUnique({ where: { email } });
     return {
       success: true,
       message: "If an account exists with this email address, password reset instructions have been sent.",

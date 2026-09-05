@@ -2,12 +2,13 @@
 
 import React, { useState, useTransition, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShieldCheck, AlertCircle } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth";
 
 function LoginForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlError = searchParams?.get("error");
 
@@ -28,12 +29,21 @@ function LoginForm() {
         const result = await loginAction(fd);
         if (result?.error) {
           setError(result.error);
+          return;
+        }
+        if (result?.success) {
+          router.push(result.redirectTo || "/dashboard");
+          router.refresh();
         }
       } catch (err: any) {
-        // If it's a redirect, next handles it; otherwise show error
-        if (err?.message && !err.message.includes("NEXT_REDIRECT")) {
-          setError("Failed to sign in. Please verify your email and password.");
+        // Next.js redirect thrown is expected behavior when redirecting
+        if (
+          err?.digest?.startsWith?.("NEXT_REDIRECT") ||
+          err?.message?.includes?.("NEXT_REDIRECT")
+        ) {
+          return;
         }
+        setError(err?.message || "Failed to sign in. Please verify your email and password.");
       }
     });
   };
@@ -50,7 +60,7 @@ function LoginForm() {
           <span className="text-2xl font-black text-[var(--lime)] font-display tracking-tight">Docodo</span>
         </Link>
         <h1 className="text-3xl font-black text-[var(--text-primary)] mb-2 font-display">Merchant Portal</h1>
-        <p className="text-[var(--text-secondary)] text-sm">Sign in with your email &amp; password</p>
+        <p className="text-[var(--text-secondary)] text-sm">Sign in to your Docodo business dashboard</p>
       </div>
 
       {/* Card */}
@@ -101,13 +111,14 @@ function LoginForm() {
 
           {/* Error Feedback */}
           {error && (
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-[var(--danger)] text-sm bg-[var(--danger)]/10 rounded-xl px-3.5 py-2.5 border border-[var(--danger)]/20 font-medium"
+              className="text-[var(--danger)] text-xs bg-[var(--danger)]/10 rounded-xl p-3 border border-[var(--danger)]/20 font-medium flex items-start gap-2"
             >
-              {error}
-            </motion.p>
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </motion.div>
           )}
 
           <button
@@ -124,7 +135,7 @@ function LoginForm() {
         </form>
 
         <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-center gap-1.5 text-[11px] text-[var(--text-muted)] font-mono">
-          <ShieldCheck size={14} className="text-[var(--lime)]" /> Secure Database Connection
+          <ShieldCheck size={14} className="text-[var(--lime)]" /> Supabase &amp; Database Connected
         </div>
       </div>
 

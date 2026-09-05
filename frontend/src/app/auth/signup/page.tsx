@@ -2,12 +2,13 @@
 
 import React, { useState, useTransition, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { signUpAction } from "@/lib/actions/auth";
 
 function SignupForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlError = searchParams?.get("error");
 
@@ -28,11 +29,20 @@ function SignupForm() {
         const result = await signUpAction(fd);
         if (result?.error) {
           setError(result.error);
+          return;
+        }
+        if (result?.success) {
+          router.push(result.redirectTo || "/onboarding");
+          router.refresh();
         }
       } catch (err: any) {
-        if (err?.message && !err.message.includes("NEXT_REDIRECT")) {
-          setError("Failed to create account. Please try again.");
+        if (
+          err?.digest?.startsWith?.("NEXT_REDIRECT") ||
+          err?.message?.includes?.("NEXT_REDIRECT")
+        ) {
+          return;
         }
+        setError(err?.message || "Failed to create account. Please try again.");
       }
     });
   };
@@ -77,9 +87,10 @@ function SignupForm() {
           </div>
 
           {error && (
-            <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-[var(--danger)] text-sm bg-[var(--danger)]/10 rounded-xl px-3.5 py-2.5 border border-[var(--danger)]/20 font-medium">
-              {error}
-            </motion.p>
+            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-[var(--danger)] text-xs bg-[var(--danger)]/10 rounded-xl p-3 border border-[var(--danger)]/20 font-medium flex items-start gap-2">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </motion.div>
           )}
 
           <button type="submit" disabled={isPending} className="w-full py-3.5 bg-[var(--lime)] text-[var(--bg-void)] font-bold rounded-xl hover:bg-[var(--lime-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-2 shadow-[var(--lime-glow-md)] active:scale-[0.99]">
