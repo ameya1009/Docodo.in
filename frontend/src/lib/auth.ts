@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/supabase-db";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
 
@@ -12,7 +11,6 @@ const credentialsSchema = z.object({
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   trustHost: true,
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "docodo-production-auth-secret-key-32-chars-minimum",
@@ -30,7 +28,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const { email, password } = parsed.data;
         const normalizedEmail = email.trim().toLowerCase();
 
-        const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+        const user = await db.user.findUnique({ where: { email: normalizedEmail } });
         if (!user || !user.password) return null;
 
         const bcrypt = await import("bcryptjs");
@@ -62,9 +60,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const userId = (token.id as string) || (user?.id as string);
       if (userId && (!token.businessId || token.onboardingComplete === false)) {
         try {
-          const business = await prisma.business.findFirst({
+          const business = await db.business.findFirst({
             where: { ownerId: userId },
-            select: { id: true, slug: true, onboardingComplete: true },
           });
           if (business) {
             token.businessId = business.id;
@@ -88,3 +85,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
