@@ -41,9 +41,10 @@ export default function RazorpayTestCheckoutPage() {
 
       // 2. Open Razorpay Standard Checkout Modal
       const options = {
-        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TTbtYssAaEGkng",
+        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TYMe9ixNLSC05R",
         amount: orderData.amount,
         currency: orderData.currency,
+
         name: "Docodo Test Merchant",
         description: `Test Payment of ₹${amount}`,
         order_id: orderData.order_id,
