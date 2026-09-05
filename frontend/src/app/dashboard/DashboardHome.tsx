@@ -116,8 +116,119 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
         })}
       </div>
 
+      {/* Autonomous Growth & Revenue Progress Engine */}
+      <div className="p-6 bg-[var(--bg-surface)] border border-[var(--lime)]/30 rounded-3xl shadow-xl space-y-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[var(--lime)]/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--lime-ghost)] text-[var(--lime)] text-xs font-mono font-bold uppercase mb-2 border border-[var(--lime)]/30">
+              <Sparkles size={13} /> ₹1,00,000/Mo Automation & Growth Engine
+            </div>
+            <h2 className="text-xl font-black text-[var(--text-primary)] font-display">
+              Autonomous Client Acquisition & Monetization Trackers
+            </h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/tools/whatsapp-nurturer"
+              className="px-3.5 py-2 rounded-xl bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-colors"
+            >
+              <MessageSquare size={14} /> Auto WhatsApp Funnel
+            </Link>
+            <Link
+              href="/dashboard/ai-content"
+              className="px-3.5 py-2 rounded-xl bg-[var(--lime)] text-black hover:bg-[var(--lime-hover)] font-bold text-xs flex items-center gap-1.5 transition-colors shadow-[var(--lime-glow-sm)]"
+            >
+              <Sparkles size={14} /> AI Marketing Suite
+            </Link>
+          </div>
+        </div>
+
+        {/* 4 Interactive Growth Progress Trackers */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* 1. Marketing & Lead Capture */}
+          <div className="p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border-subtle)] space-y-3 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[var(--text-secondary)] mb-1">
+                <span>Marketing &amp; Leads</span>
+                <span className="text-[var(--lime)] font-mono">85% Ready</span>
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)]">Instagram Bio + Google Maps booking link active</p>
+              <div className="w-full h-2 bg-[var(--bg-surface)] rounded-full overflow-hidden mt-3 border border-[var(--border-subtle)]">
+                <div className="h-full bg-[var(--lime)] rounded-full transition-all duration-1000" style={{ width: "85%" }} />
+              </div>
+            </div>
+            <Link href="/dashboard/website" className="text-[11px] font-bold text-[var(--lime)] hover:underline flex items-center gap-1 pt-1">
+              Customize Storefront <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          {/* 2. Monthly Revenue Milestone (Target: ₹1,00,000) */}
+          <div className="p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border-subtle)] space-y-3 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[var(--text-secondary)] mb-1">
+                <span>Monthly ₹1L Milestone</span>
+                <span className="text-emerald-400 font-mono">
+                  {Math.min(100, Math.round(((stats.monthlyRevenue || 0) / 100000) * 100))}%
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                {formatCurrency(stats.monthlyRevenue || 0)} / ₹1,00,000 monthly run-rate
+              </p>
+              <div className="w-full h-2 bg-[var(--bg-surface)] rounded-full overflow-hidden mt-3 border border-[var(--border-subtle)]">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-[var(--lime)] rounded-full transition-all duration-1000"
+                  style={{ width: `${Math.min(100, Math.max(8, Math.round(((stats.monthlyRevenue || 0) / 100000) * 100)))}%` }}
+                />
+              </div>
+            </div>
+            <Link href="/dashboard/analytics" className="text-[11px] font-bold text-emerald-400 hover:underline flex items-center gap-1 pt-1">
+              View Revenue Funnel <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          {/* 3. Client Retention & Fulfillment */}
+          <div className="p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border-subtle)] space-y-3 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[var(--text-secondary)] mb-1">
+                <span>Client Fulfillment</span>
+                <span className="text-blue-400 font-mono">{stats.completionRate ?? 95}%</span>
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                {stats.customers || 0} Clients · 0 Double-Booking Shield
+              </p>
+              <div className="w-full h-2 bg-[var(--bg-surface)] rounded-full overflow-hidden mt-3 border border-[var(--border-subtle)]">
+                <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${stats.completionRate ?? 95}%` }} />
+              </div>
+            </div>
+            <Link href="/dashboard/customers" className="text-[11px] font-bold text-blue-400 hover:underline flex items-center gap-1 pt-1">
+              Manage Client LTV <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          {/* 4. WhatsApp & Social Automation */}
+          <div className="p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border-subtle)] space-y-3 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-[var(--text-secondary)] mb-1">
+                <span>Social Automation</span>
+                <span className="text-purple-400 font-mono">92% Live</span>
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)]">24h Reminders + AI Auto-Replies Active</p>
+              <div className="w-full h-2 bg-[var(--bg-surface)] rounded-full overflow-hidden mt-3 border border-[var(--border-subtle)]">
+                <div className="h-full bg-purple-500 rounded-full transition-all duration-1000" style={{ width: "92%" }} />
+              </div>
+            </div>
+            <Link href="/dashboard/whatsapp" className="text-[11px] font-bold text-purple-400 hover:underline flex items-center gap-1 pt-1">
+              WhatsApp Inbox &amp; AI <ArrowRight size={12} />
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Upcoming Bookings */}
+
         <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden shadow-sm">
           <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
             <h2 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
