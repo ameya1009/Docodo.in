@@ -47,9 +47,10 @@ export const PricingSection = () => {
 
       // 2. Open Razorpay Standard Checkout Modal
       const options = {
-        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TYMe9ixNLSC05R",
+        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TYNYidAYRzZg9P",
         amount: orderData.amount,
         currency: orderData.currency,
+
         name: "Docodo India",
         description: `${plan.name} Subscription (${plan.period})`,
         order_id: orderData.order_id,
