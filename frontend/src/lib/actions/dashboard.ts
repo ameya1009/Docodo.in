@@ -367,10 +367,14 @@ export async function generateAIPost(type: string) {
   if (!businessData) throw new Error("Business not found");
 
   const prompts: Record<string, string> = {
-    INSTAGRAM: `Create an engaging Instagram post for ${businessData.name}, a ${businessData.industry} business. Include emojis, a call-to-action, and 5-7 relevant hashtags. Keep it warm and professional for an Indian audience.`,
-    WHATSAPP: `Create a WhatsApp promotional message for ${businessData.name}, a ${businessData.industry}. Keep it concise, friendly, and add a clear call-to-action. Max 200 words.`,
-    BLOG: `Write a helpful blog article outline (300 words) for ${businessData.name} about tips related to ${businessData.industry}. Include an SEO-friendly title and 3-4 key sections.`,
-    FAQ: `Generate 5 common customer FAQs with answers for ${businessData.name}, a ${businessData.industry} business in India.`,
+    INSTAGRAM: `Create an engaging Instagram post for ${businessData.name}, a ${businessData.industry} business in India. Include emojis, engaging hooks, a clear call-to-action to book at docodo.in/book/${businessData.slug}, and 5-7 relevant hashtags.`,
+    REEL_SCRIPT: `Write a viral 30-45 second Instagram Reel Script for ${businessData.name}, a premier ${businessData.industry} business in India.\n\nStructure:\n1. ⚡ 3-Second Scroll-Stopping Hook (Spoken + Visual text on screen)\n2. 💡 Problem / Agitation (Common pain point customers face)\n3. ✨ The Transformation / Secret (How ${businessData.name} delivers results)\n4. 🚀 Direct Call-to-Action (e.g., 'DM \"BOOK\" or tap link in bio to book your slot')\n5. 🎵 Suggested Audio Vibe & B-Roll Visual Direction`,
+    CAROUSEL_POST: `Create a high-retention 5-Slide Instagram Carousel Blueprint for ${businessData.name} (${businessData.industry} in India).\n\nStructure:\n- Slide 1: Bold Hook Headline & Curiosity Subtitle\n- Slide 2: The #1 Mistake People Make\n- Slide 3: Step 1 / Actionable Technique\n- Slide 4: Step 2 / Pro Transformation Tip\n- Slide 5: Recap & CTA (Save this post & book at docodo.in/book/${businessData.slug})\n\nInclude a full caption with emojis and 8 high-reach hashtags.`,
+    WHATSAPP: `Create a personalized, high-converting WhatsApp promotional message for ${businessData.name} (${businessData.industry}). Keep it concise, friendly, include an irresistible limited-time offer, and add a direct booking link: docodo.in/book/${businessData.slug}. Max 150 words.`,
+    WHATSAPP_BROADCAST: `Create a high-impact VIP WhatsApp Broadcast for existing and new clients of ${businessData.name} (${businessData.industry}). Announce a priority slot opening/exclusive perk with 1-click booking link docodo.in/book/${businessData.slug}. Professional, warm, and urgent.`,
+    DM_AUTO_REPLY: `Write a 3-step high-converting Instagram DM & WhatsApp Auto-Response flow for ${businessData.name} (${businessData.industry}) when a prospect asks for prices, location, or appointment availability. Keep it friendly, empathetic, Indian conversational style, and guide them directly to book at docodo.in/book/${businessData.slug}.`,
+    BLOG: `Write a helpful blog article outline (300 words) for ${businessData.name} about expert tips related to ${businessData.industry}. Include an SEO-friendly title, key insights, and a booking CTA.`,
+    FAQ: `Generate 5 common customer FAQs with crisp answers for ${businessData.name}, a ${businessData.industry} business in India, addressing pricing, booking procedure, and location.`,
     REVIEW_REPLY: `Write a professional, warm response to a 5-star Google review for ${businessData.name}. Thank the customer, mention specific service quality, and invite them back.`,
   };
 
@@ -380,13 +384,17 @@ export async function generateAIPost(type: string) {
     "DESCRIPTION",
     "SEO",
     "INSTAGRAM",
+    "REEL_SCRIPT",
+    "CAROUSEL_POST",
     "WHATSAPP_CAMPAIGN",
+    "WHATSAPP_BROADCAST",
+    "DM_AUTO_REPLY",
     "FAQ",
     "REVIEW_REPLY",
   ] as const;
   type AIContentType = (typeof validTypes)[number];
   const mappedType: AIContentType =
-    type === "WHATSAPP"
+    type === "WHATSAPP" || type === "WHATSAPP_BROADCAST"
       ? "WHATSAPP_CAMPAIGN"
       : validTypes.includes(type as AIContentType)
       ? (type as AIContentType)

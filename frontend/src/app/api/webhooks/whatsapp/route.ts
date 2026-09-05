@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateAIResponse } from "@/lib/engines/ai-engine";
 import { DocodoBackendAPI } from "@/lib/api-client";
+import { sendAdminNotification } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -149,6 +150,14 @@ export async function POST(request: NextRequest) {
         where: { id: conversation.id },
         data: { isBotPaused: true },
       });
+
+      sendAdminNotification("ENQUIRY", {
+        channel: "WHATSAPP_HANDOFF",
+        customerPhone: fromPhone,
+        businessName: business.name,
+        message: messageBody,
+        timestamp: new Date().toISOString(),
+      }).catch(() => {});
     }
 
     // If bot is currently paused by staff, do NOT auto-reply

@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 
 export interface AIGenerationParams {
   businessId?: string;
-  type: "DESCRIPTION" | "SEO" | "INSTAGRAM" | "WHATSAPP_CAMPAIGN" | "FAQ" | "REVIEW_REPLY";
+  type: "DESCRIPTION" | "SEO" | "INSTAGRAM" | "REEL_SCRIPT" | "CAROUSEL_POST" | "WHATSAPP_CAMPAIGN" | "WHATSAPP_BROADCAST" | "DM_AUTO_REPLY" | "FAQ" | "REVIEW_REPLY" | string;
   prompt: string;
   industry?: string;
   name?: string;

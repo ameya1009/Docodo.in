@@ -2,16 +2,20 @@
 
 import React, { useState, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Copy, Check, Loader2, RefreshCw, Instagram, MessageSquare, FileText, HelpCircle, Star } from "lucide-react";
+import { Sparkles, Copy, Check, Loader2, RefreshCw, Instagram, MessageSquare, FileText, HelpCircle, Star, Video, Layers, Send, MessageCircle } from "lucide-react";
 import { generateAIPost } from "@/lib/actions/dashboard";
 import { cn } from "@/lib/utils";
 
 const CONTENT_TYPES = [
-  { id: "INSTAGRAM", label: "Instagram Post", icon: Instagram, description: "Engaging post with emojis & hashtags", color: "text-pink-400", bg: "bg-pink-400/10" },
-  { id: "WHATSAPP", label: "WhatsApp Campaign", icon: MessageSquare, description: "Promotional broadcast message", color: "text-[var(--success)]", bg: "bg-[var(--success)]/10" },
-  { id: "BLOG", label: "Blog Article", icon: FileText, description: "SEO-optimised blog content outline", color: "text-blue-400", bg: "bg-blue-400/10" },
-  { id: "FAQ", label: "FAQ Section", icon: HelpCircle, description: "Common customer questions answered", color: "text-purple-400", bg: "bg-purple-400/10" },
-  { id: "REVIEW_REPLY", label: "Review Reply", icon: Star, description: "Professional response to 5-star reviews", color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10" },
+  { id: "REEL_SCRIPT", label: "Instagram Reel Script", icon: Video, description: "3s hook, B-roll cues, trending audio & CTA", color: "text-amber-400", bg: "bg-amber-400/10" },
+  { id: "CAROUSEL_POST", label: "Instagram Carousel", icon: Layers, description: "5-slide high-retention blueprint & caption", color: "text-purple-400", bg: "bg-purple-400/10" },
+  { id: "INSTAGRAM", label: "Instagram Post", icon: Instagram, description: "Engaging single post with emojis & hashtags", color: "text-pink-400", bg: "bg-pink-400/10" },
+  { id: "WHATSAPP_BROADCAST", label: "WhatsApp Broadcast", icon: Send, description: "VIP broadcast with 1-tap booking link", color: "text-emerald-400", bg: "bg-emerald-400/10" },
+  { id: "DM_AUTO_REPLY", label: "DM Closing Sequence", icon: MessageCircle, description: "3-step lead-to-client booking script", color: "text-cyan-400", bg: "bg-cyan-400/10" },
+  { id: "WHATSAPP", label: "WhatsApp Promo", icon: MessageSquare, description: "Concise offer broadcast message", color: "text-[var(--success)]", bg: "bg-[var(--success)]/10" },
+  { id: "BLOG", label: "SEO Blog Article", icon: FileText, description: "Rank on Google with local search intent", color: "text-blue-400", bg: "bg-blue-400/10" },
+  { id: "FAQ", label: "Customer FAQ", icon: HelpCircle, description: "Common customer questions answered", color: "text-indigo-400", bg: "bg-indigo-400/10" },
+  { id: "REVIEW_REPLY", label: "5-Star Review Reply", icon: Star, description: "Professional response to positive reviews", color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10" },
 ];
 
 interface AIContentClientProps {
