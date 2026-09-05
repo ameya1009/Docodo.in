@@ -1,195 +1,112 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { Card } from "@/components/ui/Card";
-import { ChatBubble } from "@/components/ui/SpecialtyComponents";
-import { PAIN_POINTS } from "@/lib/constants";
+import { 
+  MessageSquareOff, 
+  CalendarX, 
+  HelpCircle, 
+  Database, 
+  BellOff, 
+  Link2Off,
+  ArrowRight,
+  Clock,
+  UserX,
+  MessageSquare,
+  Instagram
+} from "lucide-react";
+import { PROBLEM_SECTION } from "@/lib/constants";
 
 export const PainPoints = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const section1 = useRef<HTMLDivElement>(null);
-  const section2 = useRef<HTMLDivElement>(null);
-  const section3 = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const sections = [section1.current, section2.current, section3.current];
-      
-      // Pin the main container
-      ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: "top top",
-        end: "+=300%",
-        pin: true,
-        scrub: 1,
-      });
-
-      // Animate between sections
-      sections.forEach((section, i) => {
-        if (i === 0) return; // First section is visible by default
-
-        gsap.fromTo(section, 
-          { x: "100%", opacity: 0 },
-          { 
-            x: "0%", 
-            opacity: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: `${i * 100}% top`,
-              end: `${(i + 1) * 100}% top`,
-              scrub: true,
-            }
-          }
-        );
-
-        // Slide out the previous section
-        gsap.to(sections[i - 1], {
-          x: "-20%",
-          opacity: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: `${i * 100}% top`,
-            end: `${(i + 1) * 100}% top`,
-            scrub: true,
-          }
-        });
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+  const iconMap: Record<string, any> = {
+    MessageSquareOff,
+    CalendarX,
+    HelpCircle,
+    Database,
+    BellOff,
+    Link2Off,
+    Instagram,
+    MessageSquare,
+    Clock,
+    UserX,
+  };
 
   return (
-    <div ref={containerRef} className="relative h-screen bg-[var(--bg-void)] overflow-hidden">
-      {/* Scene 1: The Missed Lead */}
-      <div ref={section1} className="absolute inset-0 flex items-center justify-center">
-        <div className="container grid md:grid-cols-2 gap-12 items-center">
-          <div className="order-2 md:order-1 flex flex-col gap-8">
-            <div className="p-6 bg-[#0B0E11] rounded-[var(--radius-xl)] border border-white/5 shadow-2xl max-w-sm mx-auto md:mx-0">
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-xs font-bold text-[var(--text-muted)]">WhatsApp</span>
-                <span className="text-[10px] text-[var(--text-muted)] font-mono">11:47 PM</span>
-              </div>
-              <ChatBubble direction="in">Hi, is appointment available tomorrow?</ChatBubble>
-              <ChatBubble direction="in">Anyone there?</ChatBubble>
-              <ChatBubble direction="in">Never mind, going to XYZ clinic</ChatBubble>
-              <motion.div 
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="mt-6 px-4 py-2 bg-red-500/20 border border-red-500/30 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-full text-center"
-              >
-                Lead Lost
-              </motion.div>
-            </div>
-          </div>
-          <div className="order-1 md:order-2 text-center md:text-left">
-            <h2 className="text-3xl md:text-5xl mb-6">{PAIN_POINTS[0].headline}</h2>
-            <p className="text-[var(--text-secondary)] text-lg">{PAIN_POINTS[0].sub}</p>
+    <section className="py-24 bg-[var(--bg-elevated)]/40 border-y border-[var(--border-subtle)] relative overflow-hidden">
+      <div className="container">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-red-400 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20 mb-3 inline-block">
+            The Cost of Inaction
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-display font-black text-[var(--text-primary)] tracking-tight mb-4">
+            {PROBLEM_SECTION.headline}
+          </h2>
+          <p className="text-base sm:text-lg text-[var(--text-secondary)]">
+            {PROBLEM_SECTION.subheadline}
+          </p>
+        </div>
+
+        {/* The Current Reality: 4-Step Lost Customer Flow */}
+        <div className="max-w-4xl mx-auto mb-16 p-6 sm:p-8 bg-[var(--bg-surface)] border border-red-500/20 rounded-3xl shadow-xl">
+          <p className="text-xs font-bold text-red-400 uppercase tracking-wider mb-6 text-center font-mono">
+            ⚠️ The Anatomy of a Lost Customer
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 relative">
+            {PROBLEM_SECTION.flow.map((step, idx) => {
+              const Icon = iconMap[step.icon] || MessageSquare;
+              return (
+                <div key={idx} className="flex flex-col items-center text-center p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] relative group hover:border-red-500/40 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center mb-3">
+                    {Icon && <Icon className="w-5 h-5" />}
+                  </div>
+                  <h4 className="font-bold text-sm text-[var(--text-primary)] mb-1">{step.title}</h4>
+                  <p className="text-xs text-[var(--text-muted)] leading-snug">{step.desc}</p>
+
+                  {idx < PROBLEM_SECTION.flow.length - 1 && (
+                    <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 text-[var(--border-default)] z-10">
+                      <ArrowRight size={16} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
 
-      {/* Scene 2: The Excel Chaos */}
-      <div ref={section2} className="absolute inset-0 flex items-center justify-center">
-        <div className="container grid md:grid-cols-2 gap-12 items-center">
-          <div className="text-center md:text-left">
-            <h2 className="text-3xl md:text-5xl mb-6">{PAIN_POINTS[1].headline}</h2>
-            <p className="text-[var(--text-secondary)] text-lg">{PAIN_POINTS[1].sub}</p>
-          </div>
-          <div className="flex flex-col gap-8">
-            <Card variant="elevated" className="p-0 overflow-hidden border border-white/5">
-              <div className="bg-[var(--bg-surface)] p-4 border-b border-[var(--border-subtle)] flex gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500/50" />
-                <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
-                <div className="w-2 h-2 rounded-full bg-green-500/50" />
-              </div>
-              <div className="p-4 font-mono text-[10px]">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="text-[var(--text-muted)]">
-                      <th className="pb-4">Name</th>
-                      <th className="pb-4">Status</th>
-                      <th className="pb-4">Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-[var(--text-secondary)]">
-                    <tr className="border-t border-white/5">
-                      <td className="py-3">Rahul S.</td>
-                      <td><span className="px-2 py-0.5 bg-red-500/10 text-red-500 rounded">Lost</span></td>
-                      <td className="line-through">Forgot to call back</td>
-                    </tr>
-                    <tr className="border-t border-white/5">
-                      <td className="py-3">Priya K.</td>
-                      <td><span className="px-2 py-0.5 bg-yellow-500/10 text-yellow-500 rounded">Cold</span></td>
-                      <td>Wait... who is this?</td>
-                    </tr>
-                    <tr className="border-t border-white/5">
-                      <td className="py-3">Amit M.</td>
-                      <td><span className="px-2 py-0.5 bg-red-500/10 text-red-500 rounded">Missed</span></td>
-                      <td className="line-through">Call not picked up</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Scene 3: The 4-Job Burnout */}
-      <div ref={section3} className="absolute inset-0 flex items-center justify-center">
-        <div className="container grid md:grid-cols-2 gap-12 items-center">
-          <div className="order-2 md:order-1 relative h-80 flex items-center justify-center">
-            {/* Person Icon */}
-            <div className="absolute w-20 h-20 bg-[var(--bg-elevated)] rounded-full flex items-center justify-center text-[var(--text-muted)]">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
-            </div>
-            {/* Drifting Jobs */}
-            {['Sales', 'Support', 'Marketing', 'Billing'].map((job, i) => (
+        {/* 6 Problem Detail Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {PROBLEM_SECTION.painPoints.map((item, idx) => {
+            const Icon = iconMap[item.icon] || MessageSquareOff;
+            return (
               <motion.div
-                key={job}
-                animate={{ 
-                  y: [0, -40, 0], 
-                  rotate: [0, i % 2 === 0 ? 5 : -5, 0],
-                  scale: [1, 1.1, 1] 
-                }}
-                transition={{ 
-                  duration: 3, 
-                  repeat: Infinity, 
-                  delay: i * 0.5 
-                }}
-                className={cn(
-                  "absolute px-6 py-3 bg-[var(--bg-surface)] border border-[var(--border-strong)] rounded-[var(--radius-md)] text-xs font-bold uppercase tracking-widest shadow-xl",
-                  i === 0 && "-top-10 left-0",
-                  i === 1 && "top-0 -right-10",
-                  i === 2 && "bottom-0 -left-10",
-                  i === 3 && "-bottom-10 right-0"
-                )}
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.08 }}
+                className="p-6 bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-red-500/40 rounded-2xl flex flex-col justify-between transition-all group shadow-sm hover:shadow-md"
               >
-                <div className="flex items-center gap-2">
-                  <motion.span 
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="w-3 h-3 border-2 border-[var(--lime)] border-t-transparent rounded-full"
-                  />
-                  {job}
+                <div>
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    {Icon && <Icon className="w-5 h-5" />}
+                  </div>
+                  <h3 className="font-bold text-lg text-[var(--text-primary)] mb-2 font-display">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs text-red-400/80 font-mono">
+                  <span>Revenue Leakage</span>
+                  <span>❌ Lost Booking</span>
                 </div>
               </motion.div>
-            ))}
-          </div>
-          <div className="order-1 md:order-2 text-center md:text-left">
-            <h2 className="text-3xl md:text-5xl mb-6">{PAIN_POINTS[2].headline}</h2>
-            <p className="text-[var(--text-secondary)] text-lg">{PAIN_POINTS[2].sub}</p>
-          </div>
+            );
+          })}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
