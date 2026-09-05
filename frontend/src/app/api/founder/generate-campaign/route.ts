@@ -42,6 +42,35 @@ Format:
 1. Identifying the gap (They get Google traffic, but customers leave because there is no 1-click booking link).
 2. The Proposition: Adding docodo.in/book/[name] to their Google Business profile to turn map visitors into paying appointments 24/7.
 3. Pricing pitch: Flat ₹999/month, zero commission per booking.`,
+
+  OBJECTION_BUSTER: `You are the lead sales closer for Docodo.in.
+Task: Provide high-converting, empathetic, and persuasive scripts to crush the 4 most common merchant objections in India:
+1. "We already manage everything fine on paper / WhatsApp": (Show how manual replies lose after-hours night bookings).
+2. "We are not tech-savvy / Staff can't use computers": (Explain it's 100% automated on their existing WhatsApp number with zero tech skills needed).
+3. "₹999/₹2,499 per month is too expensive": (Show ROI: saving just ONE missed haircut/facial or dental appointment pays for the entire monthly subscription).
+4. "We already get enough clients through word-of-mouth": (Explain how automated reminder alerts cut 30% no-shows and increase repeat visit frequency).`,
+
+  FOLLOWUP_SEQUENCE: `Write a 3-part WhatsApp automated follow-up sequence for Docodo.in leads who asked for info or received a demo link but haven't activated their account yet:
+- Day 1 (24 Hours Later): Quick value check + offering a 5-minute setup call over Google Meet/WhatsApp.
+- Day 3 (72 Hours Later): Social proof / Case study ("How a local studio increased bookings by 42% in 2 weeks with automated WhatsApp reminders").
+- Day 7 (Final Call): Limited-time founder incentive (Free custom domain setup + ₹0 onboarding assistance if activated this week).`,
+
+  CONTENT_CALENDAR_7DAY: `Create a comprehensive 7-Day High-Engagement Social Media Content Calendar for Docodo.in's official Instagram and LinkedIn pages.
+For each day (Monday to Sunday):
+- Day & Topic Theme (e.g., Myth Busting, Case Study, Reel Hook, Behind the Scenes, Weekend Promo).
+- Suggested Visual Format (Reel / 5-Slide Carousel / Single Graphic).
+- Exact 2-sentence Scroll Stopping Hook.
+- Key Value Point.
+- Call to Action.`,
+
+  GMT_PROSPECT_LEADS: `You are the Lead Intelligence Analyst for Docodo.in.
+Task: Generate a targeted list of 5 high-potential local business archetypes/prospects for the selected category in Indian tier 1/2 cities.
+For each prospect:
+1. Realistic Business Name & Neighborhood/City.
+2. Estimated Google Rating (e.g. 4.7★ with 150+ reviews).
+3. The Exact Operational Gap (e.g., Has Instagram/Google profile but no instant booking link, manual WhatsApp only).
+4. Personalized 1-Sentence Pitch Ameya can send directly on WhatsApp.
+5. Estimated Monthly Revenue Increase if they switch to Docodo (₹30,000 - ₹60,000/mo).`,
 };
 
 export async function POST(request: NextRequest) {
