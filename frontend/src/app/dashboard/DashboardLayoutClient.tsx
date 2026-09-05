@@ -94,6 +94,19 @@ function SidebarContent({
         </div>
       )}
 
+      {/* Founder Direct Shortcut (Strictly Ameya Kshirsagar Only) */}
+      {user.email?.toLowerCase() === "ameyakshirsagar@docodo.in" && (
+        <div className="px-3 py-2 border-t border-[var(--border-subtle)]">
+          <Link
+            href="/founder"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-[var(--lime)] bg-[var(--lime-ghost)] border border-[var(--lime)]/30 hover:bg-[var(--lime)]/20 transition-all"
+          >
+            <Sparkles size={14} />
+            <span>Founder Suite (/founder)</span>
+          </Link>
+        </div>
+      )}
+
       {/* User */}
       <div className="px-3 py-3 border-t border-[var(--border-subtle)]">
         <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[var(--bg-elevated)]/50">
