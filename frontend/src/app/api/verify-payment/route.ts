@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
       // Send transactional booking confirmation email if customerEmail exists
       if (updatedBooking.customerEmail) {
-        import("@/lib/notifications").then(({ sendBookingConfirmationEmail }) => {
+        import("@/lib/notifications").then(({ sendBookingConfirmationEmail, sendAdminNotification }) => {
           sendBookingConfirmationEmail({
             toEmail: updatedBooking.customerEmail!,
             customerName: updatedBooking.customerName,
@@ -93,8 +93,16 @@ export async function POST(req: NextRequest) {
             price: updatedBooking.price,
             paymentMethod: "Razorpay (Online)",
           }).catch((err) => console.warn("[Email Notification] Failed:", err));
+
+          sendAdminNotification("PAYMENT", {
+            amount: updatedBooking.price,
+            customerName: updatedBooking.customerName,
+            business: updatedBooking.business.name,
+            paymentId: razorpay_payment_id,
+          }).catch((err) => console.warn("[Admin Notification] Failed:", err));
         });
       }
+
 
       revalidatePath(`/book/${updatedBooking.business.slug}`);
       revalidatePath("/dashboard/bookings");

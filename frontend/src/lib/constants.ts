@@ -1,8 +1,8 @@
 import React from "react";
 
 export const CONTACT = {
-  whatsapp: "91XXXXXXXXXX",
-  email: "hello@docodo.in",
+  whatsapp: "919284310604",
+  email: "ameyakshirsagar@docodo.in",
   location: "Pune & Mumbai, Maharashtra, India",
   youtube: "https://youtube.com/@docodo",
   spotify: "https://spotify.com/docodo",
@@ -10,6 +10,7 @@ export const CONTACT = {
   linkedin: "https://linkedin.com/company/docodo",
   twitter: "https://twitter.com/docodo_in",
 };
+
 
 export const WHATSAPP_LINK = (text: string) => `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(text)}`;
 

@@ -3,6 +3,11 @@ import { Resend } from "resend";
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+export const ADMIN_ALERT_CONFIG = {
+  email: "ameyakshirsagar@docodo.in",
+  whatsapp: "+919284310604",
+};
+
 export interface BookingConfirmationEmailParams {
   toEmail: string;
   customerName: string;
@@ -26,7 +31,7 @@ export async function sendBookingConfirmationEmail(params: BookingConfirmationEm
       to: [params.toEmail],
       subject: `Appointment Confirmed: ${params.serviceName} at ${params.businessName}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; rounded: 12px;">
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
           <h2 style="color: #0f172a; margin-bottom: 8px;">Your Booking is Confirmed!</h2>
           <p style="color: #475569; font-size: 15px;">Hi ${params.customerName},</p>
           <p style="color: #475569; font-size: 15px;">Your appointment at <strong>${params.businessName}</strong> has been successfully booked.</p>
@@ -55,5 +60,32 @@ export async function sendBookingConfirmationEmail(params: BookingConfirmationEm
   } catch (err: any) {
     console.warn("[Notification Engine] Failed to dispatch confirmation email:", err);
     return { success: false, error: err.message };
+  }
+}
+
+export async function sendAdminNotification(type: "BOOKING" | "PAYMENT" | "ENQUIRY" | "SYSTEM_ERROR", payload: Record<string, any>) {
+  console.log(`[Admin Alert Dispatched to ${ADMIN_ALERT_CONFIG.email} & ${ADMIN_ALERT_CONFIG.whatsapp}] Event: ${type}`, payload);
+
+  if (!resend) {
+    return { success: true, logged: true };
+  }
+
+  try {
+    await resend.emails.send({
+      from: "Docodo System Alerts <alerts@docodo.in>",
+      to: [ADMIN_ALERT_CONFIG.email],
+      subject: `🚨 [Docodo Alert] New ${type} Event`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <h3>Docodo Platform Event: ${type}</h3>
+          <pre style="background: #f1f5f9; padding: 12px; border-radius: 6px; font-size: 12px;">${JSON.stringify(payload, null, 2)}</pre>
+          <p style="font-size: 11px; color: #64748b;">Instant alert dispatched to Ameya Kshirsagar (${ADMIN_ALERT_CONFIG.whatsapp}).</p>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (err) {
+    console.warn("[Admin Notification] Email delivery error:", err);
+    return { success: false };
   }
 }
