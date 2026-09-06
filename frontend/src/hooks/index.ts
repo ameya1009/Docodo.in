@@ -112,31 +112,37 @@ export const useMouseParallax = (strength = 0.05) => {
 // useScrollReveal hook with clean unmount and mobile responsiveness
 export const useScrollReveal = () => {
   useEffect(() => {
-    const revealElements = document.querySelectorAll("[data-reveal]");
-    if (!revealElements.length) return;
+    try {
+      const revealElements = document.querySelectorAll("[data-reveal]");
+      if (!revealElements.length) return;
 
-    const ctx = gsap.context(() => {
-      revealElements.forEach((el) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: el,
-              start: "top 88%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
+      const ctx = gsap.context(() => {
+        revealElements.forEach((el) => {
+          gsap.fromTo(
+            el,
+            { opacity: 0, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 88%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
+        });
       });
-    });
 
-    return () => {
-      ctx.revert();
-    };
+      return () => {
+        try {
+          ctx.revert();
+        } catch {}
+      };
+    } catch (err) {
+      console.warn("[GSAP ScrollReveal Init Notice]:", err);
+    }
   }, []);
 };

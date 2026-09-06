@@ -8,23 +8,32 @@ export default async function CustomersPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
 
-  const business = await prisma.business.findFirst({
-    where: { ownerId: session.user.id },
-    select: { id: true, name: true },
-  });
-  if (!business) redirect("/onboarding");
+  let businessName = "My Business";
+  let customers: any[] = [];
 
-  const customers = await prisma.customer.findMany({
-    where: { businessId: business.id },
-    orderBy: { createdAt: "desc" },
-    include: {
-      bookings: {
-        orderBy: { date: "desc" },
-        take: 5,
-        include: { service: true },
-      },
-    },
-  });
+  try {
+    const business = await prisma.business.findFirst({
+      where: { ownerId: session.user.id },
+      select: { id: true, name: true },
+    });
 
-  return <CustomersClient customers={customers} businessName={business.name} />;
+    if (business) {
+      businessName = business.name;
+      customers = await prisma.customer.findMany({
+        where: { businessId: business.id },
+        orderBy: { createdAt: "desc" },
+        include: {
+          bookings: {
+            orderBy: { date: "desc" },
+            take: 5,
+            include: { service: true },
+          },
+        },
+      });
+    }
+  } catch (err) {
+    console.warn("[CustomersPage Fallback]:", err);
+  }
+
+  return <CustomersClient customers={customers} businessName={businessName} />;
 }
