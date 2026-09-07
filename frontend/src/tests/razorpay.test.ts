@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import crypto from "crypto";
 
 describe("Razorpay Standard Checkout & Signature Verification Tests", () => {
-  const TEST_KEY_SECRET = "Qrn5jYGiDsqCMiIMpFQ2maEZ";
-  const TEST_ORDER_ID = "order_O4vj94u3U02V98";
-  const TEST_PAYMENT_ID = "pay_O4vkR571lKq4v9";
+  const TEST_KEY_SECRET = "dummy_mock_secret_for_unit_testing_12345";
+  const TEST_ORDER_ID = "order_mock_test_12345";
+  const TEST_PAYMENT_ID = "pay_mock_test_12345";
 
   it("generates correct HMAC-SHA256 signature matching official Razorpay algorithm", () => {
     // Algorithm: HMAC-SHA256(order_id + "|" + payment_id, KEY_SECRET)
