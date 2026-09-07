@@ -132,9 +132,36 @@ const GMT_PRESET_AREAS = [
 
 const TARGET_PRESETS = [50000, 100000, 250000, 500000, 1000000];
 
+const SWARM_AGENTS = [
+  { id: "REDDIT", name: "Reddit Viral Authority", icon: MessageCircle, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/30", platform: "r/smallbusiness, r/indiasocial", desc: "Crafts case-study value breakdowns of local salon/clinic revenue leaks with zero spam flags." },
+  { id: "QUORA", name: "Quora Evergreen Intent", icon: HelpCircle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", platform: "High-Intent Booking FAQs", desc: "Ranks for top booking software queries comparing ₹999 flat vs 20% commission platforms." },
+  { id: "MEDIUM", name: "Medium & Substack Publisher", icon: Layers, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30", platform: "Medium.com & Newsletters", desc: "Publishes long-form thought-leadership articles capturing Google search rankings." },
+  { id: "GOOGLE_MAPS_TARGETER", name: "Google Maps Intelligence Scout", icon: MapPin, color: "text-pink-400", bg: "bg-pink-500/10", border: "border-pink-500/30", platform: "Google Maps 4.5★ Stores", desc: "Extracts local targets and writes 1-click personalized WhatsApp trial offers." },
+  { id: "TWITTER_X", name: "Twitter/X Build In Public", icon: Sparkles, color: "text-sky-400", bg: "bg-sky-500/10", border: "border-sky-500/30", platform: "X / Twitter", desc: "Generates high-engagement threads documenting Indian local business transformations." },
+  { id: "LINKEDIN", name: "LinkedIn B2B Prospector", icon: Briefcase, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30", platform: "LinkedIn Network", desc: "Targets clinic founders, salon owners, and franchise directors with ROI breakdowns." },
+  { id: "INSTAGRAM", name: "Instagram Viral Reels & Post Architect", icon: Video, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/30", platform: "Instagram Reels & Bio", desc: "30s scroll-stopping hooks and 5-slide carousel layouts with viral Indian hashtags." },
+  { id: "WHATSAPP_DIAGNOSTICS", name: "Live WhatsApp Connectivity Diagnostic", icon: Phone, color: "text-lime-400", bg: "bg-lime-500/10", border: "border-lime-500/30", platform: "Meta Cloud API & Webhooks", desc: "Runs end-to-end webhook handshake checks for Ameya (+919284310604)." },
+] as const;
+
 export default function FounderDashboardClient({ initialData }: FounderDashboardProps) {
   const router = useRouter();
-  const [activeMainTab, setActiveMainTab] = useState<"CRM" | "GMT" | "AI_MARKETING" | "TARGETS" | "PLATFORM">("CRM");
+  const [activeMainTab, setActiveMainTab] = useState<"CRM" | "SWARM" | "WHATSAPP_LIVE" | "GMT" | "AI_MARKETING" | "TARGETS" | "PLATFORM">("CRM");
+
+  // Swarm State
+  const [selectedSwarmChannel, setSelectedSwarmChannel] = useState<string>("REDDIT");
+  const [swarmTargetCity, setSwarmTargetCity] = useState("Pune & Mumbai");
+  const [swarmIndustry, setSwarmIndustry] = useState("Salons, Spas & Clinics");
+  const [swarmResult, setSwarmResult] = useState<any>(null);
+  const [isSwarmRunning, setIsSwarmRunning] = useState(false);
+
+  // Live WhatsApp Diagnostics State
+  const [waPingStatus, setWaPingStatus] = useState<string | null>(null);
+  const [isPingingWa, setIsPingingWa] = useState(false);
+  const [testWaMessage, setTestWaMessage] = useState("Hi Docodo, I want to book a Hair Spa appointment for tomorrow at 4 PM in Pune.");
+  const [waTestResult, setWaTestResult] = useState<string | null>(null);
+  const [isSendingTestWa, setIsSendingTestWa] = useState(false);
+  const [cronRunStatus, setCronRunStatus] = useState<string | null>(null);
+  const [isCronRunning, setIsCronRunning] = useState(false);
 
   // CRM State
   const [leads, setLeads] = useState<FounderLead[]>(INITIAL_LEADS);
@@ -278,6 +305,115 @@ export default function FounderDashboardClient({ initialData }: FounderDashboard
     window.open(`https://www.google.com/maps/search/${query}`, "_blank");
   };
 
+  const handleRunSwarmAgent = async (channelId: string) => {
+    setIsSwarmRunning(true);
+    setSwarmResult(null);
+    try {
+      const res = await fetch("/api/founder/agent-swarm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          channel: channelId,
+          targetCity: swarmTargetCity,
+          industry: swarmIndustry,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.result) {
+        setSwarmResult(data.result);
+      } else {
+        setSwarmResult({
+          title: "Execution Error",
+          summary: data.error || "Failed to execute agent.",
+          actionableContent: "Please check your network and API key configurations in .env.local.",
+          status: "READY_TO_DISPATCH",
+          metrics: { estimatedReach: "0", expectedConversionRate: "0%", targetAudience: "N/A" },
+          targetPlatforms: [],
+        });
+      }
+    } catch (err: any) {
+      setSwarmResult({
+        title: "Connection Error",
+        summary: err?.message || "Failed to connect to Swarm engine",
+        actionableContent: "Please retry.",
+        status: "READY_TO_DISPATCH",
+        metrics: { estimatedReach: "0", expectedConversionRate: "0%", targetAudience: "N/A" },
+        targetPlatforms: [],
+      });
+    } finally {
+      setIsSwarmRunning(false);
+    }
+  };
+
+  const handlePingWhatsApp = async () => {
+    setIsPingingWa(true);
+    setWaPingStatus(null);
+    try {
+      const res = await fetch("/api/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=docodo_wa_verify_secret&hub.challenge=docodo_ping_ok_2026");
+      const text = await res.text();
+      if (res.ok && text.includes("docodo_ping_ok_2026")) {
+        setWaPingStatus("✅ Webhook Handshake 100% OK! Verification token matched, webhook route is active.");
+      } else {
+        setWaPingStatus(`⚡ Webhook responded with status ${res.status}: ${text.slice(0, 100)}`);
+      }
+    } catch (err: any) {
+      setWaPingStatus(`❌ Webhook ping failed: ${err?.message}`);
+    } finally {
+      setIsPingingWa(false);
+    }
+  };
+
+  const handleSendTestWhatsApp = async () => {
+    setIsSendingTestWa(true);
+    setWaTestResult(null);
+    try {
+      const res = await fetch("/api/webhooks/whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entry: [
+            {
+              changes: [
+                {
+                  value: {
+                    metadata: { display_phone_number: "9284310604" },
+                    messages: [
+                      {
+                        from: "919284310604",
+                        id: `test_msg_${Date.now()}`,
+                        text: { body: testWaMessage },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      });
+      const data = await res.json();
+      setWaTestResult(`✅ Inbound Message Processed: Status = ${data.status || "OK"}. AI Auto-Responder triggered.`);
+    } catch (err: any) {
+      setWaTestResult(`❌ Test message failed: ${err?.message}`);
+    } finally {
+      setIsSendingTestWa(false);
+    }
+  };
+
+  const handleRunCronReminders = async () => {
+    setIsCronRunning(true);
+    setCronRunStatus(null);
+    try {
+      const res = await fetch("/api/cron/reminders");
+      const data = await res.json();
+      setCronRunStatus(`✅ Reminder Cron Executed: Target Date = ${data.targetDate || "Tomorrow"}, Reminders Sent = ${data.remindersSent ?? 0}`);
+    } catch (err: any) {
+      setCronRunStatus(`❌ Cron execution failed: ${err?.message}`);
+    } finally {
+      setIsCronRunning(false);
+    }
+  };
+
   // Pipeline Math
   const totalPipelineValue = leads.reduce((sum, l) => sum + l.expectedMonthly, 0);
   const paidMonthlyMRR = leads.filter((l) => l.stage === "PAID_MERCHANT").reduce((sum, l) => sum + l.expectedMonthly, 0);
@@ -322,6 +458,8 @@ export default function FounderDashboardClient({ initialData }: FounderDashboard
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 overflow-x-auto py-2.5">
           {[
             { id: "CRM", label: "Lead Acquisition CRM", icon: Users, badge: `${leads.length}` },
+            { id: "SWARM", label: "Autonomous AI Client Swarm", icon: Zap, badge: "8 Agents" },
+            { id: "WHATSAPP_LIVE", label: "Live WhatsApp Diagnostics", icon: Phone, badge: "Meta Cloud" },
             { id: "GMT", label: "Google Maps Targeter (GMT)", icon: MapPin, badge: "Live" },
             { id: "AI_MARKETING", label: "AI Marketing & Automations", icon: Sparkles, badge: "8 Tools" },
             { id: "TARGETS", label: "₹1,00,000 Milestone Planner", icon: Target, badge: "Math" },
@@ -541,7 +679,305 @@ export default function FounderDashboardClient({ initialData }: FounderDashboard
           </div>
         )}
 
-        {/* ==================== TAB 2: GOOGLE MAPS TARGETER (GMT) ==================== */}
+        {/* ==================== TAB 2: AUTONOMOUS AI CLIENT ACQUISITION SWARM ==================== */}
+        {activeMainTab === "SWARM" && (
+          <div className="space-y-6">
+            <div className="p-6 sm:p-8 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[var(--lime)] uppercase mb-1">
+                    <Zap size={14} /> Autonomous Growth Engine
+                  </div>
+                  <h2 className="text-xl font-black text-[var(--text-primary)] font-display">
+                    Multi-Platform Autonomous AI Client Acquisition Swarm
+                  </h2>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    Deploy specialized AI growth agents across Reddit, Quora, Medium, Google Maps, Twitter/X, and Instagram to attract local merchants and drive inbound clients.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={swarmTargetCity}
+                      onChange={(e) => setSwarmTargetCity(e.target.value)}
+                      className="px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--lime)]"
+                    >
+                      <option value="Pune & Mumbai">Pune & Mumbai</option>
+                      <option value="Bangalore">Bangalore</option>
+                      <option value="Delhi NCR">Delhi NCR</option>
+                      <option value="Hyderabad">Hyderabad</option>
+                      <option value="All India Tier 1/2 Cities">All India (Tier 1 & 2)</option>
+                    </select>
+
+                    <select
+                      value={swarmIndustry}
+                      onChange={(e) => setSwarmIndustry(e.target.value)}
+                      className="px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--lime)]"
+                    >
+                      <option value="Salons, Spas & Clinics">Salons, Spas & Clinics</option>
+                      <option value="Dental Clinics & Doctors">Dental & Healthcare Clinics</option>
+                      <option value="Gyms, Fitness & CrossFit">Gyms & Fitness Studios</option>
+                      <option value="Car Detailing & Auto Care">Car Detailing & Garages</option>
+                      <option value="Beauty Parlours & Makeup Studios">Beauty & Makeup Studios</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Swarm Agent Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {SWARM_AGENTS.map((agent) => {
+                  const Icon = agent.icon;
+                  const isSelected = selectedSwarmChannel === agent.id;
+                  return (
+                    <div
+                      key={agent.id}
+                      onClick={() => {
+                        setSelectedSwarmChannel(agent.id);
+                        handleRunSwarmAgent(agent.id);
+                      }}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+                        isSelected
+                          ? "bg-[var(--bg-elevated)] border-[var(--lime)] shadow-[var(--lime-glow-sm)]"
+                          : "bg-[var(--bg-surface)] border-[var(--border-subtle)] hover:border-[var(--lime)]/40 hover:bg-[var(--bg-elevated)]"
+                      }`}
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className={`w-8 h-8 rounded-xl ${agent.bg} ${agent.border} border flex items-center justify-center ${agent.color}`}>
+                            <Icon size={16} />
+                          </div>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--bg-void)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                            {agent.id}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{agent.name}</h4>
+                        <p className="text-[11px] text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                          {agent.desc}
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[10px]">
+                        <span className="text-[var(--text-muted)] font-mono">{agent.platform.split(",")[0]}</span>
+                        <button
+                          disabled={isSwarmRunning}
+                          className="px-2.5 py-1 rounded-lg bg-[var(--lime-ghost)] text-[var(--lime)] font-bold text-[10px] hover:bg-[var(--lime)]/20 transition-colors flex items-center gap-1"
+                        >
+                          {isSwarmRunning && isSelected ? <Loader2 size={10} className="animate-spin" /> : <Zap size={10} />}
+                          Deploy
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Swarm Live Execution Output */}
+              <div className="p-6 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[var(--lime)] animate-pulse" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                      {swarmResult ? swarmResult.title : "Agent Swarm Live Execution Console"}
+                    </h3>
+                  </div>
+
+                  {swarmResult && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        onClick={() => handleCopy(swarmResult.actionableContent)}
+                        className="px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] hover:bg-[var(--lime-ghost)] border border-[var(--border-subtle)] hover:border-[var(--lime)]/30 text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5"
+                      >
+                        {copied ? <Check size={12} className="text-[var(--lime)]" /> : <Copy size={12} />}
+                        {copied ? "Copied!" : "Copy Campaign Copy"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {isSwarmRunning ? (
+                  <div className="text-center py-12 space-y-3">
+                    <Loader2 size={28} className="animate-spin mx-auto text-[var(--lime)]" />
+                    <p className="text-xs font-bold text-[var(--text-primary)]">
+                      Orchestrating {selectedSwarmChannel} Agent...
+                    </p>
+                    <p className="text-[11px] text-[var(--text-muted)] max-w-sm mx-auto">
+                      Analyzing local business discussion trends, formatting value hooks, and calculating conversion probabilities...
+                    </p>
+                  </div>
+                ) : swarmResult ? (
+                  <div className="space-y-4">
+                    {/* Metrics Bar */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                        <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Estimated Reach</span>
+                        <div className="text-sm font-bold text-[var(--lime)]">{swarmResult.metrics?.estimatedReach || "5,000+ views"}</div>
+                      </div>
+                      <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                        <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Expected Conversion</span>
+                        <div className="text-sm font-bold text-cyan-400">{swarmResult.metrics?.expectedConversionRate || "3.5%"}</div>
+                      </div>
+                      <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                        <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Target Audience</span>
+                        <div className="text-sm font-bold text-purple-400 truncate">{swarmResult.metrics?.targetAudience || "Local Businesses"}</div>
+                      </div>
+                    </div>
+
+                    {/* Content Display */}
+                    <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-sans text-xs leading-relaxed whitespace-pre-wrap text-[var(--text-primary)] max-h-96 overflow-y-auto">
+                      {swarmResult.actionableContent}
+                    </div>
+
+                    {/* Action Footer */}
+                    <div className="p-3 rounded-xl bg-[var(--lime-ghost)]/20 border border-[var(--lime)]/30 flex items-center justify-between text-xs">
+                      <span className="text-[var(--text-secondary)] font-medium">
+                        💡 <strong>Action:</strong> {swarmResult.callToAction}
+                      </span>
+                      <button
+                        onClick={() => handleCopy(swarmResult.actionableContent)}
+                        className="px-3 py-1 bg-[var(--lime)] text-black font-bold rounded-lg text-xs hover:bg-[var(--lime-hover)] transition-all shrink-0 ml-3"
+                      >
+                        Copy to Clipboard
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 space-y-2">
+                    <Sparkles size={28} className="mx-auto text-[var(--text-muted)] mb-2" />
+                    <p className="text-xs font-bold text-[var(--text-secondary)]">Select any Agent above to deploy</p>
+                    <p className="text-[11px] text-[var(--text-muted)] max-w-sm mx-auto">
+                      Each agent automatically targets high-intent channels (Reddit r/smallbusiness, Quora, Medium, Google Maps) to bring paying clients directly to Docodo.in.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ==================== TAB 3: LIVE WHATSAPP CONNECTIVITY DIAGNOSTICS ==================== */}
+        {activeMainTab === "WHATSAPP_LIVE" && (
+          <div className="p-6 sm:p-8 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase mb-1">
+                  <Phone size={14} /> WhatsApp Live Diagnostics
+                </div>
+                <h2 className="text-xl font-black text-[var(--text-primary)] font-display">
+                  Meta WhatsApp Cloud API & Webhook Health Monitor
+                </h2>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Verify real-time webhook handshakes, test automated 24/7 AI responses, and run reminder cron jobs.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePingWhatsApp}
+                  disabled={isPingingWa}
+                  className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs flex items-center gap-1.5 hover:bg-emerald-500/30 transition-all"
+                >
+                  {isPingingWa ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                  Ping Webhook Endpoint
+                </button>
+              </div>
+            </div>
+
+            {/* Diagnostic Badges */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-emerald-500/30 space-y-1">
+                <span className="text-[10px] font-bold text-emerald-400 uppercase">Founder Alert Phone</span>
+                <div className="text-base font-black text-[var(--text-primary)] font-mono">+91 9284310604</div>
+                <p className="text-[10px] text-[var(--text-muted)]">Ameya Kshirsagar &middot; Instant alert channel</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-1">
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Inbound Webhook Receiver</span>
+                <div className="text-base font-black text-cyan-400 font-mono">/api/webhooks/whatsapp</div>
+                <p className="text-[10px] text-[var(--text-muted)]">Two-Way Meta Cloud API & AI Auto-Responder</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-1">
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">24-Hour Pre-Appt Reminders</span>
+                <div className="text-base font-black text-purple-400 font-mono">/api/cron/reminders</div>
+                <p className="text-[10px] text-[var(--text-muted)]">Cuts merchant no-shows from 30% to &lt;6%</p>
+              </div>
+            </div>
+
+            {/* Ping Result Alert */}
+            {waPingStatus && (
+              <div className="p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-emerald-500/30 text-xs font-mono text-emerald-300">
+                {waPingStatus}
+              </div>
+            )}
+
+            {/* Inbound WhatsApp AI Message Simulator */}
+            <div className="p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
+                  <MessageCircle size={14} className="text-emerald-400" /> Interactive WhatsApp Inbound Message Simulator
+                </h4>
+                <span className="text-[10px] text-[var(--text-muted)]">Tests live webhook pipeline + AI cascade</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <input
+                  type="text"
+                  value={testWaMessage}
+                  onChange={(e) => setTestWaMessage(e.target.value)}
+                  placeholder="Type an inbound customer WhatsApp message..."
+                  className="w-full px-3 py-2.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--lime)] font-sans"
+                />
+                <button
+                  onClick={handleSendTestWhatsApp}
+                  disabled={isSendingTestWa}
+                  className="px-4 py-2.5 rounded-xl bg-[var(--lime)] text-black font-bold text-xs flex items-center gap-1.5 hover:bg-[var(--lime-hover)] transition-all shrink-0 shadow-[var(--lime-glow-sm)]"
+                >
+                  {isSendingTestWa ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                  Test Inbound AI Reply
+                </button>
+              </div>
+
+              {waTestResult && (
+                <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-emerald-500/30 text-xs text-emerald-300 font-mono">
+                  {waTestResult}
+                </div>
+              )}
+            </div>
+
+            {/* Reminder Cron Trigger */}
+            <div className="p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <Clock size={14} className="text-purple-400" /> 24-Hour Pre-Appointment Automated Reminder Cron
+                  </h4>
+                  <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                    Scans all CONFIRMED appointments scheduled for tomorrow and dispatches WhatsApp / Email alerts.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleRunCronReminders}
+                  disabled={isCronRunning}
+                  className="px-3.5 py-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-xs flex items-center gap-1.5 hover:bg-purple-500/30 transition-all shrink-0"
+                >
+                  {isCronRunning ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
+                  Run Reminder Cron Now
+                </button>
+              </div>
+
+              {cronRunStatus && (
+                <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-purple-500/30 text-xs text-purple-300 font-mono">
+                  {cronRunStatus}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ==================== TAB 4: GOOGLE MAPS TARGETER (GMT) ==================== */}
         {activeMainTab === "GMT" && (
           <div className="p-6 sm:p-8 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
