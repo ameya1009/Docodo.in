@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, Plus, Trash2, Loader2, Check, Clock, DollarSign, Power, AlertCircle } from "lucide-react";
+import { Settings, Plus, Trash2, Loader2, Check, Clock, DollarSign, Power, AlertCircle, Bell, MessageSquare, Star } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import { createServiceAction, updateServiceAction, deleteServiceAction } from "@/lib/actions/website";
 
@@ -17,13 +17,20 @@ const DAY_LABELS: Record<string, string> = {
 };
 
 export default function SettingsClient({ business }: SettingsClientProps) {
-  const [activeTab, setActiveTab] = useState<"services" | "hours" | "staff">("services");
+  const [activeTab, setActiveTab] = useState<"services" | "hours" | "staff" | "automations">("services");
   const [services, setServices] = useState(business.services ?? []);
   const [workingHours, _setWorkingHours] = useState(business.workingHours ?? []);
   const [staff, _setStaff] = useState(business.staff ?? []);
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Automation Toggles State (Section 14)
+  const [automations, setAutomations] = useState({
+    bookingConfirmation: true,
+    reminder24h: true,
+    reviewRequest: true,
+  });
 
   // New service form
   const [newService, setNewService] = useState({ name: "", description: "", duration: 60, price: 500 });
@@ -112,8 +119,8 @@ export default function SettingsClient({ business }: SettingsClientProps) {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-[var(--bg-elevated)] rounded-xl w-fit">
-        {(["services", "hours", "staff"] as const).map((tab) => (
+      <div className="flex gap-1 p-1 bg-[var(--bg-elevated)] rounded-xl w-fit flex-wrap">
+        {(["services", "hours", "staff", "automations"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -124,7 +131,7 @@ export default function SettingsClient({ business }: SettingsClientProps) {
                 : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             )}
           >
-            {tab === "hours" ? "Working Hours" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === "hours" ? "Working Hours" : tab === "automations" ? "Automations" : tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
@@ -274,6 +281,127 @@ export default function SettingsClient({ business }: SettingsClientProps) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Automations Tab (Section 14) */}
+      {activeTab === "automations" && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="font-bold text-[var(--text-primary)]">Pre-Built Automation Toggles</h2>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                Toggle zero-effort WhatsApp and notification triggers for your clients.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {/* 1. Instant Confirmation */}
+            <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl flex items-center justify-between gap-4">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-[var(--lime)]/10 text-[var(--lime)] shrink-0 mt-0.5">
+                  <Check size={16} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Instant Booking Confirmation</h4>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Sends an immediate WhatsApp alert to the client as soon as their booking is confirmed.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setAutomations((prev) => ({
+                    ...prev,
+                    bookingConfirmation: !prev.bookingConfirmation,
+                  }))
+                }
+                className={cn(
+                  "w-12 h-6 rounded-full transition-colors relative shrink-0",
+                  automations.bookingConfirmation ? "bg-[var(--lime)]" : "bg-gray-800 border border-gray-700"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-5 h-5 rounded-full bg-black transition-transform absolute top-0.5",
+                    automations.bookingConfirmation ? "left-6 bg-black" : "left-0.5 bg-gray-400"
+                  )}
+                />
+              </button>
+            </div>
+
+            {/* 2. 24-Hour Pre-Appointment Reminder */}
+            <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl flex items-center justify-between gap-4">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 shrink-0 mt-0.5">
+                  <Bell size={16} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">24-Hour WhatsApp Reminder</h4>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Automated pre-appointment reminder dispatched 24h prior via cron to prevent no-shows.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setAutomations((prev) => ({
+                    ...prev,
+                    reminder24h: !prev.reminder24h,
+                  }))
+                }
+                className={cn(
+                  "w-12 h-6 rounded-full transition-colors relative shrink-0",
+                  automations.reminder24h ? "bg-[var(--lime)]" : "bg-gray-800 border border-gray-700"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-5 h-5 rounded-full bg-black transition-transform absolute top-0.5",
+                    automations.reminder24h ? "left-6 bg-black" : "left-0.5 bg-gray-400"
+                  )}
+                />
+              </button>
+            </div>
+
+            {/* 3. Post-Service Review Request */}
+            <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl flex items-center justify-between gap-4">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0 mt-0.5">
+                  <Star size={16} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Google Review Nudge</h4>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Sends your Google Review link 2 hours after service completion to collect 5-star ratings.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setAutomations((prev) => ({
+                    ...prev,
+                    reviewRequest: !prev.reviewRequest,
+                  }))
+                }
+                className={cn(
+                  "w-12 h-6 rounded-full transition-colors relative shrink-0",
+                  automations.reviewRequest ? "bg-[var(--lime)]" : "bg-gray-800 border border-gray-700"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-5 h-5 rounded-full bg-black transition-transform absolute top-0.5",
+                    automations.reviewRequest ? "left-6 bg-black" : "left-0.5 bg-gray-400"
+                  )}
+                />
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

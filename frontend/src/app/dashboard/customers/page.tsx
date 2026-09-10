@@ -9,6 +9,7 @@ export default async function CustomersPage() {
   if (!session?.user?.id) redirect("/auth/login");
 
   let businessName = "My Business";
+  let businessId = "";
   let customers: any[] = [];
 
   try {
@@ -19,6 +20,7 @@ export default async function CustomersPage() {
 
     if (business) {
       businessName = business.name;
+      businessId = business.id;
       customers = await prisma.customer.findMany({
         where: { businessId: business.id },
         orderBy: { createdAt: "desc" },
@@ -35,5 +37,5 @@ export default async function CustomersPage() {
     console.warn("[CustomersPage Fallback]:", err);
   }
 
-  return <CustomersClient customers={customers} businessName={businessName} />;
+  return <CustomersClient customers={customers} businessName={businessName} businessId={businessId} />;
 }

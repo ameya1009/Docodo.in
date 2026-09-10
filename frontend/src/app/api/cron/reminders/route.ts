@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Tomorrow's date in Asia/Kolkata
-    const now = new Date();
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+    // Calculate tomorrow's date string in Asia/Kolkata timezone (IST is UTC+5:30)
+    const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+    const istTomorrow = new Date(istNow.getTime() + 24 * 60 * 60 * 1000);
+    const tomorrowStr = istTomorrow.toISOString().slice(0, 10);
 
     const upcomingBookings = await prisma.booking.findMany({
       where: {

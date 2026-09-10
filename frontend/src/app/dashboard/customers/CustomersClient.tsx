@@ -2,16 +2,33 @@
 
 import React, { useState, useMemo, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Users, Phone, Calendar, Clock, ArrowRight, Loader2, Check, Tag } from "lucide-react";
+import { Search, X, Users, Phone, Calendar, Clock, ArrowRight, Loader2, Check, Tag, Upload, FileText } from "lucide-react";
 import { cn, formatCurrency, getInitials, formatDate } from "@/lib/utils";
 import { calculateCustomerTier, parseTags } from "@/lib/engines/crm-engine";
+import { createCustomerAction } from "@/lib/actions/crm";
 
-export default function CustomersClient({ customers, businessName }: { customers: any[]; businessName: string }) {
+export default function CustomersClient({
+  customers: initialCustomers,
+  businessName,
+  businessId,
+}: {
+  customers: any[];
+  businessName: string;
+  businessId: string;
+}) {
+  const [customers, setCustomers] = useState(initialCustomers);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
   const [notesValue, setNotesValue] = useState("");
   const [notesSaved, setNotesSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // CSV Import State
+  const [showCsvModal, setShowCsvModal] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvPreview, setCsvPreview] = useState<Array<{ name: string; phone: string; email?: string }>>([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((c) => {
@@ -48,6 +65,71 @@ export default function CustomersClient({ customers, businessName }: { customers
     });
   };
 
+  const handleCsvFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvFile(file);
+    setImportStatus(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+      if (lines.length <= 1) return;
+
+      const parsed: Array<{ name: string; phone: string; email?: string }> = [];
+      // Assume Header: Name, Phone, Email
+      for (let i = 1; i < lines.length; i++) {
+        const parts = lines[i].split(",").map((p) => p.trim().replace(/^["']|["']$/g, ""));
+        if (parts[0] && parts[1]) {
+          parsed.push({
+            name: parts[0],
+            phone: parts[1],
+            email: parts[2] || undefined,
+          });
+        }
+      }
+      setCsvPreview(parsed);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleRunImport = async () => {
+    if (!businessId || csvPreview.length === 0) return;
+    setIsImporting(true);
+    setImportStatus("Importing profiles...");
+
+    try {
+      let importedCount = 0;
+      for (const item of csvPreview) {
+        await createCustomerAction({
+          businessId,
+          name: item.name,
+          phone: item.phone,
+          email: item.email,
+          source: "WALK_IN",
+        });
+        importedCount++;
+      }
+
+      setImportStatus(`Successfully imported ${importedCount} client profiles!`);
+      setTimeout(() => {
+        setShowCsvModal(false);
+        setCsvFile(null);
+        setCsvPreview([]);
+        setImportStatus(null);
+        window.location.reload();
+      }, 1500);
+    } catch (err: any) {
+      console.error(err);
+      setImportStatus(`Import encountered an issue: ${err.message || "Unknown error"}`);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] p-6 overflow-hidden">
       {/* Header */}
@@ -58,15 +140,24 @@ export default function CustomersClient({ customers, businessName }: { customers
             {customers.length} verified profiles
           </span>
         </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
-          <input
-            type="text"
-            placeholder="Search name or phone..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--lime)] transition-colors"
-          />
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setShowCsvModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--lime)]/50 rounded-xl text-xs font-bold transition-colors shrink-0 shadow-sm"
+          >
+            <Upload size={14} className="text-[var(--lime)]" /> Import CSV
+          </button>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
+            <input
+              type="text"
+              placeholder="Search name or phone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--lime)] transition-colors"
+            />
+          </div>
         </div>
       </div>
 
@@ -281,6 +372,90 @@ export default function CustomersClient({ customers, businessName }: { customers
                     </div>
                   )}
                 </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+
+        {/* CSV Import Modal */}
+        {showCsvModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCsvModal(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-3xl p-6 z-50 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+                <div className="flex items-center gap-2">
+                  <FileText size={18} className="text-[var(--lime)]" />
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">Import Client CSV</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCsvModal(false)}
+                  className="p-1.5 text-[var(--text-muted)] hover:text-white rounded-lg transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="text-xs text-[var(--text-secondary)] space-y-2">
+                <p>Upload a CSV file containing your past clients. We automatically map columns matching:</p>
+                <p className="font-mono text-[11px] text-[var(--lime)] bg-[var(--bg-elevated)] p-2 rounded-lg border border-[var(--border-subtle)]">
+                  Name, Phone, Email (optional)
+                </p>
+              </div>
+
+              <div className="p-6 border-2 border-dashed border-[var(--border-subtle)] hover:border-[var(--lime)]/50 rounded-2xl text-center space-y-2 cursor-pointer transition-colors bg-[var(--bg-elevated)]/40">
+                <Upload size={24} className="mx-auto text-[var(--text-muted)]" />
+                <label className="block text-xs font-bold text-[var(--lime)] cursor-pointer">
+                  <span>Click to select CSV</span>
+                  <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={handleCsvFile}
+                    className="hidden"
+                  />
+                </label>
+                {csvFile && (
+                  <p className="text-xs text-[var(--text-primary)] font-medium">
+                    {csvFile.name} ({csvPreview.length} clients detected)
+                  </p>
+                )}
+              </div>
+
+              {/* Status Message */}
+              {importStatus && (
+                <div className="p-3 bg-[var(--bg-elevated)] rounded-xl text-xs font-medium text-[var(--lime)] border border-[var(--lime)]/30 text-center">
+                  {importStatus}
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCsvModal(false)}
+                  className="px-4 py-2 bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-white text-xs font-bold rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRunImport}
+                  disabled={isImporting || csvPreview.length === 0}
+                  className="px-4 py-2 bg-[var(--lime)] text-black text-xs font-bold rounded-xl hover:bg-[var(--lime-hover)] transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+                >
+                  {isImporting ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                  Import {csvPreview.length > 0 ? `${csvPreview.length} Clients` : ""}
+                </button>
               </div>
             </motion.div>
           </>
