@@ -6,7 +6,7 @@ export const FOUNDER_CONFIG = {
   email: "ameyakshirsagar@docodo.in",
   whatsapp: "+919284310604",
   cookieName: "docodo_founder_session",
-  secret: process.env.FOUNDER_SECRET || process.env.AUTH_SECRET || "docodo_founder_superadmin_master_secret_key_2026",
+  secret: process.env.FOUNDER_SECRET || process.env.AUTH_SECRET || (process.env.NODE_ENV === "test" ? "docodo_test_founder_secret_key" : ""),
 };
 
 /**
@@ -15,9 +15,9 @@ export const FOUNDER_CONFIG = {
 export function verifyFounderCredentials(email: string, pass: string): boolean {
   const normalizedEmail = email.trim().toLowerCase();
   const validEmail = FOUNDER_CONFIG.email.toLowerCase();
-  const validPassword = process.env.FOUNDER_PASSWORD || "Ameya@02";
+  const validPassword = process.env.FOUNDER_PASSWORD || (process.env.NODE_ENV === "test" ? "Ameya@02" : "");
 
-  if (normalizedEmail !== validEmail) {
+  if (!validPassword || !pass || normalizedEmail !== validEmail) {
     return false;
   }
 
