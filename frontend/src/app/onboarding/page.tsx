@@ -21,6 +21,8 @@ import {
   MapPin,
   Phone,
   IndianRupee,
+  QrCode,
+  Printer,
 } from "lucide-react";
 import { save15MinuteOnboardingAction } from "@/lib/actions/onboarding";
 import { formatCurrency } from "@/lib/utils";
@@ -690,6 +692,40 @@ export default function OnboardingPage() {
                 >
                   <ExternalLink size={16} /> Open Booking Page
                 </a>
+              </div>
+
+              {/* Counter-Top QR Code Kit */}
+              <div className="p-5 bg-[#0d1117] border border-lime/30 rounded-2xl text-left space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <QrCode size={18} className="text-lime" />
+                    <div>
+                      <p className="text-xs font-bold text-white">Counter-Top Reception QR Card</p>
+                      <p className="text-[11px] text-gray-400">Place at your billing counter for walk-in clients to book next visit</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors border border-gray-700 shrink-0"
+                  >
+                    <Printer size={13} /> Print Card
+                  </button>
+                </div>
+                <div className="p-4 bg-white rounded-xl flex flex-col items-center justify-center text-center space-y-2 border border-gray-200">
+                  {/* Generated QR Code via standard vector API */}
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                      `https://docodo.in/book/${publishedSlug}`
+                    )}`}
+                    alt="Scan to Book Online"
+                    className="w-36 h-36 rounded-lg"
+                  />
+                  <div className="text-black space-y-0.5">
+                    <p className="text-xs font-black uppercase tracking-wider text-black">Scan to Book Appointment</p>
+                    <p className="text-[10px] text-gray-600 font-medium">{info.name} · Instant Slot Confirmation</p>
+                  </div>
+                </div>
               </div>
 
               {/* Google Business Tips */}

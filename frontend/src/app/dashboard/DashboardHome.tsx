@@ -8,6 +8,7 @@ import {
   CheckCircle2, AlertCircle, Sparkles, Copy, ExternalLink, Activity, Award, MessageSquare, Phone
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { ActionCenter } from "./ActionCenter";
 
 interface DashboardHomeProps {
   data: any;
@@ -116,6 +117,13 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
         })}
       </div>
 
+      {/* Action Center - Urgent triage for today */}
+      <ActionCenter
+        business={business}
+        bookings={data.upcomingBookings || []}
+        enquiries={recentEnquiries}
+      />
+
       {/* Autonomous Growth & Revenue Progress Engine */}
       <div className="p-6 bg-[var(--bg-surface)] border border-[var(--lime)]/30 rounded-3xl shadow-xl space-y-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-[var(--lime)]/5 rounded-full blur-3xl pointer-events-none" />
@@ -123,10 +131,10 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--lime-ghost)] text-[var(--lime)] text-xs font-mono font-bold uppercase mb-2 border border-[var(--lime)]/30">
-              <Sparkles size={13} /> ₹1,00,000/Mo Automation & Growth Engine
+              <Sparkles size={13} /> Target ₹1,00,000/Mo Run-Rate Milestone
             </div>
             <h2 className="text-xl font-black text-[var(--text-primary)] font-display">
-              Autonomous Client Acquisition & Monetization Trackers
+              Client Acquisition &amp; Revenue Milestone Trackers
             </h2>
           </div>
           <div className="flex items-center gap-3">

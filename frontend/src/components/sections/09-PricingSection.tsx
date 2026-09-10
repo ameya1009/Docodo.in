@@ -118,32 +118,56 @@ export const PricingSection = () => {
       {/* Success Modal */}
       <AnimatePresence>
         {paidPlan && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-[var(--bg-surface)] border border-[var(--lime)] p-8 rounded-3xl max-w-md w-full text-center space-y-4 shadow-2xl"
+              className="bg-[var(--bg-surface)] border border-[var(--lime)]/50 p-6 sm:p-8 rounded-3xl max-w-md w-full text-center space-y-5 shadow-2xl relative overflow-hidden"
             >
               <div className="w-16 h-16 rounded-full bg-[var(--lime)]/20 text-[var(--lime)] flex items-center justify-center mx-auto">
                 <CheckCircle2 size={36} />
               </div>
-              <h3 className="text-2xl font-black text-white font-display">
-                {paidPlan} Activated! 🎉
-              </h3>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Your payment was verified via Razorpay HMAC SHA-256. Welcome to the future of local business operations.
-              </p>
+              <div>
+                <h3 className="text-2xl font-black text-white font-display">
+                  {paidPlan} Activated! 🎉
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Razorpay cryptographic HMAC SHA-256 signature verified.
+                </p>
+              </div>
+
+              {/* Progressive Provisioning Checklist (Section 1) */}
+              <div className="p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border-subtle)] text-left space-y-2.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--lime)] font-mono">
+                  Provisioning System Engines
+                </p>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <CheckCircle2 size={14} className="shrink-0" />
+                    <span>PostgreSQL connection pool &amp; tenant security initialized</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <CheckCircle2 size={14} className="shrink-0" />
+                    <span>Dynamic appointment slot calculation engine active</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <CheckCircle2 size={14} className="shrink-0" />
+                    <span>WhatsApp 24h reminder &amp; assistant webhook ready</span>
+                  </div>
+                </div>
+              </div>
+
               <Button
                 variant="primary"
                 size="lg"
-                className="w-full font-bold"
+                className="w-full font-bold shadow-[var(--lime-glow-sm)]"
                 onClick={() => {
                   setPaidPlan(null);
                   router.push("/onboarding");
                 }}
               >
-                Go to 15-Min Onboarding <ArrowRight size={16} className="ml-1" />
+                Continue to 15-Min Onboarding <ArrowRight size={16} className="ml-1" />
               </Button>
             </motion.div>
           </div>

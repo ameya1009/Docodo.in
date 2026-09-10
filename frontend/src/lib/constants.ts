@@ -57,7 +57,7 @@ export const PROBLEM_SECTION = {
     {
       id: "missed-enquiries",
       title: "Missed WhatsApp Enquiries",
-      desc: "40% of enquiries come while you are busy or closed. Delayed replies lead directly to lost bookings.",
+      desc: "Nearly half of customer enquiries arrive while you are busy or closed. Delayed replies lead directly to lost bookings.",
       icon: "MessageSquareOff",
     },
     {
@@ -203,7 +203,7 @@ export const FEATURES = [
     category: "G. Follow-up Automation",
     title: "Automated Reminders & Review Requests",
     desc: "Send automated 24-hour pre-appointment reminders and post-service Google review requests to double positive ratings.",
-    highlights: ["98% Show-up Rate", "Automated Rebooking Nudges", "Review Link Generator"],
+    highlights: ["Virtually Zero No-Shows", "Automated Rebooking Nudges", "Review Link Generator"],
     badge: "Automation",
   },
   {
