@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Script from "next/script";
 import { CheckCircle2, AlertCircle, Loader2, CreditCard, ShieldCheck, ArrowRight } from "lucide-react";
+import { loadRazorpayScript } from "@/lib/razorpay";
 
 export default function RazorpayTestCheckoutPage() {
   const [amount, setAmount] = useState<number>(500); // ₹500
@@ -19,6 +20,13 @@ export default function RazorpayTestCheckoutPage() {
     setErrorMessage("");
 
     try {
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
+        setLoading(false);
+        setErrorMessage("Razorpay SDK failed to load. Please check your internet connection or reload the page.");
+        return;
+      }
+
       // 1. Call Backend Order Creation Endpoint: POST /api/create-order
       const orderRes = await fetch("/api/create-order", {
         method: "POST",

@@ -40,7 +40,7 @@ export async function createCheckoutOrder(bookingId: string) {
   });
 
   return {
-    keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_dummy",
+    keyId: process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_dummy",
     orderId: order.id,
     amount: order.amount,
     currency: order.currency,

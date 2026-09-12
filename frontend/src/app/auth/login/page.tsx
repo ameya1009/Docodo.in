@@ -36,11 +36,12 @@ function LoginForm() {
           router.refresh();
         }
       } catch (err: any) {
-        // Next.js redirect thrown is expected behavior when redirecting
         if (
           err?.digest?.startsWith?.("NEXT_REDIRECT") ||
           err?.message?.includes?.("NEXT_REDIRECT")
         ) {
+          router.push("/dashboard");
+          router.refresh();
           return;
         }
         setError(err?.message || "Failed to sign in. Please verify your email and password.");

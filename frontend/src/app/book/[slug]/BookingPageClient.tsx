@@ -110,6 +110,14 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
 
         if (booking.price > 0) {
           // Trigger Razorpay
+          const { loadRazorpayScript } = await import("@/lib/razorpay");
+          const isLoaded = await loadRazorpayScript();
+          if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
+            console.error("Razorpay SDK is not loaded.");
+            alert("Payment gateway is temporarily unavailable. Please check your internet connection or reload the page.");
+            return;
+          }
+
           const checkoutOrder = await createCheckoutOrder(booking.id);
           
           const options = {
@@ -156,12 +164,6 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               },
             },
           };
-
-          if (typeof window === "undefined" || !(window as any).Razorpay) {
-            console.error("Razorpay SDK is not loaded.");
-            alert("Payment gateway is temporarily unavailable. Please check your internet connection or reload the page.");
-            return;
-          }
 
           const rzp = new (window as any).Razorpay(options);
           rzp.on("payment.failed", function (response: any) {

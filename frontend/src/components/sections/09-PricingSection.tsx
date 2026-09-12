@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowRight, Sparkles, Shield, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PRICING_PLANS } from "@/lib/constants";
+import { loadRazorpayScript } from "@/lib/razorpay";
 
 export const PricingSection = () => {
   const router = useRouter();
@@ -25,6 +26,14 @@ export const PricingSection = () => {
     setLoadingPlan(plan.id);
 
     try {
+      // Ensure Razorpay SDK is loaded
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
+        setLoadingPlan(null);
+        alert("Unable to load Razorpay payment gateway. Please check your internet connection.");
+        return;
+      }
+
       // 1. Call Backend Order Creation Endpoint: POST /api/create-order
       const orderRes = await fetch("/api/create-order", {
         method: "POST",
@@ -63,6 +72,7 @@ export const PricingSection = () => {
           backdropclose: false,
           ondismiss: function () {
             setLoadingPlan(null);
+            console.log("Customer closed the checkout modal.");
           },
         },
         handler: async function (response: any) {
@@ -92,12 +102,6 @@ export const PricingSection = () => {
           }
         },
       };
-
-      if (typeof window === "undefined" || !(window as any).Razorpay) {
-        setLoadingPlan(null);
-        alert("Razorpay checkout is loading, please try again in a second.");
-        return;
-      }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on("payment.failed", function (response: any) {

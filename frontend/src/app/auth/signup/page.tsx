@@ -40,6 +40,8 @@ function SignupForm() {
           err?.digest?.startsWith?.("NEXT_REDIRECT") ||
           err?.message?.includes?.("NEXT_REDIRECT")
         ) {
+          router.push("/onboarding");
+          router.refresh();
           return;
         }
         setError(err?.message || "Failed to create account. Please try again.");

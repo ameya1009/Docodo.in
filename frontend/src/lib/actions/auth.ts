@@ -58,20 +58,23 @@ export async function signUpAction(formData: FormData) {
     };
   }
 
-  // Auto sign-in after signup
+  // Auto sign-in after signup with redirect: false for seamless client router navigation
   try {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/onboarding",
+      redirect: false,
     });
     return { success: true, redirectTo: "/onboarding" };
-  } catch (err) {
-    if (isNextRedirect(err)) throw err;
+  } catch (err: any) {
+    if (isNextRedirect(err)) {
+      return { success: true, redirectTo: "/onboarding" };
+    }
     if (err instanceof AuthError) {
       return { success: true, redirectTo: "/auth/login", message: "Account created! Please sign in." };
     }
-    throw err;
+    // Even if auto-sign-in has an issue, account creation succeeded
+    return { success: true, redirectTo: "/auth/login", message: "Account created successfully! Please sign in." };
   }
 }
 
@@ -93,15 +96,17 @@ export async function loginAction(formData: FormData) {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/dashboard",
+      redirect: false,
     });
     return { success: true, redirectTo: "/dashboard" };
   } catch (err: any) {
-    if (isNextRedirect(err)) throw err;
+    if (isNextRedirect(err)) {
+      return { success: true, redirectTo: "/dashboard" };
+    }
     if (err instanceof AuthError) {
       switch (err.type) {
         case "CredentialsSignin":
-          return { error: "Invalid email or password." };
+          return { error: "Invalid email or password. Please check your credentials." };
         default:
           return { error: "Authentication failed. Please verify your credentials and try again." };
       }
