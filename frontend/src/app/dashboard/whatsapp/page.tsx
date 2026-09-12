@@ -12,8 +12,8 @@ export default async function WhatsAppPage() {
     id: "biz-default",
     name: "My Business",
     slug: "my-business",
-    phone: "+91 9284310604",
-    whatsapp: "919284310604",
+    phone: "+91 98765 43210",
+    whatsapp: "919876543210",
   };
   let logs: any[] = [];
   let customerCount = 0;

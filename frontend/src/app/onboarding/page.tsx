@@ -80,9 +80,13 @@ export default function OnboardingPage() {
 
   // Started timestamp telemetry
   const [startedAt, setStartedAt] = useState<string>("");
+  const [origin, setOrigin] = useState<string>("https://docodo.in");
 
   useEffect(() => {
     setStartedAt(new Date().toISOString());
+    if (typeof window !== "undefined" && window.location.origin) {
+      setOrigin(window.location.origin);
+    }
   }, []);
 
   // Form State
@@ -149,6 +153,24 @@ export default function OnboardingPage() {
       prev.map((h) => (h.day === dayKey ? { ...h, [field]: val } : h))
     );
   };
+
+  const scheduleSummary = React.useMemo(() => {
+    const openDays = workingHours.filter((h) => h.isOpen);
+    if (openDays.length === 0) return "Closed all days";
+    if (openDays.length === 7) {
+      const first = openDays[0];
+      return `Open Every Day (${first.openTime}–${first.closeTime})`;
+    }
+    const dayNames = openDays.map((d) => d.day);
+    if (
+      openDays.length === 6 &&
+      !workingHours.find((h) => h.day === "SUN")?.isOpen
+    ) {
+      const first = openDays[0];
+      return `Open Mon–Sat (${first.openTime}–${first.closeTime})`;
+    }
+    return `Open ${openDays.length} days/wk (${openDays[0].openTime}–${openDays[0].closeTime})`;
+  }, [workingHours]);
 
   const handleFinishOnboarding = () => {
     setError("");
@@ -598,10 +620,27 @@ export default function OnboardingPage() {
                 <div className="p-3 bg-blue-50 text-blue-900 rounded-xl text-xs flex items-center gap-2">
                   <Clock size={14} className="text-blue-600 shrink-0" />
                   <span>
-                    Open Monday–Saturday (10 AM–8 PM) · Instant confirmation on WhatsApp
+                    {scheduleSummary} · Instant confirmation on WhatsApp
                   </span>
                 </div>
               </div>
+
+              {error && (
+                <div className="p-4 bg-red-950/60 border border-red-800/80 rounded-xl text-red-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-400 font-bold">Error:</span>
+                    <span>{error}</span>
+                  </div>
+                  {error.toLowerCase().includes("unauthorized") && (
+                    <a
+                      href="/auth/login?callbackUrl=/onboarding"
+                      className="px-3 py-1.5 bg-red-800/80 hover:bg-red-700 text-white font-bold text-xs rounded-lg text-center shrink-0 transition-colors"
+                    >
+                      Sign In Now
+                    </a>
+                  )}
+                </div>
+              )}
 
               <div className="flex justify-between items-center pt-4">
                 <button
@@ -657,13 +696,13 @@ export default function OnboardingPage() {
                     Your Public Booking Page
                   </p>
                   <p className="text-sm font-mono text-white truncate">
-                    https://docodo.in/book/{publishedSlug}
+                    {origin}/book/{publishedSlug}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://docodo.in/book/${publishedSlug}`);
+                    navigator.clipboard.writeText(`${origin}/book/${publishedSlug}`);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
@@ -677,7 +716,7 @@ export default function OnboardingPage() {
               {/* Share CTAs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`Hi! You can now book appointments with ${info.name} online here: https://docodo.in/book/${publishedSlug}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hi! You can now book appointments with ${info.name} online here: ${origin}/book/${publishedSlug}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
@@ -716,7 +755,7 @@ export default function OnboardingPage() {
                   {/* Generated QR Code via standard vector API */}
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-                      `https://docodo.in/book/${publishedSlug}`
+                      `${origin}/book/${publishedSlug}`
                     )}`}
                     alt="Scan to Book Online"
                     className="w-36 h-36 rounded-lg"

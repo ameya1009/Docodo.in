@@ -81,8 +81,8 @@ export default async function BookingPage({ params }: Props) {
       description: "Premier wellness, hair styling, and skincare treatments with instant WhatsApp confirmation.",
       city: "Pune",
       address: "FC Road, Deccan Gymkhana, Pune",
-      phone: "+91 9284310604",
-      whatsapp: "919284310604",
+      phone: "+91 98765 43210",
+      whatsapp: "919876543210",
       themeColor: "#CCFF00",
       services: [
         { id: "srv-1", name: "Signature Haircut & Styling", duration: 45, price: 650, description: "Precision styling with hair wash and blowdry", isActive: true },
