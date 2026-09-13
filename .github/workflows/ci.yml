@@ -46,3 +46,4 @@ jobs:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/docodo"
           NEXTAUTH_SECRET: "ci-pipeline-build-secret-32-chars-minimum"
           NEXTAUTH_URL: "http://localhost:3000"
+          NEXT_PUBLIC_RAZORPAY_KEY_ID: "rzp_test_placeholder"

@@ -1,31 +1,95 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart3, TrendingUp, Users, DollarSign, Calendar,
-  ArrowUpRight, ShieldCheck, Clock, Award, ChevronDown
+  ArrowUpRight, ShieldCheck, Clock, Award, ChevronDown, Loader2
 } from "lucide-react";
+import { getBusinessAnalytics, AnalyticsMetrics } from "@/lib/actions/analytics";
 
 export default function AnalyticsDashboardPage() {
-  const [timeRange, setTimeRange] = useState("30D");
+  const [timeRange, setTimeRange] = useState<"7D" | "30D" | "90D" | "ALL">("30D");
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AnalyticsMetrics>({
+    grossRevenue: 0,
+    totalBookings: 0,
+    completedBookings: 0,
+    uniqueCustomers: 0,
+    avgLTV: 0,
+    conversionRate: 0,
+    weeklyTrends: [
+      { day: "Mon", revenue: 0, label: "₹0", count: 0 },
+      { day: "Tue", revenue: 0, label: "₹0", count: 0 },
+      { day: "Wed", revenue: 0, label: "₹0", count: 0 },
+      { day: "Thu", revenue: 0, label: "₹0", count: 0 },
+      { day: "Fri", revenue: 0, label: "₹0", count: 0 },
+      { day: "Sat", revenue: 0, label: "₹0", count: 0 },
+      { day: "Sun", revenue: 0, label: "₹0", count: 0 },
+    ],
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    getBusinessAnalytics(timeRange)
+      .then((res) => {
+        if (mounted) {
+          setData(res);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Analytics fetch error:", err);
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [timeRange]);
+
+  const maxRevenue = Math.max(...data.weeklyTrends.map((d) => d.revenue), 1);
 
   const metrics = [
-    { title: "Gross Booked Revenue", val: "₹1,48,500", change: "+24.8%", icon: DollarSign, isPositive: true, sub: "vs previous 30 days" },
-    { title: "Confirmed Bookings", val: "342 slots", change: "+18.2%", icon: Calendar, isPositive: true, sub: "94.2% completion rate" },
-    { title: "Customer Retention LTV", val: "₹2,840", change: "+31.4%", icon: Users, isPositive: true, sub: "Avg lifetime spend" },
-    { title: "WhatsApp Conversion", val: "68.4%", change: "+12.1%", icon: TrendingUp, isPositive: true, sub: "From automated followups" },
+    {
+      title: "Gross Booked Revenue",
+      val: `₹${data.grossRevenue.toLocaleString("en-IN")}`,
+      change: data.grossRevenue > 0 ? "+100%" : "₹0",
+      icon: DollarSign,
+      isPositive: true,
+      sub: `Filtered by ${timeRange}`,
+    },
+    {
+      title: "Confirmed Bookings",
+      val: `${data.completedBookings} slots`,
+      change: data.totalBookings > 0 ? `${Math.round((data.completedBookings / data.totalBookings) * 100)}%` : "0%",
+      icon: Calendar,
+      isPositive: true,
+      sub: `${data.totalBookings} total reservations`,
+    },
+    {
+      title: "Customer Retention LTV",
+      val: `₹${data.avgLTV.toLocaleString("en-IN")}`,
+      change: `${data.uniqueCustomers} clients`,
+      icon: Users,
+      isPositive: true,
+      sub: "Avg spend per customer",
+    },
+    {
+      title: "Booking Conversion",
+      val: `${data.conversionRate}%`,
+      change: "Active",
+      icon: TrendingUp,
+      isPositive: true,
+      sub: "Completed vs received bookings",
+    },
   ];
 
-  const weeklyChartData = [
-    { day: "Mon", revenue: 42, label: "₹18.4k" },
-    { day: "Tue", revenue: 65, label: "₹24.1k" },
-    { day: "Wed", revenue: 52, label: "₹21.0k" },
-    { day: "Thu", revenue: 80, label: "₹31.5k" },
-    { day: "Fri", revenue: 95, label: "₹36.8k" },
-    { day: "Sat", revenue: 100, label: "₹42.2k" },
-    { day: "Sun", revenue: 75, label: "₹28.9k" },
-  ];
+  const weeklyChartData = data.weeklyTrends.map((d) => ({
+    day: d.day,
+    revenue: maxRevenue > 1 ? Math.round((d.revenue / maxRevenue) * 100) : (d.count > 0 ? 50 : 0),
+    label: d.label,
+  }));
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-6">

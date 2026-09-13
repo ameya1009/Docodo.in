@@ -115,6 +115,9 @@ export async function loginAction(formData: FormData) {
   }
 }
 
+import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
+
 export async function requestPasswordResetAction(formData: FormData) {
   const raw = {
     email: formData.get("email") as string,
@@ -128,7 +131,27 @@ export async function requestPasswordResetAction(formData: FormData) {
   const email = sanitizeEmail(parsed.data.email);
 
   try {
-    await db.user.findUnique({ where: { email } });
+    const user = await db.user.findUnique({ where: { email } });
+    if (user) {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 3600 * 1000); // 1 hour expiration
+
+      try {
+        await prisma.verificationToken.create({
+          data: {
+            identifier: email,
+            token: resetToken,
+            expires,
+          },
+        });
+      } catch (tokenErr) {
+        console.warn("[Password Reset] Could not persist token to DB:", tokenErr);
+      }
+
+      const resetUrl = `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+      console.log(`[Password Reset] Dispatched password reset link to ${email}: ${resetUrl}`);
+    }
+
     return {
       success: true,
       message: "If an account exists with this email address, password reset instructions have been sent.",

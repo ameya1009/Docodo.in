@@ -70,6 +70,24 @@ export async function POST(req: NextRequest) {
           revalidatePath("/dashboard");
         }
       }
+
+      // Check for SaaS subscription notes
+      const notes = payload.payload?.order?.entity?.notes || paymentEntity?.notes || {};
+      const planId = notes.planId || notes.planName;
+      const userId = notes.userId;
+
+      if (planId && userId) {
+        const normalizedPlan = String(planId).toLowerCase().includes("growth") || String(planId).toLowerCase().includes("pro")
+          ? "PRO"
+          : "STARTER";
+
+        await prisma.user.update({
+          where: { id: userId },
+          data: { plan: normalizedPlan },
+        }).catch(() => null);
+
+        console.log(`[Razorpay Webhook] User ${userId} upgraded to ${normalizedPlan} via webhook`);
+      }
     }
 
     return NextResponse.json({ received: true });

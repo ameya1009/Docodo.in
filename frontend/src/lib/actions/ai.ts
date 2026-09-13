@@ -2,19 +2,32 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 // Ensure the API key is available
 const genAI = new (GoogleGenerativeAI as any)(process.env.GEMINI_API_KEY || "dummy-key-for-build");
 
 export async function simulateWhatsAppMessage(userMessage: string, history: {role: string, text: string}[], businessSlug?: string) {
   try {
-    // 1. Fetch Business Context
-    const business = businessSlug 
-      ? await prisma.business.findUnique({ where: { slug: businessSlug }, include: { services: true, workingHours: true } })
-      : await prisma.business.findFirst({ include: { services: true, workingHours: true } });
+    // 1. Fetch Business Context with Multi-Tenant Guard
+    let business = null;
+    if (businessSlug) {
+      business = await prisma.business.findUnique({
+        where: { slug: businessSlug },
+        include: { services: true, workingHours: true },
+      });
+    } else {
+      const session = await auth();
+      if (session?.user?.id) {
+        business = await prisma.business.findFirst({
+          where: { ownerId: session.user.id },
+          include: { services: true, workingHours: true },
+        });
+      }
+    }
 
     if (!business) {
-      return { error: "Business not found." };
+      return { error: "Business not found or unauthorized." };
     }
 
     // 2. Construct System Prompt
@@ -32,8 +45,8 @@ ${hoursList}
 
 If they want to book, tell them you can check slots for them and ask for their preferred time.`;
 
-    // 3. Initialize Gemini (gemini-2.5-flash for speed)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // 3. Initialize Gemini (gemini-1.5-flash for speed and reliability)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
     // Format history for Gemini
     const contents = history.map(msg => ({
@@ -90,7 +103,7 @@ export async function repurposeContent(urlOrText: string) {
       { "id": "whatsapp", "title": "WhatsApp", "icon": "MessageSquare", "tag": "Broadcast", "preview": "..." }
     ]`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\nInput: ${urlOrText}` }] }],
       generationConfig: { temperature: 0.7, maxOutputTokens: 800 }

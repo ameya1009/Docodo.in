@@ -110,6 +110,15 @@ export const db = {
       }
       return created;
     },
+
+    async update({ where, data }: { where: { id?: string; email?: string }; data: any }): Promise<any> {
+      let query = supabaseAdmin.from("User").update({ ...data, updatedAt: new Date().toISOString() });
+      if (where.id) query = query.eq("id", where.id);
+      if (where.email) query = query.eq("email", where.email.toLowerCase().trim());
+      const { data: res, error } = await query.select().maybeSingle();
+      if (error) console.warn("[Supabase DB] user.update error:", error);
+      return res || null;
+    },
   },
 
   business: {

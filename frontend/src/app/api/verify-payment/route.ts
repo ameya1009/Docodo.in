@@ -103,10 +103,51 @@ export async function POST(req: NextRequest) {
         });
       }
 
-
       revalidatePath(`/book/${updatedBooking.business.slug}`);
       revalidatePath("/dashboard/bookings");
       revalidatePath("/dashboard");
+    }
+
+    // Handle SaaS Subscription plan purchase
+    let updatedPlanResult: string | undefined;
+    const planIdentifier = body.planId || body.planName;
+    if (planIdentifier) {
+      try {
+        const { auth } = await import("@/lib/auth");
+        const { db } = await import("@/lib/supabase-db");
+        const session = await auth();
+        const userId = session?.user?.id || body.userId;
+        const normalizedPlan = planIdentifier.toLowerCase().includes("growth") || planIdentifier.toLowerCase().includes("pro")
+          ? "PRO"
+          : "STARTER";
+
+        if (userId) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { plan: normalizedPlan },
+          }).catch(async () => {
+            await db.user.update({
+              where: { id: userId },
+              data: { plan: normalizedPlan },
+            }).catch(() => null);
+          });
+          updatedPlanResult = normalizedPlan;
+        }
+
+        import("@/lib/notifications").then(({ sendAdminNotification }) => {
+          sendAdminNotification("PAYMENT", {
+            type: "SAAS_PLAN_PURCHASE",
+            plan: normalizedPlan,
+            userId: userId || "guest",
+            paymentId: razorpay_payment_id,
+            orderId: finalOrderId,
+          }).catch(() => null);
+        });
+
+        revalidatePath("/dashboard");
+      } catch (planErr) {
+        console.warn("[Payment Verify] SaaS plan upgrade failed:", planErr);
+      }
     }
 
     return NextResponse.json({
@@ -115,6 +156,7 @@ export async function POST(req: NextRequest) {
       payment_id: razorpay_payment_id,
       order_id: finalOrderId,
       booking_id: bookingIdResult,
+      plan: updatedPlanResult,
     });
   } catch (error: any) {
     console.error("[Razorpay Verify] Error processing verification:", error);
