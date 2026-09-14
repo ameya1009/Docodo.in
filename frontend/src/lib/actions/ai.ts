@@ -30,20 +30,31 @@ export async function simulateWhatsAppMessage(userMessage: string, history: {rol
       return { error: "Business not found or unauthorized." };
     }
 
-    // 2. Construct System Prompt
-    const servicesList = business.services.map(s => `- ${s.name} (${s.duration} mins) - ${s.price} ${s.currency}`).join("\n");
-    const hoursList = business.workingHours.map(h => `${h.day}: ${h.isOpen ? `${h.openTime} - ${h.closeTime}` : "Closed"}`).join("\n");
+    // Fetch custom knowledge base FAQs for this business
+    const kbs = await prisma.knowledgeBase.findMany({
+      where: { businessId: business.id },
+      take: 10,
+    }).catch(() => []);
 
-    const systemPrompt = `You are the friendly WhatsApp AI Receptionist for "${business.name}".
-Your goal is to answer customer questions, nurture leads, and help them book an appointment.
-Keep responses under 3 sentences. Be extremely concise, conversational, and helpful. Use emojis sparingly.
-If they ask for pricing or services, here is the menu:
+    // 2. Construct System Prompt with Real Business Data & Knowledge Base
+    const servicesList = business.services.map(s => `- ${s.name} (${s.duration} mins) - ₹${s.price}`).join("\n");
+    const hoursList = business.workingHours.map(h => `${h.day}: ${h.isOpen ? `${h.openTime} - ${h.closeTime}` : "Closed"}`).join("\n");
+    const kbList = kbs.length > 0
+      ? kbs.map((k) => `Q: ${k.question}\nA: ${k.answer}`).join("\n\n")
+      : "";
+
+    const systemPrompt = `You are the friendly, professional WhatsApp AI Assistant for "${business.name}".
+Your goal is to answer customer queries accurately, nurture appointments, and help them book.
+Keep responses under 3 sentences. Be extremely concise, conversational, and helpful in polite English or Hinglish.
+
+SERVICES & PRICING:
 ${servicesList}
 
-If they ask for hours, here are the hours:
+WORKING HOURS:
 ${hoursList}
+${kbList ? `\nBUSINESS FAQS & POLICIES:\n${kbList}` : ""}
 
-If they want to book, tell them you can check slots for them and ask for their preferred time.`;
+If they want to book, invite them to share their preferred date and time or provide their booking link.`;
 
     // 3. Initialize Gemini (gemini-1.5-flash for speed and reliability)
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
