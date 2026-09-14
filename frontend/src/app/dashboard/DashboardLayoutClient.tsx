@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Calendar, Users, Globe, Sparkles,
   Settings, LogOut, Menu, X, ChevronRight, Bell, ExternalLink,
-  MessageSquare, BarChart3
+  MessageSquare, BarChart3, Zap
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/bookings", label: "Bookings", icon: Calendar, mobileNav: true },
   { href: "/dashboard/customers", label: "Customers", icon: Users, mobileNav: true },
   { href: "/dashboard/whatsapp", label: "WhatsApp", icon: MessageSquare, mobileNav: true },
+  { href: "/dashboard/automations", label: "Automations", icon: Zap, mobileNav: true },
   { href: "/dashboard/ai-content", label: "AI Suite", icon: Sparkles, mobileNav: true },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, mobileNav: false },
   { href: "/dashboard/website", label: "Website", icon: Globe, mobileNav: false },

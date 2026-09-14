@@ -16,11 +16,11 @@ export const WHATSAPP_LINK = (text: string) => `https://wa.me/${CONTACT.whatsapp
 
 export const NAVIGATION = [
   { label: "Features", href: "/features" },
-  { label: "How It Works", href: "/how-it-works" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Automations", href: "/automations" },
+  { label: "Integrations", href: "/integrations" },
   { label: "Solutions", href: "/solutions" },
-  { label: "Live Demo", href: "/demo" },
-  { label: "FAQ", href: "/faq" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "How It Works", href: "/how-it-works" },
   { label: "Contact", href: "/contact" },
 ];
 
