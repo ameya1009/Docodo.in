@@ -151,7 +151,7 @@ export function synthesizeBusinessProfile(input: BusinessDiscoveryInput): Discov
     tagline,
     description: desc,
     address: `Central Commercial Hub, Near High Street, ${city}`,
-    phone: "+91 98765 43210",
+    phone: "+91 9284310604",
     workingHours,
     services,
     seoTitle: `${name} | Premier ${businessType} in ${city} — Instant Online Booking`,

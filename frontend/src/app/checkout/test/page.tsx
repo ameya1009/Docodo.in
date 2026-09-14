@@ -9,7 +9,7 @@ export default function RazorpayTestCheckoutPage() {
   const [amount, setAmount] = useState<number>(500); // ₹500
   const [name, setName] = useState<string>("Test Customer");
   const [email, setEmail] = useState<string>("customer@example.com");
-  const [phone, setPhone] = useState<string>("+919876543210");
+  const [phone, setPhone] = useState<string>("+919284310604");
   const [loading, setLoading] = useState<boolean>(false);
   const [paymentStatus, setPaymentStatus] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");

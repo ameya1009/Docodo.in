@@ -44,7 +44,7 @@ export default function ContactPage() {
 
             <div className="space-y-4 pt-4">
               <a
-                href="https://wa.me/919876543210?text=Hi%20Docodo%2C%20I%20would%20like%20to%20learn%20more%20about%20the%20booking%20platform."
+                href="https://wa.me/919284310604?text=Hi%20Docodo%2C%20I%20would%20like%20to%20learn%20more%20about%20the%20booking%20platform."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--lime)]/40 rounded-2xl transition-all group"
@@ -54,12 +54,12 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-xs text-[var(--text-muted)]">WhatsApp Direct Support</p>
-                  <p className="text-sm font-bold text-white group-hover:text-[var(--lime)] transition-colors">+91 98765 43210</p>
+                  <p className="text-sm font-bold text-white group-hover:text-[var(--lime)] transition-colors">+91 9284310604</p>
                 </div>
               </a>
 
               <a
-                href="mailto:support@docodo.in"
+                href="mailto:ameyakshirsagar@docodo.in"
                 className="flex items-center gap-4 p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--lime)]/40 rounded-2xl transition-all group"
               >
                 <div className="w-10 h-10 rounded-xl bg-[var(--lime-ghost)] text-[var(--lime)] flex items-center justify-center shrink-0">
@@ -67,7 +67,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-xs text-[var(--text-muted)]">Email Support</p>
-                  <p className="text-sm font-bold text-white group-hover:text-[var(--lime)] transition-colors">support@docodo.in</p>
+                  <p className="text-sm font-bold text-white group-hover:text-[var(--lime)] transition-colors">ameyakshirsagar@docodo.in</p>
                 </div>
               </a>
 

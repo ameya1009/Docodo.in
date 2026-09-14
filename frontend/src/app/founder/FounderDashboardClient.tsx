@@ -78,7 +78,7 @@ const INITIAL_LEADS: FounderLead[] = [
     id: "lead-1",
     businessName: "Luxe Glow Salon & Spa",
     ownerName: "Priya Sharma",
-    phone: "919876543210",
+    phone: "919284310604",
     city: "Pune (Kothrud)",
     industry: "Salons & Spas",
     stage: "TRIAL_ACTIVE",
@@ -593,7 +593,7 @@ export default function FounderDashboardClient({ initialData }: FounderDashboard
                       <input
                         type="text"
                         required
-                        placeholder="WhatsApp Phone (e.g. 919876543210)"
+                        placeholder="WhatsApp Phone (e.g. 919284310604)"
                         value={newLeadForm.phone}
                         onChange={(e) => setNewLeadForm({ ...newLeadForm, phone: e.target.value })}
                         className="px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--lime)] font-mono"

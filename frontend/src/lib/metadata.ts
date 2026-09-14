@@ -96,7 +96,7 @@ export const jsonLd = {
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+91-9876543210",
+        "telephone": "+91-9284310604",
         "contactType": "customer service",
         "areaServed": "IN",
         "availableLanguage": ["English", "Hindi", "Marathi"]

@@ -11,7 +11,8 @@ import {
   sendWhatsAppBroadcastAction,
   toggleBotPauseAction,
   sendStaffReplyAction,
-  getConversationMessagesAction
+  getConversationMessagesAction,
+  activateWhatsAppAutomationAction
 } from "@/lib/actions/whatsapp";
 import {
   createKnowledgeBaseAction,
@@ -25,6 +26,7 @@ interface WhatsAppClientProps {
     slug: string;
     phone?: string | null;
     whatsapp?: string | null;
+    email?: string | null;
   };
   logs: Array<{
     id: string;
@@ -45,7 +47,14 @@ export default function WhatsAppClient({
   initialConversations = [],
   initialKnowledgeBases = [],
 }: WhatsAppClientProps) {
-  const [activeTab, setActiveTab] = useState<"flows" | "live_chat" | "knowledge_base" | "ai_keys" | "broadcast" | "bot" | "logs">("live_chat");
+  const [activeTab, setActiveTab] = useState<"opt_in" | "live_chat" | "knowledge_base" | "ai_keys" | "flows" | "broadcast" | "bot" | "logs">("opt_in");
+
+  // Opt-in & Automation Setup State
+  const [optInPhone, setOptInPhone] = useState(business.whatsapp || business.phone || "+91 9284310604");
+  const [optInEmail, setOptInEmail] = useState(business.email || "ameyakshirsagar@docodo.in");
+  const [optInMode, setOptInMode] = useState<"FREE_INTENT" | "MANAGED_CONCIERGE">("FREE_INTENT");
+  const [savingOptIn, setSavingOptIn] = useState(false);
+  const [optInSuccess, setOptInSuccess] = useState(false);
 
   // Live Chat State
   const [conversations, setConversations] = useState(initialConversations);
@@ -69,6 +78,26 @@ export default function WhatsAppClient({
   const [selectedSegment, setSelectedSegment] = useState("ALL_CUSTOMERS");
   const [sending, setSending] = useState(false);
   const [sentCount, setSentCount] = useState(customerCount > 0 ? customerCount : 24);
+
+  // Opt-in activation handler
+  const handleActivateOptIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingOptIn(true);
+    try {
+      await activateWhatsAppAutomationAction({
+        businessId: business.id,
+        phone: optInPhone,
+        email: optInEmail,
+        mode: optInMode,
+      });
+      setOptInSuccess(true);
+      setTimeout(() => setOptInSuccess(false), 5000);
+    } catch (err: any) {
+      alert(err.message || "Failed to update WhatsApp automation settings.");
+    } finally {
+      setSavingOptIn(false);
+    }
+  };
 
   // Select conversation and load thread
   const handleSelectConversation = async (conv: any) => {
@@ -116,17 +145,16 @@ export default function WhatsAppClient({
     }
   };
 
-  // Add Knowledge Base Item
-  const handleAddKbItem = async (e: React.FormEvent) => {
+  // Save Knowledge Base Item
+  const handleSaveKbItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newQuestion.trim() || !newAnswer.trim()) return;
-
     setSavingKb(true);
     try {
       const created = await createKnowledgeBaseAction({
-        category: newCategory,
         question: newQuestion,
         answer: newAnswer,
+        category: newCategory,
       });
       setKbList((prev) => [created, ...prev]);
       setNewQuestion("");
@@ -192,6 +220,7 @@ export default function WhatsAppClient({
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] pb-2 overflow-x-auto">
         {[
+          { id: "opt_in", label: "⚡ Automation Setup & Opt-In" },
           { id: "live_chat", label: "💬 Live Chat & Human Handoff", count: conversations.length },
           { id: "knowledge_base", label: "📚 Knowledge Base & FAQs", count: kbList.length },
           { id: "ai_keys", label: "🔑 Zero-Cost AI Key Pools" },
@@ -218,6 +247,200 @@ export default function WhatsAppClient({
           </button>
         ))}
       </div>
+
+      {/* ─── TAB 0: AUTOMATION SETUP & OPT-IN ─── */}
+      {activeTab === "opt_in" && (
+        <div className="space-y-6">
+          {/* Channel Settings Card */}
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl p-6 space-y-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+              <div>
+                <h2 className="text-base font-bold text-[var(--text-primary)] font-display flex items-center gap-2">
+                  <Smartphone className="text-emerald-400" size={20} />
+                  WhatsApp Automation Channel Profile
+                </h2>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Connect your business WhatsApp number and contact email to activate automatic booking workflows and alerts.
+                </p>
+              </div>
+              <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 self-start sm:self-auto">
+                ● Live Channel Ready
+              </span>
+            </div>
+
+            {optInSuccess && (
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2 font-bold">
+                <CheckCircle2 size={16} />
+                WhatsApp automation settings updated successfully! Your direct booking links and alerts are active.
+              </div>
+            )}
+
+            <form onSubmit={handleActivateOptIn} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
+                  Business WhatsApp Number *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={optInPhone}
+                  onChange={(e) => setOptInPhone(e.target.value)}
+                  placeholder="+91 9284310604"
+                  className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-xl text-xs text-white focus:outline-none focus:border-[var(--lime)] font-mono"
+                />
+                <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                  This number receives customer appointment bookings and direct enquiries.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
+                  Notification & Settlement Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={optInEmail}
+                  onChange={(e) => setOptInEmail(e.target.value)}
+                  placeholder="ameyakshirsagar@docodo.in"
+                  className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-xl text-xs text-white focus:outline-none focus:border-[var(--lime)] font-mono"
+                />
+                <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                  Receives instant booking receipts, settlement reports, and system alerts.
+                </p>
+              </div>
+
+              <div className="sm:col-span-2 pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="text-xs text-[var(--text-muted)]">
+                  Supports any Indian mobile number (+91) with standard WhatsApp or WhatsApp Business app.
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingOptIn}
+                  className="px-6 py-3 bg-[var(--lime)] text-black font-bold text-xs rounded-xl hover:bg-[var(--lime-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-60 shadow-md"
+                >
+                  {savingOptIn ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                  Save Channel Profile
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Automation Tiers Comparison */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Tier 1: Free Zero-Cost Tools */}
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl p-6 flex flex-col justify-between space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Mode A • 100% Free Forever
+                  </span>
+                  <span className="text-xs font-bold text-[var(--lime)] font-mono">₹0 / month</span>
+                </div>
+                <h3 className="text-base font-bold text-[var(--text-primary)] font-display">
+                  Free Intent-Based Automation Tools
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                  Zero setup cost, no Meta Cloud API approvals required. Direct WhatsApp links open customer WhatsApp with pre-filled service and booking details.
+                </p>
+
+                <div className="space-y-3 mt-5">
+                  <div className="p-3 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] space-y-1.5">
+                    <div className="text-[11px] font-bold text-[var(--text-primary)]">Your Instant WhatsApp Booking Link:</div>
+                    <div className="text-[11px] font-mono text-emerald-400 break-all select-all">
+                      {`https://wa.me/${(optInPhone || "919284310604").replace(/[^0-9]/g, "")}?text=Hi%20${encodeURIComponent(business.name)}%2C%20I%20would%20like%20to%20book%20an%20appointment.`}
+                    </div>
+                  </div>
+
+                  <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-emerald-400 shrink-0" />
+                      <span>One-click WhatsApp booking from Instagram Bio and Google Profile</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-emerald-400 shrink-0" />
+                      <span>Pre-filled customer appointment intent (date, time, selected service)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-emerald-400 shrink-0" />
+                      <span>Printable QR Code counter stand design for salon/clinic reception</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-emerald-400 shrink-0" />
+                      <span>Zero messaging costs, zero Meta verification paperwork</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <a
+                  href={`https://wa.me/${(optInPhone || "919284310604").replace(/[^0-9]/g, "")}?text=Hi%20${encodeURIComponent(business.name)}%2C%20I%20would%20like%20to%20test%20my%20Docodo%20WhatsApp%20booking%20system.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 border border-[var(--border-default)]"
+                >
+                  <ExternalLink size={14} /> Test Free WhatsApp Intent Link
+                </a>
+              </div>
+            </div>
+
+            {/* Tier 2: Managed Concierge Automation */}
+            <div className="bg-[var(--bg-surface)] border-2 border-[var(--lime)]/50 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-[var(--lime-glow-sm)] relative">
+              <div className="absolute -top-3 right-6 px-3 py-0.5 bg-[var(--lime)] text-black text-[10px] font-black uppercase rounded-full tracking-wider">
+                Option C • Concierge
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-[var(--lime-ghost)] text-[var(--lime)] border border-[var(--lime)]/30">
+                    Full Automation Suite
+                  </span>
+                  <span className="text-xs font-bold text-[var(--lime)] font-mono">₹4,999 one-time / ₹999/mo</span>
+                </div>
+                <h3 className="text-base font-bold text-[var(--text-primary)] font-display">
+                  Managed WhatsApp Concierge Automation
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                  We handle the complete technical integration for you. Automated 24-hr pre-appointment reminders, AI receptionist answering menu rates, and instant staff takeover.
+                </p>
+
+                <div className="space-y-3 mt-5">
+                  <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-[var(--lime)] shrink-0" />
+                      <span>Automated 24h pre-visit reminders (reduces no-shows by up to 40%)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-[var(--lime)] shrink-0" />
+                      <span>Round-Robin AI assistant answering menu pricing, timings, and address</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-[var(--lime)] shrink-0" />
+                      <span>Google Reviews automated collection sequences post-appointment</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check size={14} className="text-[var(--lime)] shrink-0" />
+                      <span>Dedicated Docodo onboarding specialist configures everything for you</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <a
+                  href={`https://wa.me/919284310604?text=Hi%20Ameya%2C%20I%20run%20${encodeURIComponent(business.name)}%20and%20I%20would%20like%20to%20activate%20Managed%20WhatsApp%20Concierge%20Automation%20(Option%20C).`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-xl bg-[var(--lime)] text-black text-xs font-bold hover:bg-[var(--lime-hover)] transition-all flex items-center justify-center gap-2 shadow-md"
+                >
+                  <Zap size={14} /> Request Managed Automation Concierge
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── TAB 1: LIVE CHAT & HUMAN HANDOFF ─── */}
       {activeTab === "live_chat" && (
@@ -390,7 +613,7 @@ export default function WhatsAppClient({
               Teach your AI Assistant specific details about services, doctor/stylist specialties, location directions, and pricing policies.
             </p>
 
-            <form onSubmit={handleAddKbItem} className="space-y-3">
+            <form onSubmit={handleSaveKbItem} className="space-y-3">
               <div>
                 <label className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase">Category</label>
                 <select

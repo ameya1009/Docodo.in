@@ -55,6 +55,43 @@ export async function saveWhatsAppConfigAction(rawInput: {
   return { success: true, whatsapp: updated.whatsapp };
 }
 
+export async function activateWhatsAppAutomationAction(rawInput: {
+  businessId: string;
+  phone: string;
+  email: string;
+  mode: "FREE_INTENT" | "MANAGED_CONCIERGE";
+}) {
+  const business = await requireBusinessOwnership(rawInput.businessId);
+  const cleanPhone = rawInput.phone.replace(/[^0-9]/g, "");
+
+  const updated = await prisma.business.update({
+    where: { id: business.id },
+    data: {
+      whatsapp: cleanPhone,
+      phone: rawInput.phone,
+      email: rawInput.email.trim().toLowerCase(),
+    },
+  });
+
+  // If merchant opted for Managed Concierge setup, dispatch alert to founder team
+  if (rawInput.mode === "MANAGED_CONCIERGE") {
+    import("@/lib/notifications").then(({ sendAdminNotification }) => {
+      sendAdminNotification("ENQUIRY", {
+        type: "WHATSAPP_AUTOMATION_CONCIERGE_OPT_IN",
+        businessName: business.name,
+        businessSlug: business.slug,
+        phone: cleanPhone,
+        email: rawInput.email,
+        timestamp: new Date().toISOString(),
+      }).catch(() => null);
+    });
+  }
+
+  revalidatePath("/dashboard/whatsapp");
+  revalidatePath("/dashboard/settings");
+  return { success: true, business: updated };
+}
+
 export async function getWhatsAppLogsAction(businessId: string) {
   await requireBusinessOwnership(businessId);
 
