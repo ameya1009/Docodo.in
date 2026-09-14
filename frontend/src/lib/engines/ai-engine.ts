@@ -87,7 +87,7 @@ export function getAvailableAIProviders(): AIProviderConfig[] {
     providers.push({
       name: "OPENROUTER",
       apiKey: key,
-      model: "meta-llama/llama-3.3-70b-instruct:free",
+      model: "meta-llama/llama-3.3-70b-instruct",
       baseUrl: "https://openrouter.ai/api/v1/chat/completions",
     });
   }
@@ -202,6 +202,8 @@ export async function generateAIResponse(
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${provider.apiKey}`,
+            "HTTP-Referer": "https://docodo.in",
+            "X-Title": "Docodo",
           },
           body: JSON.stringify({
             model: provider.model,
