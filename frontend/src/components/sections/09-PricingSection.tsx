@@ -17,7 +17,7 @@ export const PricingSection = () => {
 
   const handlePlanCheckout = async (plan: any) => {
     // If pilot/free plan, go directly to signup
-    if (plan.id === "starter" || plan.price === "₹0") {
+    if (plan.id === "pilot" || plan.price === "₹0") {
       router.push("/auth/signup");
       return;
     }

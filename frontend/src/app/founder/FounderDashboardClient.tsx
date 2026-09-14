@@ -190,21 +190,48 @@ export default function FounderDashboardClient({ initialData }: FounderDashboard
   const [alertSent, setAlertSent] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Load / Save Leads to LocalStorage
+  // Load / Save Leads to Database API with LocalStorage fallback
   useEffect(() => {
+    // 1. Instant optimistic load from localStorage
     try {
       const saved = localStorage.getItem("docodo_founder_leads");
       if (saved) {
         setLeads(JSON.parse(saved));
       }
     } catch {}
+
+    // 2. Fetch authoritative database leads from PostgreSQL
+    fetch("/api/founder/leads")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.leads && data.leads.length > 0) {
+          setLeads((prev) => {
+            const combined = [...data.leads];
+            // Merge with local leads without duplicates
+            for (const p of prev) {
+              if (!combined.some((c) => c.id === p.id)) {
+                combined.push(p);
+              }
+            }
+            return combined;
+          });
+        }
+      })
+      .catch(() => null);
   }, []);
 
-  const saveLeads = (updated: FounderLead[]) => {
+  const saveLeads = (updated: FounderLead[], newLead?: FounderLead) => {
     setLeads(updated);
     try {
       localStorage.setItem("docodo_founder_leads", JSON.stringify(updated));
     } catch {}
+
+    // Persist to PostgreSQL in background
+    fetch("/api/founder/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lead: newLead, leads: updated }),
+    }).catch((err) => console.warn("[Founder CRM] Could not sync lead to DB:", err));
   };
 
   const handleLogout = async () => {
@@ -234,7 +261,7 @@ export default function FounderDashboardClient({ initialData }: FounderDashboard
       createdAt: new Date().toISOString(),
     };
 
-    saveLeads([newLead, ...leads]);
+    saveLeads([newLead, ...leads], newLead);
     setIsAddingLead(false);
     setNewLeadForm({
       businessName: "",

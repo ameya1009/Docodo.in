@@ -117,7 +117,8 @@ export async function POST(req: NextRequest) {
         const { db } = await import("@/lib/supabase-db");
         const session = await auth();
         const userId = session?.user?.id || body.userId;
-        const normalizedPlan = planIdentifier.toLowerCase().includes("growth") || planIdentifier.toLowerCase().includes("pro")
+        const isDoneForYou = planIdentifier.toLowerCase().includes("setup") || planIdentifier.toLowerCase().includes("concierge");
+        const normalizedPlan = planIdentifier.toLowerCase().includes("growth") || planIdentifier.toLowerCase().includes("pro") || isDoneForYou
           ? "PRO"
           : "STARTER";
 
@@ -136,8 +137,8 @@ export async function POST(req: NextRequest) {
 
         import("@/lib/notifications").then(({ sendAdminNotification }) => {
           sendAdminNotification("PAYMENT", {
-            type: "SAAS_PLAN_PURCHASE",
-            plan: normalizedPlan,
+            type: isDoneForYou ? "DONE_FOR_YOU_SETUP_PURCHASE" : "SAAS_PLAN_PURCHASE",
+            plan: isDoneForYou ? "DONE_FOR_YOU_ONBOARDING (₹4,999)" : normalizedPlan,
             userId: userId || "guest",
             paymentId: razorpay_payment_id,
             orderId: finalOrderId,
