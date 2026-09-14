@@ -45,30 +45,6 @@ export async function createPublicBooking(rawInput: {
     throw new Error("Too many booking attempts. Please wait a minute before submitting again.");
   }
 
-  // Gracefully handle interactive demo store without crashing
-  if (data.businessId === "biz-demo") {
-    return {
-      id: `demo-${Date.now()}`,
-      businessId: "biz-demo",
-      serviceId: data.serviceId,
-      staffId: data.staffId ?? null,
-      customerName: data.customerName,
-      customerPhone: data.customerPhone,
-      customerEmail: data.customerEmail ?? null,
-      date: data.date,
-      startTime: data.startTime,
-      endTime: calculateEndTime(data.startTime, 45),
-      status: "CONFIRMED",
-      paymentStatus: data.paymentMethod === "CASH_ON_DELIVERY" ? "PENDING" : "PAID",
-      paymentMethod: data.paymentMethod ?? "UPI",
-      price: 650,
-      paidAmount: data.paymentMethod === "CASH_ON_DELIVERY" ? 0 : 650,
-      notes: data.notes ?? null,
-      business: { name: "Docodo Wellness & Spa", slug: "demo-studio" },
-      service: { name: "Signature Haircut & Styling", price: 650, duration: 45 },
-    };
-  }
-
   // Use a serializable transaction to prevent TOCTOU race conditions.
   // Both the conflict check and the insert happen atomically.
   const booking = await prisma.$transaction(

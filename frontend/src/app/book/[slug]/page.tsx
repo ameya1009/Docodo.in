@@ -71,38 +71,50 @@ export default async function BookingPage({ params }: Props) {
     console.warn("[BookingPage Prisma Fallback]:", err);
   }
 
-  // Fallback demo store if not found or testing arbitrary slug
+  // If business does not exist in DB, show verified Business Not Found state
   if (!business) {
-    business = {
-      id: "biz-demo",
-      name: slug ? `${slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " ")} Studio` : "Docodo Wellness & Spa",
-      slug: slug || "demo-studio",
-      industry: "Salons & Spas",
-      description: "Premier wellness, hair styling, and skincare treatments with instant WhatsApp confirmation.",
-      city: "Pune",
-      address: "FC Road, Deccan Gymkhana, Pune",
-      phone: "+91 9284310604",
-      whatsapp: "919284310604",
-      themeColor: "#CCFF00",
-      services: [
-        { id: "srv-1", name: "Signature Haircut & Styling", duration: 45, price: 650, description: "Precision styling with hair wash and blowdry", isActive: true },
-        { id: "srv-2", name: "Deep Cleansing Organic Facial", duration: 60, price: 1450, description: "Hydrating botanical facial with shoulder massage", isActive: true },
-        { id: "srv-3", name: "Aromatherapy Full Body Massage", duration: 75, price: 2200, description: "Relaxing Swedish massage with essential herbal oils", isActive: true },
-      ],
-      staff: [
-        { id: "stf-1", name: "Rahul (Master Stylist)", role: "Senior Stylist", isActive: true },
-        { id: "stf-2", name: "Priya (Skin Specialist)", role: "Esthetician", isActive: true },
-      ],
-      workingHours: [
-        { day: 1, openTime: "10:00", closeTime: "20:00", isOpen: true },
-        { day: 2, openTime: "10:00", closeTime: "20:00", isOpen: true },
-        { day: 3, openTime: "10:00", closeTime: "20:00", isOpen: true },
-        { day: 4, openTime: "10:00", closeTime: "20:00", isOpen: true },
-        { day: 5, openTime: "10:00", closeTime: "20:00", isOpen: true },
-        { day: 6, openTime: "09:00", closeTime: "21:00", isOpen: true },
-        { day: 0, openTime: "09:00", closeTime: "21:00", isOpen: true },
-      ],
-    };
+    return (
+      <main className="min-h-screen bg-[var(--bg-void)] text-white flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center space-y-5 bg-[var(--bg-surface)] border border-[var(--border-default)] p-8 rounded-3xl shadow-2xl">
+          <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-2xl font-mono">
+            🏪
+          </div>
+          <div>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20 inline-block mb-2">
+              Storefront Not Claimed
+            </span>
+            <h1 className="text-2xl font-display font-black text-white">
+              Business Not Found
+            </h1>
+            <p className="text-xs text-[var(--text-secondary)] mt-2">
+              The booking portal for <span className="font-mono text-[var(--lime)] font-bold">/{slug}</span> has not been registered yet or is currently inactive.
+            </p>
+          </div>
+
+          <div className="p-4 bg-[var(--bg-elevated)] rounded-2xl border border-[var(--border-subtle)] text-xs text-left space-y-1.5">
+            <p className="font-bold text-white">Are you the business owner?</p>
+            <p className="text-[var(--text-secondary)]">
+              Claim this booking URL, list your real services and pricing, and start accepting online UPI payments and automated WhatsApp appointments today.
+            </p>
+          </div>
+
+          <div className="pt-2 flex flex-col gap-2.5">
+            <a
+              href={`/onboarding?slug=${encodeURIComponent(slug)}`}
+              className="w-full py-3 bg-[var(--lime)] text-black font-bold rounded-xl text-xs hover:opacity-90 transition-all flex items-center justify-center gap-1.5 shadow-[var(--lime-glow-sm)]"
+            >
+              Launch Your Business in 15 Mins →
+            </a>
+            <a
+              href="/"
+              className="w-full py-2.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] font-semibold rounded-xl text-xs hover:text-white transition-all"
+            >
+              Return to Docodo Home
+            </a>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
