@@ -572,4 +572,36 @@ export const db = {
       return { count: data.length };
     },
   },
+  subscription: {
+    async findUnique({ where }: any): Promise<any> { return null; },
+    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
+    async findMany({ where }: any): Promise<any[]> { return []; },
+    async create({ data }: any): Promise<any> { return { ...data, id: `sub_${Date.now()}` }; },
+    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
+    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `sub_${Date.now()}` }; },
+  },
+  businessEntitlement: {
+    async findUnique({ where }: any): Promise<any> { return null; },
+    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
+    async findMany({ where }: any): Promise<any[]> { return []; },
+    async create({ data }: any): Promise<any> { return { ...data, id: `ent_${Date.now()}` }; },
+    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
+    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `ent_${Date.now()}` }; },
+  },
+  usageRecord: {
+    async findUnique({ where }: any): Promise<any> { return null; },
+    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
+    async findMany({ where }: any): Promise<any[]> { return []; },
+    async create({ data }: any): Promise<any> { return { ...data, id: `ur_${Date.now()}` }; },
+    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
+    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `ur_${Date.now()}` }; },
+  },
+  conciergeOrder: {
+    async findUnique({ where }: any): Promise<any> { return null; },
+    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
+    async findMany({ where }: any): Promise<any[]> { return []; },
+    async create({ data }: any): Promise<any> { return { ...data, id: `co_${Date.now()}` }; },
+    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
+    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `co_${Date.now()}` }; },
+  },
 };

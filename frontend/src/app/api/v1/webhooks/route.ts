@@ -9,9 +9,14 @@ export async function POST(req: NextRequest) {
     const signature = req.headers.get("x-docodo-signature");
     const bodyText = await req.text();
 
-    // Verify HMAC signature if secret configured
+    // Verify HMAC signature — mandatory when DOCODO_WEBHOOK_SECRET is configured.
+    // A missing or invalid signature is always rejected; only an unconfigured secret
+    // (dev/local mode) skips verification.
     const webhookSecret = process.env.DOCODO_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET;
-    if (webhookSecret && signature) {
+    if (webhookSecret) {
+      if (!signature) {
+        return NextResponse.json({ error: "Missing x-docodo-signature header" }, { status: 401 });
+      }
       const expectedSig = crypto
         .createHmac("sha256", webhookSecret)
         .update(bodyText)

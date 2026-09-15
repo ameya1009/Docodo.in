@@ -115,8 +115,12 @@ export async function loginAction(formData: FormData) {
   }
 }
 
+
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
+import { Resend } from "resend";
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function requestPasswordResetAction(formData: FormData) {
   const raw = {
@@ -148,8 +152,33 @@ export async function requestPasswordResetAction(formData: FormData) {
         console.warn("[Password Reset] Could not persist token to DB:", tokenErr);
       }
 
-      const resetUrl = `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
-      console.log(`[Password Reset] Dispatched password reset link to ${email}: ${resetUrl}`);
+      const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+      const resetUrl = `${appUrl}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+      // P0-7: Actually send the email via Resend instead of console.log
+      if (resend) {
+        await resend.emails.send({
+          from: "Docodo <noreply@docodo.in>",
+          to: [email],
+          subject: "Reset your Docodo password",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
+              <h2 style="color: #0f172a; margin-bottom: 8px;">Reset your password</h2>
+              <p style="color: #475569; font-size: 15px;">Hi there,</p>
+              <p style="color: #475569; font-size: 15px;">We received a request to reset the password for your Docodo account. Click the button below to choose a new password. This link expires in 1 hour.</p>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${resetUrl}" style="background-color: #2563EB; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+                  Reset Password
+                </a>
+              </div>
+              <p style="color: #94a3b8; font-size: 13px;">If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
+              <p style="color: #94a3b8; font-size: 13px;">Or copy this link: ${resetUrl}</p>
+            </div>
+          `,
+        }).catch((err) => console.error("[Password Reset] Resend email failed:", err));
+      } else {
+        console.warn("[Password Reset] RESEND_API_KEY not configured — email not sent. Reset URL:", resetUrl);
+      }
     }
 
     return {
@@ -161,3 +190,49 @@ export async function requestPasswordResetAction(formData: FormData) {
   }
 }
 
+export async function resetPasswordAction(token: string, email: string, newPassword: string) {
+  if (!token || !email || !newPassword) {
+    return { error: "Token, email and new password are all required." };
+  }
+  if (newPassword.length < 8) {
+    return { error: "Password must be at least 8 characters." };
+  }
+
+  try {
+    const sanitized = sanitizeEmail(email);
+
+    // Find and validate the token
+    const resetToken = await prisma.verificationToken.findUnique({
+      where: { identifier_token: { identifier: sanitized, token } },
+    });
+
+    if (!resetToken) {
+      return { error: "Invalid or expired reset link. Please request a new one." };
+    }
+    if (resetToken.expires < new Date()) {
+      await prisma.verificationToken.delete({
+        where: { identifier_token: { identifier: sanitized, token } },
+      }).catch(() => null);
+      return { error: "This reset link has expired. Please request a new one." };
+    }
+
+    // Hash the new password and update the user
+    const bcrypt = await import("bcryptjs");
+    const hashed = await bcrypt.hash(newPassword, 12);
+
+    await prisma.user.update({
+      where: { email: sanitized },
+      data: { password: hashed },
+    });
+
+    // Delete the used token
+    await prisma.verificationToken.delete({
+      where: { identifier_token: { identifier: sanitized, token } },
+    }).catch(() => null);
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("[Reset Password] Error:", err);
+    return { error: "Unable to reset password at this time. Please try again." };
+  }
+}

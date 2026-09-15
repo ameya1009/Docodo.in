@@ -17,11 +17,13 @@ import {
 } from "lucide-react";
 import { loadRazorpayScript } from "@/lib/razorpay";
 import { PRICING_PLANS } from "@/lib/constants";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   const planParam = searchParams.get("plan") || "starter";
   const [selectedPlanId, setSelectedPlanId] = useState<string>(planParam);
@@ -47,6 +49,12 @@ function CheckoutContent() {
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
+
+    if (status === "unauthenticated" || !session) {
+      const planQ = selectedPlanId ? `?plan=${selectedPlanId}` : "";
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent("/checkout" + planQ)}`);
+      return;
+    }
 
     if (isFreePilot) {
       router.push("/auth/signup");
@@ -432,3 +440,5 @@ export default function CheckoutPage() {
     </main>
   );
 }
+
+

@@ -39,8 +39,13 @@ export async function GET(request: NextRequest) {
     });
 
     let dispatchedCount = 0;
+    let failedCount = 0;
 
-    for (const booking of upcomingBookings) {
+    // P0-8: Process in batches of 10 with Promise.allSettled to prevent
+    // Vercel serverless timeout when handling 100+ bookings sequentially.
+    const BATCH_SIZE = 10;
+
+    const processBooking = async (booking: typeof upcomingBookings[number]): Promise<void> => {
       const bizName = booking.business.name;
       const serviceName = booking.service?.name || "Appointment";
       const timeStr = booking.startTime;
@@ -48,7 +53,7 @@ export async function GET(request: NextRequest) {
 
       // 1. Dispatch WhatsApp Reminder
       const waContent = `⏰ Reminder: You have an appointment for *${serviceName}* with *${bizName}* tomorrow at *${timeStr}*. Address: ${booking.business.address || booking.business.city || "Clinic / Salon"}. Reply 'RESCHEDULE' if you need changes.`;
-      
+
       try {
         await DocodoBackendAPI.dispatchWhatsAppMessage({
           businessId: booking.businessId,
@@ -83,15 +88,28 @@ export async function GET(request: NextRequest) {
         where: { id: booking.id },
         data: { reminderSent: true },
       });
+    };
 
-      dispatchedCount++;
+    for (let i = 0; i < upcomingBookings.length; i += BATCH_SIZE) {
+      const batch = upcomingBookings.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(batch.map((b) => processBooking(b)));
+      results.forEach((result, idx) => {
+        if (result.status === "fulfilled") {
+          dispatchedCount++;
+        } else {
+          failedCount++;
+          console.error(`[Cron] Reminder failed for booking ${batch[idx].id}:`, result.reason);
+        }
+      });
     }
 
     return NextResponse.json({
       success: true,
       targetDate: tomorrowStr,
       remindersSent: dispatchedCount,
+      failed: failedCount,
     });
+
   } catch (error: any) {
     console.error("[Cron Reminder Error]", error);
     return NextResponse.json(

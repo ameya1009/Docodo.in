@@ -41,7 +41,7 @@ export async function provisionPilot(businessId: string, client: any = prisma) {
   const existingSub = await client.subscription.findFirst({
     where: { businessId },
     orderBy: { createdAt: "desc" },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   if (!existingSub) {
     await client.subscription.create({
@@ -53,7 +53,7 @@ export async function provisionPilot(businessId: string, client: any = prisma) {
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   await client.usageRecord.upsert({
@@ -73,7 +73,7 @@ export async function provisionPilot(businessId: string, client: any = prisma) {
       periodEnd,
       count: 0,
     },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   await recalculateEntitlements(businessId, client);
   return { success: true, plan: PLAN_IDS.PILOT };
@@ -88,7 +88,7 @@ export async function provisionStarter(businessId: string, metadata: Provisionin
   const existingSub = await client.subscription.findFirst({
     where: { businessId },
     orderBy: { createdAt: "desc" },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   if (existingSub) {
     await client.subscription.update({
@@ -101,7 +101,7 @@ export async function provisionStarter(businessId: string, metadata: Provisionin
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   } else {
     await client.subscription.create({
       data: {
@@ -113,24 +113,24 @@ export async function provisionStarter(businessId: string, metadata: Provisionin
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   if (metadata.userId) {
     await client.user.update({
       where: { id: metadata.userId },
       data: { plan: "STARTER" },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   } else {
     const biz = await client.business.findUnique({
       where: { id: businessId },
       select: { ownerId: true },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
     if (biz?.ownerId) {
       await client.user.update({
         where: { id: biz.ownerId },
         data: { plan: "STARTER" },
-      }).catch(() => null);
+      }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
     }
   }
 
@@ -147,7 +147,7 @@ export async function provisionGrowth(businessId: string, metadata: Provisioning
   const existingSub = await client.subscription.findFirst({
     where: { businessId },
     orderBy: { createdAt: "desc" },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   if (existingSub) {
     await client.subscription.update({
@@ -160,7 +160,7 @@ export async function provisionGrowth(businessId: string, metadata: Provisioning
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   } else {
     await client.subscription.create({
       data: {
@@ -172,20 +172,20 @@ export async function provisionGrowth(businessId: string, metadata: Provisioning
         currentPeriodStart: periodStart,
         currentPeriodEnd: periodEnd,
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   const biz = await client.business.findUnique({
     where: { id: businessId },
     select: { ownerId: true },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   const targetUserId = metadata.userId || biz?.ownerId;
   if (targetUserId) {
     await client.user.update({
       where: { id: targetUserId },
       data: { plan: "GROWTH" },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   await recalculateEntitlements(businessId, client);
@@ -203,7 +203,7 @@ export async function provisionConcierge(businessId: string, metadata: Provision
   if (metadata.orderId) {
     conciergeOrder = await client.conciergeOrder.findFirst({
       where: { razorpayOrderId: metadata.orderId },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   if (!conciergeOrder) {
@@ -220,13 +220,13 @@ export async function provisionConcierge(businessId: string, metadata: Provision
         razorpayOrderId: metadata.orderId || null,
         notes: "Automated Done-For-You launch initiated. Specialist assigned for catalog upload and QR design.",
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   const existingSub = await client.subscription.findFirst({
     where: { businessId },
     orderBy: { createdAt: "desc" },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   if (existingSub) {
     await client.subscription.update({
@@ -238,7 +238,7 @@ export async function provisionConcierge(businessId: string, metadata: Provision
         currentPeriodStart: now,
         currentPeriodEnd: growthEnd,
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   } else {
     await client.subscription.create({
       data: {
@@ -249,20 +249,20 @@ export async function provisionConcierge(businessId: string, metadata: Provision
         currentPeriodStart: now,
         currentPeriodEnd: growthEnd,
       },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   const biz = await client.business.findUnique({
     where: { id: businessId },
     select: { ownerId: true },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   const targetUserId = metadata.userId || biz?.ownerId;
   if (targetUserId) {
     await client.user.update({
       where: { id: targetUserId },
       data: { plan: "GROWTH" },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   await recalculateEntitlements(businessId, client);
@@ -284,13 +284,13 @@ export async function downgradeSubscription(businessId: string, targetPlanId: Pl
 
   const activeSub = await client.subscription.findFirst({
     where: { businessId, status: SUBSCRIPTION_STATES.ACTIVE },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   if (activeSub) {
     await client.subscription.update({
       where: { id: activeSub.id },
       data: { status: SUBSCRIPTION_STATES.EXPIRED },
-    }).catch(() => null);
+    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
   await client.subscription.create({
@@ -302,7 +302,7 @@ export async function downgradeSubscription(businessId: string, targetPlanId: Pl
       currentPeriodStart: periodStart,
       currentPeriodEnd: periodEnd,
     },
-  }).catch(() => null);
+  }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
 
   await recalculateEntitlements(businessId, client);
   return { success: true, plan: targetPlanId };

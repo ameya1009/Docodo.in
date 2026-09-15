@@ -258,7 +258,7 @@ export async function getUsage(businessId: string, metric: string = "BOOKINGS_CO
           periodEnd,
           count: dbCount,
         },
-      }).catch(() => null);
+      }).catch((err: any) => { console.error('[entitlement]', err); throw err; });
     }
   } catch (err) {
     try {

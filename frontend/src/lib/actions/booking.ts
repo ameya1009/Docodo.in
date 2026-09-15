@@ -153,7 +153,8 @@ export async function createPublicBooking(rawInput: {
             name: data.customerName,
             ...(data.customerEmail ? { email: data.customerEmail } : {}),
             visitCount: { increment: 1 },
-            lifetimeValue: { increment: service.price },
+            // P0-6: lifetimeValue is incremented only on payment confirmation,
+            // not here at booking creation time, to prevent CRM LTV inflation.
           },
           create: {
             businessId: data.businessId,
@@ -161,13 +162,14 @@ export async function createPublicBooking(rawInput: {
             phone: data.customerPhone,
             email: data.customerEmail || null,
             visitCount: 1,
-            lifetimeValue: service.price,
+            lifetimeValue: 0, // starts at 0; set to service.price after payment verified
             source: "BOOKING",
           },
         });
       } catch (crmErr) {
         console.warn("[CRM] Customer upsert handled:", crmErr);
       }
+
 
       // 7. Create the booking.
       const newBooking = await tx.booking.create({

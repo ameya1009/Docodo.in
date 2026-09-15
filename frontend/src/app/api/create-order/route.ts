@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { razorpay } from "@/lib/razorpay";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,24 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { currency = "INR", bookingId } = body;
     let { amount, receipt, notes = {} } = body;
+
+    const session = await auth();
+    const userId = session?.user?.id || body.userId;
+    let businessId = body.businessId;
+
+    if (!businessId && userId) {
+      const biz = await prisma.business.findFirst({
+        where: { ownerId: userId },
+        select: { id: true }
+      });
+      businessId = biz?.id;
+    }
+
+    notes = {
+      ...notes,
+      userId: userId || "",
+      businessId: businessId || ""
+    };
 
     // If bookingId is provided, look up booking details
     let booking = null;
@@ -95,3 +114,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

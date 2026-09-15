@@ -34,6 +34,10 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [isPending, startTransition] = useTransition();
+  // P0-5: Payment decoupling — default to cash/pay-at-venue so customers are
+  // never forced through Docodo's central Razorpay account.
+  const [paymentPreference, setPaymentPreference] = useState<"cash" | "online">("cash");
+
 
   // Enquiry Form State
   const [enquiryForm, setEnquiryForm] = useState({ name: "", phone: "", serviceName: "", message: "" });
@@ -108,8 +112,14 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           notes: form.notes || undefined,
         });
 
-        if (booking.price > 0) {
-          // Trigger Razorpay
+        // P0-5: Branch on customer's chosen payment preference
+        if (paymentPreference === "cash" || booking.price === 0) {
+          // Cash/free — no Razorpay, booking already created with PENDING/UNPAID status.
+          // Show success immediately; business owner collects payment at venue.
+          setBookingResult(booking);
+          setStep("success");
+        } else {
+          // Online payment — trigger Razorpay
           const { loadRazorpayScript } = await import("@/lib/razorpay");
           const isLoaded = await loadRazorpayScript();
           if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
@@ -171,11 +181,8 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
             alert(`Payment Failed: ${response.error.description || "Transaction could not be completed."}`);
           });
           rzp.open();
-        } else {
-          // Free booking
-          setBookingResult(booking);
-          setStep("success");
         }
+
       } catch (err: any) {
         console.error("Booking verification failed:", err);
         alert(err.message || "We could not process your booking at this time. Please try another slot or refresh.");
@@ -690,6 +697,43 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                 ))}
               </div>
 
+              {/* P0-5: Payment method selector — shown for paid services only */}
+              {selectedService?.price > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">How would you like to pay?</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentPreference("cash")}
+                      className={cn(
+                        "py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all",
+                        paymentPreference === "cash"
+                          ? "border-current text-white"
+                          : "border-gray-200 text-gray-600 bg-white hover:border-gray-400"
+                      )}
+                      style={paymentPreference === "cash" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                    >
+                      🏠 Pay at Venue
+                      <span className="block text-xs font-normal opacity-75">Cash on Arrival</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentPreference("online")}
+                      className={cn(
+                        "py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all",
+                        paymentPreference === "online"
+                          ? "border-current text-white"
+                          : "border-gray-200 text-gray-600 bg-white hover:border-gray-400"
+                      )}
+                      style={paymentPreference === "online" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                    >
+                      💳 Pay Online Now
+                      <span className="block text-xs font-normal opacity-75">Razorpay (Secure)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <button
                 onClick={handleConfirmBooking}
                 disabled={isPending}
@@ -700,6 +744,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               </button>
             </motion.div>
           )}
+
 
           {/* Step 5: Success */}
           {step === "success" && (

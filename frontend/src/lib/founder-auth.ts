@@ -2,11 +2,25 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 import { auth } from "@/lib/auth";
 
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (!val) {
+    throw new Error(
+      `[founder-auth] Required environment variable "${name}" is not set. ` +
+      `Set it in your Vercel/deployment environment and restart the server.`
+    );
+  }
+  return val;
+}
+
 export const FOUNDER_CONFIG = {
   email: "ameyakshirsagar@docodo.in",
   whatsapp: "+919284310604",
   cookieName: "docodo_founder_session",
-  secret: process.env.FOUNDER_SECRET || process.env.AUTH_SECRET || "docodo_founder_superadmin_master_secret_key_2026",
+  // Evaluated lazily via getter so Next.js build-time doesn't throw when env vars aren't present
+  get secret(): string {
+    return requireEnv("FOUNDER_SECRET");
+  },
 };
 
 /**
@@ -15,7 +29,8 @@ export const FOUNDER_CONFIG = {
 export function verifyFounderCredentials(email: string, pass: string): boolean {
   const normalizedEmail = email.trim().toLowerCase();
   const validEmail = FOUNDER_CONFIG.email.toLowerCase();
-  const validPassword = process.env.FOUNDER_PASSWORD || "Ameya@02";
+  // Throws if FOUNDER_PASSWORD is not set — fail-fast, no silent bypass
+  const validPassword = requireEnv("FOUNDER_PASSWORD");
 
   if (normalizedEmail !== validEmail) {
     return false;

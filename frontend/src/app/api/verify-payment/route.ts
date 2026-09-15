@@ -85,6 +85,14 @@ export async function POST(req: NextRequest) {
       });
       bookingIdResult = updatedBooking.id;
 
+      // P0-6: Increment customer LTV only after payment is confirmed, not at booking creation.
+      if (targetBooking.customerId && targetBooking.price > 0) {
+        await prisma.customer.update({
+          where: { id: targetBooking.customerId },
+          data: { lifetimeValue: { increment: targetBooking.price } },
+        }).catch((err) => console.warn("[CRM] LTV update after payment failed:", err));
+      }
+
       // Send transactional booking confirmation email if customerEmail exists
       if (updatedBooking.customerEmail) {
         import("@/lib/notifications").then(({ sendBookingConfirmationEmail, sendAdminNotification }) => {
@@ -126,6 +134,7 @@ export async function POST(req: NextRequest) {
         const isGrowth = planStr.includes("growth") || planStr.includes("pro");
         const normalizedPlan = isDoneForYou || isGrowth ? "PRO" : "STARTER";
 
+        // P0-2: resolvedBusinessId is required — fail with 400 if missing
         let resolvedBusinessId = body.businessId;
         if (!resolvedBusinessId && userId) {
           const biz = await prisma.business.findFirst({
@@ -135,42 +144,40 @@ export async function POST(req: NextRequest) {
           resolvedBusinessId = biz?.id;
         }
 
-        if (resolvedBusinessId) {
-          if (isDoneForYou) {
-            await provisionConcierge(resolvedBusinessId, {
-              userId,
-              orderId: finalOrderId,
-              paymentId: razorpay_payment_id,
-              amount: 4999,
-              source: "RAZORPAY",
-            });
-            updatedPlanResult = "CONCIERGE";
-          } else if (isGrowth) {
-            await provisionGrowth(resolvedBusinessId, {
-              userId,
-              orderId: finalOrderId,
-              paymentId: razorpay_payment_id,
-              amount: 2499,
-              source: "RAZORPAY",
-            });
-            updatedPlanResult = "PRO";
-          } else {
-            await provisionStarter(resolvedBusinessId, {
-              userId,
-              orderId: finalOrderId,
-              paymentId: razorpay_payment_id,
-              amount: 999,
-              source: "RAZORPAY",
-            });
-            updatedPlanResult = "STARTER";
-          }
-        } else if (userId) {
-          // Fallback user plan update if business not yet created
-          await prisma.user.update({
-            where: { id: userId },
-            data: { plan: normalizedPlan },
-          }).catch(() => null);
-          updatedPlanResult = normalizedPlan;
+        if (!resolvedBusinessId) {
+          return NextResponse.json(
+            { success: false, error: "Business ID is required to provision a SaaS plan. Please ensure you are signed in." },
+            { status: 400 }
+          );
+        }
+
+        if (isDoneForYou) {
+          await provisionConcierge(resolvedBusinessId, {
+            userId,
+            orderId: finalOrderId,
+            paymentId: razorpay_payment_id,
+            amount: 4999,
+            source: "RAZORPAY",
+          });
+          updatedPlanResult = "CONCIERGE";
+        } else if (isGrowth) {
+          await provisionGrowth(resolvedBusinessId, {
+            userId,
+            orderId: finalOrderId,
+            paymentId: razorpay_payment_id,
+            amount: 2499,
+            source: "RAZORPAY",
+          });
+          updatedPlanResult = "PRO";
+        } else {
+          await provisionStarter(resolvedBusinessId, {
+            userId,
+            orderId: finalOrderId,
+            paymentId: razorpay_payment_id,
+            amount: 999,
+            source: "RAZORPAY",
+          });
+          updatedPlanResult = "STARTER";
         }
 
         import("@/lib/notifications").then(({ sendAdminNotification }) => {

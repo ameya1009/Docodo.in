@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(() => Promise.resolve({
@@ -12,6 +12,18 @@ vi.mock("@/lib/auth", () => ({
   auth: vi.fn(() => Promise.resolve(null)),
 }));
 
+// P0-3C: Set required env vars BEFORE importing founder-auth so requireEnv() doesn't throw
+// when the module is evaluated. These are test-only values.
+const TEST_FOUNDER_PASSWORD = "TestFounderPass@99";
+const TEST_FOUNDER_SECRET = "test-founder-secret-for-vitest-only";
+process.env.FOUNDER_PASSWORD = TEST_FOUNDER_PASSWORD;
+process.env.FOUNDER_SECRET = TEST_FOUNDER_SECRET;
+
+afterAll(() => {
+  delete process.env.FOUNDER_PASSWORD;
+  delete process.env.FOUNDER_SECRET;
+});
+
 import {
   FOUNDER_CONFIG,
   verifyFounderCredentials,
@@ -19,19 +31,20 @@ import {
   verifyFounderToken,
 } from "../lib/founder-auth";
 
+
 describe("Founder Security & Authentication Suite", () => {
   it("authenticates valid founder email and password with constant-time equality", () => {
-    const isValid = verifyFounderCredentials(FOUNDER_CONFIG.email, "Ameya@02");
+    const isValid = verifyFounderCredentials(FOUNDER_CONFIG.email, TEST_FOUNDER_PASSWORD);
     expect(isValid).toBe(true);
   });
 
   it("authenticates case-insensitively for email", () => {
-    const isValid = verifyFounderCredentials("AMEYAKSHIRSAGAR@DOCODO.IN", "Ameya@02");
+    const isValid = verifyFounderCredentials("AMEYAKSHIRSAGAR@DOCODO.IN", TEST_FOUNDER_PASSWORD);
     expect(isValid).toBe(true);
   });
 
   it("rejects unauthorized email addresses", () => {
-    const isValid = verifyFounderCredentials("hacker@malicious.com", "Ameya@02");
+    const isValid = verifyFounderCredentials("hacker@malicious.com", TEST_FOUNDER_PASSWORD);
     expect(isValid).toBe(false);
   });
 
@@ -62,3 +75,4 @@ describe("Founder Security & Authentication Suite", () => {
     expect(verifyFounderToken("")).toBe(false);
   });
 });
+
