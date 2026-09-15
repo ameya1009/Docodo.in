@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import {
+  provisionStarter,
+  provisionGrowth,
+  provisionConcierge,
+} from "@/lib/services/provisioning-service";
 
 export const dynamic = "force-dynamic";
 
@@ -108,30 +113,63 @@ export async function POST(req: NextRequest) {
       revalidatePath("/dashboard");
     }
 
-    // Handle SaaS Subscription plan purchase
+    // Handle SaaS Subscription or Concierge plan purchase
     let updatedPlanResult: string | undefined;
     const planIdentifier = body.planId || body.planName;
     if (planIdentifier) {
       try {
         const { auth } = await import("@/lib/auth");
-        const { db } = await import("@/lib/supabase-db");
         const session = await auth();
         const userId = session?.user?.id || body.userId;
-        const isDoneForYou = planIdentifier.toLowerCase().includes("setup") || planIdentifier.toLowerCase().includes("concierge");
-        const normalizedPlan = planIdentifier.toLowerCase().includes("growth") || planIdentifier.toLowerCase().includes("pro") || isDoneForYou
-          ? "PRO"
-          : "STARTER";
+        const planStr = String(planIdentifier).toLowerCase();
+        const isDoneForYou = planStr.includes("setup") || planStr.includes("concierge");
+        const isGrowth = planStr.includes("growth") || planStr.includes("pro");
+        const normalizedPlan = isDoneForYou || isGrowth ? "PRO" : "STARTER";
 
-        if (userId) {
+        let resolvedBusinessId = body.businessId;
+        if (!resolvedBusinessId && userId) {
+          const biz = await prisma.business.findFirst({
+            where: { ownerId: userId },
+            select: { id: true },
+          });
+          resolvedBusinessId = biz?.id;
+        }
+
+        if (resolvedBusinessId) {
+          if (isDoneForYou) {
+            await provisionConcierge(resolvedBusinessId, {
+              userId,
+              orderId: finalOrderId,
+              paymentId: razorpay_payment_id,
+              amount: 4999,
+              source: "RAZORPAY",
+            });
+            updatedPlanResult = "CONCIERGE";
+          } else if (isGrowth) {
+            await provisionGrowth(resolvedBusinessId, {
+              userId,
+              orderId: finalOrderId,
+              paymentId: razorpay_payment_id,
+              amount: 2499,
+              source: "RAZORPAY",
+            });
+            updatedPlanResult = "PRO";
+          } else {
+            await provisionStarter(resolvedBusinessId, {
+              userId,
+              orderId: finalOrderId,
+              paymentId: razorpay_payment_id,
+              amount: 999,
+              source: "RAZORPAY",
+            });
+            updatedPlanResult = "STARTER";
+          }
+        } else if (userId) {
+          // Fallback user plan update if business not yet created
           await prisma.user.update({
             where: { id: userId },
             data: { plan: normalizedPlan },
-          }).catch(async () => {
-            await db.user.update({
-              where: { id: userId },
-              data: { plan: normalizedPlan },
-            }).catch(() => null);
-          });
+          }).catch(() => null);
           updatedPlanResult = normalizedPlan;
         }
 
@@ -146,6 +184,8 @@ export async function POST(req: NextRequest) {
         });
 
         revalidatePath("/dashboard");
+        revalidatePath("/dashboard/usage");
+        revalidatePath("/pricing");
       } catch (planErr) {
         console.warn("[Payment Verify] SaaS plan upgrade failed:", planErr);
       }

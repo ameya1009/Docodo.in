@@ -14,13 +14,25 @@ import {
   hasTimeSlotConflict,
   generateAvailableTimeSlots,
 } from "@/lib/engines/booking-engine";
-
 import { checkRateLimit } from "@/lib/rate-limit";
+import { 
+  canConsume, 
+  recordUsage, 
+  getBusinessSubscription,
+} from "@/lib/services/entitlement-service";
+import { PILOT_BOOKING_LIMIT } from "@/lib/plans-config";
 
 /**
  * PUBLIC booking creation — used by the /book/[slug] page.
- * businessId is validated against isPublished — not trusted from client.
- * Booking conflict check is wrapped in a serializable transaction to prevent race conditions.
+ * 
+ * Enforces real subscription & entitlement limits server-side:
+ * 1. Authenticate / Identify business
+ * 2. Determine active subscription / plan
+ * 3. Determine booking limit
+ * 4. Calculate current-period usage inside an atomic serializable transaction
+ * 5. Reject if limit exceeded (cannot exceed 50 bookings on Pilot)
+ * 6. Concurrency & race condition defense
+ * 7. Atomically create booking & record usage
  */
 export async function createPublicBooking(rawInput: {
   businessId: string;
@@ -45,11 +57,18 @@ export async function createPublicBooking(rawInput: {
     throw new Error("Too many booking attempts. Please wait a minute before submitting again.");
   }
 
+  // Pre-check entitlement before opening transaction for rapid fast-fail
+  const preCheck = await canConsume(data.businessId, "BOOKINGS_COUNT", 1);
+  if (!preCheck.allowed) {
+    throw new Error(
+      "This business has reached its monthly booking limit and is currently not accepting new online bookings."
+    );
+  }
+
   // Use a serializable transaction to prevent TOCTOU race conditions.
-  // Both the conflict check and the insert happen atomically.
   const booking = await prisma.$transaction(
     async (tx) => {
-      // 1. Verify business is published and accepting bookings.
+      // 1. Verify business is published and active.
       const business = await tx.business.findFirst({
         where: { id: data.businessId, isPublished: true },
         select: { id: true, name: true, slug: true },
@@ -58,7 +77,34 @@ export async function createPublicBooking(rawInput: {
         throw new Error("Business is currently not receiving online appointments.");
       }
 
-      // 2. Verify service exists and belongs to this business.
+      // 2. Strict In-Transaction Booking Limit & Concurrency Defense
+      const sub = await getBusinessSubscription(data.businessId, tx);
+      const isPilot = sub.planId === "pilot";
+
+      if (isPilot) {
+        const periodStart = new Date(sub.currentPeriodStart);
+        const periodEnd = new Date(sub.currentPeriodEnd);
+
+        // Count non-cancelled bookings directly within transaction snapshot
+        const currentPeriodBookingsCount = await tx.booking.count({
+          where: {
+            businessId: data.businessId,
+            createdAt: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+            status: { not: "CANCELLED" },
+          },
+        });
+
+        if (currentPeriodBookingsCount >= PILOT_BOOKING_LIMIT) {
+          throw new Error(
+            "This business has reached its monthly booking limit and is currently not accepting new online bookings."
+          );
+        }
+      }
+
+      // 3. Verify service exists and belongs to this business.
       const service = await tx.service.findUnique({
         where: { id: data.serviceId },
       });
@@ -69,11 +115,10 @@ export async function createPublicBooking(rawInput: {
         throw new Error("This service is not currently available for booking.");
       }
 
-      // 3. Calculate end time from service duration.
+      // 4. Calculate end time from service duration.
       const endTime = calculateEndTime(data.startTime, service.duration);
 
-      // 4. Check for conflicts inside the transaction (atomic read-check-write).
-      // We enforce a 15-minute lock window on PENDING bookings to prevent ghost locks.
+      // 5. Check for conflicts inside the transaction (atomic read-check-write).
       const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
       const existingBookings = await tx.booking.findMany({
         where: {
@@ -94,7 +139,7 @@ export async function createPublicBooking(rawInput: {
         );
       }
 
-      // 5. Upsert customer (phone-based, per-business identity).
+      // 6. Upsert customer (phone-based, per-business identity).
       let customer = null;
       try {
         customer = await tx.customer.upsert({
@@ -121,11 +166,10 @@ export async function createPublicBooking(rawInput: {
           },
         });
       } catch (crmErr) {
-        // CRM failure must NOT block booking — log and continue.
-        console.warn("[CRM] Customer upsert failed, booking will proceed:", crmErr);
+        console.warn("[CRM] Customer upsert handled:", crmErr);
       }
 
-      // 6. Create the booking.
+      // 7. Create the booking.
       const newBooking = await tx.booking.create({
         data: {
           businessId: data.businessId,
@@ -148,23 +192,24 @@ export async function createPublicBooking(rawInput: {
         include: { service: true },
       });
 
+      // 8. Atomically Record Usage for the current billing period
+      await recordUsage(data.businessId, "BOOKINGS_COUNT", 1, tx);
+
       return { booking: newBooking, businessSlug: business.slug };
     },
     {
-      // Serializable isolation prevents concurrent transactions from reading
-      // the same available slot and both succeeding.
       isolationLevel: "Serializable",
     }
   );
 
-  // Non-blocking: trigger WhatsApp & Email confirmation — failure must not affect booking.
+  // Non-blocking notifications
   DocodoBackendAPI.verifyNDRBooking({
     businessId: data.businessId,
     bookingId: booking.booking.id,
     customerPhone: data.customerPhone,
     customerName: data.customerName,
   }).catch((err) => {
-    console.warn("[NDR] Backend notification failed (non-critical):", err);
+    console.warn("[NDR] Backend notification handled:", err);
   });
 
   if (data.customerEmail) {
@@ -172,25 +217,26 @@ export async function createPublicBooking(rawInput: {
       sendBookingConfirmationEmail({
         toEmail: data.customerEmail!,
         customerName: data.customerName,
-        businessName: booking.booking.service?.name ? `Docodo Partner` : "Docodo Partner",
+        businessName: "Docodo Partner",
         serviceName: booking.booking.service?.name || "Appointment",
         date: data.date,
         startTime: data.startTime,
         price: booking.booking.price,
         paymentMethod: data.paymentMethod,
-      }).catch((err) => console.warn("[Email Notification] Failed:", err));
+      }).catch((err) => console.warn("[Email Notification] Handled:", err));
     });
   }
 
   revalidatePath(`/book/${booking.businessSlug}`);
   revalidatePath("/dashboard/bookings");
+  revalidatePath("/dashboard/usage");
+  revalidatePath("/dashboard");
 
   return booking.booking;
 }
 
 /**
  * Get available time slots for a service on a given date.
- * Used by the public booking page.
  */
 export async function getAvailableSlotsAction(rawInput: {
   businessId: string;
@@ -198,6 +244,17 @@ export async function getAvailableSlotsAction(rawInput: {
   date: string;
 }) {
   const { businessId, serviceId, date } = GetAvailableSlotsSchema.parse(rawInput);
+
+  // Check if business has reached monthly booking limit
+  const limitCheck = await canConsume(businessId, "BOOKINGS_COUNT", 1);
+  if (!limitCheck.allowed) {
+    return {
+      slots: [],
+      isClosed: true,
+      reason: "This business has reached its monthly booking limit and is currently not accepting new online bookings.",
+      limitReached: true,
+    };
+  }
 
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
   const [service, workingHours, existingBookings] = await Promise.all([
@@ -221,7 +278,6 @@ export async function getAvailableSlotsAction(rawInput: {
     throw new Error("Service does not belong to this business.");
   }
 
-  // Determine weekday from date (0=Sun, 1=Mon, ..., 6=Sat)
   const dayIndex = new Date(date).getDay();
   const daysMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
   const dayStr = daysMap[dayIndex];
@@ -248,20 +304,17 @@ export async function getAvailableSlotsAction(rawInput: {
 
 /**
  * Update booking status — protected, owner-only.
- * Used by the dashboard.
  */
 export async function updateBookingStatusAction(rawInput: {
   bookingId: string;
   status: "CONFIRMED" | "PENDING" | "COMPLETED" | "CANCELLED" | "NO_SHOW" | "NDR_HOLD";
   internalNotes?: string;
 }) {
-  // SECURITY: Verify session and that booking belongs to user's business.
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const validated = UpdateBookingStatusSchema.parse(rawInput);
 
-  // Verify ownership before updating.
   const booking = await prisma.booking.findUnique({
     where: { id: validated.bookingId },
     select: { businessId: true },
@@ -287,6 +340,7 @@ export async function updateBookingStatusAction(rawInput: {
   });
 
   revalidatePath("/dashboard/bookings");
+  revalidatePath("/dashboard/usage");
   revalidatePath("/dashboard");
   return updated;
 }
