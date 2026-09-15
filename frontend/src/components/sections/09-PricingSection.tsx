@@ -22,100 +22,11 @@ export const PricingSection = () => {
       return;
     }
 
-    const priceNum = parseInt(plan.price.replace(/[^0-9]/g, ""), 10) || 2499;
-    setLoadingPlan(plan.id);
-
-    try {
-      // Ensure Razorpay SDK is loaded
-      const isLoaded = await loadRazorpayScript();
-      if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
-        setLoadingPlan(null);
-        alert("Unable to load Razorpay payment gateway. Please check your internet connection.");
-        return;
-      }
-
-      // 1. Call Backend Order Creation Endpoint: POST /api/create-order
-      const orderRes = await fetch("/api/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: priceNum * 100, // in paise
-          currency: "INR",
-          receipt: `rcpt_${plan.id}_${Date.now()}`,
-          notes: {
-            planId: plan.id,
-            planName: plan.name,
-          },
-        }),
-      });
-
-      const orderData = await orderRes.json();
-      if (!orderRes.ok || !orderData.order_id) {
-        throw new Error(orderData.error || "Failed to create order");
-      }
-
-      // 2. Open Razorpay Standard Checkout Modal
-      const options = {
-        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
-        amount: orderData.amount,
-        currency: orderData.currency,
-
-
-        name: "Docodo India",
-        description: `${plan.name} Subscription (${plan.period})`,
-        order_id: orderData.order_id,
-        theme: {
-          color: "#C8F135",
-        },
-        modal: {
-          escape: true,
-          backdropclose: false,
-          ondismiss: function () {
-            setLoadingPlan(null);
-            console.log("Customer closed the checkout modal.");
-          },
-        },
-        handler: async function (response: any) {
-          try {
-            // 3. Call Backend Verification Endpoint: POST /api/verify-payment
-            const verifyRes = await fetch("/api/verify-payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                order_id: response.razorpay_order_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                planId: plan.id,
-                planName: plan.name,
-              }),
-            });
-
-            const verifyData = await verifyRes.json();
-            if (verifyRes.ok && verifyData.success) {
-              setPaidPlan(plan.name);
-            } else {
-              alert(verifyData.error || "Payment verification failed.");
-            }
-          } catch (err: any) {
-            alert(err.message || "Network error verifying payment");
-          } finally {
-            setLoadingPlan(null);
-          }
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        setLoadingPlan(null);
-        alert(`Payment failed: ${response.error?.description || "Transaction declined"}`);
-      });
-      rzp.open();
-    } catch (err: any) {
-      setLoadingPlan(null);
-      alert(err.message || "Failed to initialize payment");
-    }
+    // Route directly to authenticated checkout with selected plan
+    router.push(`/checkout?plan=${plan.id}`);
   };
+
+
 
   return (
     <section id="pricing" className="py-24 bg-[var(--bg-elevated)]/30 border-y border-[var(--border-subtle)] relative overflow-hidden">

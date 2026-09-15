@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const slug = searchParams.get("slug");
     const date = searchParams.get("date");
 
-    // Authenticate via session or x-api-key
+    // Authenticate via session or x-api-key — never allow unauthenticated public PII access
     let businessId: string | undefined;
 
     if (session?.user?.id) {
@@ -23,9 +23,10 @@ export async function GET(req: NextRequest) {
         select: { id: true },
       });
       businessId = biz?.id;
-    } else if (slug) {
-      const biz = await prisma.business.findUnique({
-        where: { slug },
+    } else if (apiKey) {
+      // In a production setup, verify API key against business
+      const biz = await prisma.business.findFirst({
+        where: { id: apiKey },
         select: { id: true },
       });
       businessId = biz?.id;
@@ -33,10 +34,11 @@ export async function GET(req: NextRequest) {
 
     if (!businessId) {
       return NextResponse.json(
-        { error: "Unauthorized or missing valid business identifier" },
+        { error: "Unauthorized: An authenticated merchant session or valid API key is required to view customer bookings." },
         { status: 401 }
       );
     }
+
 
     const bookings = await prisma.booking.findMany({
       where: {

@@ -52,9 +52,10 @@ export class DocodoBackendAPI {
           recipient: params.recipientPhone,
           messageType: params.messageType,
           content: params.customMessage,
-          status: waToken ? "SENT" : "DELIVERED",
+          status: waToken && waPhoneId ? "SENT" : "NOT_CONFIGURED",
         },
       });
+
 
       if (waToken && waPhoneId && cleanPhone) {
         try {
@@ -169,7 +170,7 @@ Provide engaging, high-converting, concise copy suited for Indian customers.`;
             recipient: phone,
             messageType: "BROADCAST",
             content: params.template,
-            status: waToken ? "SENT" : "DELIVERED",
+            status: waToken && waPhoneId ? "SENT" : "NOT_CONFIGURED",
           })),
         });
       }
@@ -214,13 +215,16 @@ Provide engaging, high-converting, concise copy suited for Indian customers.`;
    */
   static async verifyNDRBooking(params: NDRVerifyParams): Promise<{ success: boolean }> {
     try {
+      const waToken = process.env.WHATSAPP_ACCESS_TOKEN;
+      const waPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
       await prisma.whatsAppLog.create({
         data: {
           businessId: params.businessId,
           recipient: params.customerPhone,
           messageType: "NDR_VERIFICATION",
           content: `Hi ${params.customerName || "Customer"}, your booking #${params.bookingId.slice(0, 8)} is awaiting confirmation.`,
-          status: "DELIVERED",
+          status: waToken && waPhoneId ? "SENT" : "NOT_CONFIGURED",
         },
       });
       return { success: true };
@@ -229,6 +233,7 @@ Provide engaging, high-converting, concise copy suited for Indian customers.`;
       return { success: false };
     }
   }
+
 
   /**
    * Record transaction into payment reconciliation ledger

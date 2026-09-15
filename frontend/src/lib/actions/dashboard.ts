@@ -162,15 +162,9 @@ export async function getDashboardData() {
       },
     };
   } catch (err) {
-    console.warn("[getDashboardData Exception Handled]:", err);
+    console.error("[getDashboardData Exception Handled]:", err);
     return {
-      business: {
-        id: "biz-fallback",
-        name: "My Business",
-        slug: "my-business",
-        industry: "Salons & Spas",
-        services: [],
-      },
+      business: null,
       upcomingBookings: [],
       recentBookings: [],
       recentEnquiries: [],
@@ -180,7 +174,7 @@ export async function getDashboardData() {
         totalRevenue: 0,
         customers: 0,
         activeServices: 0,
-        completionRate: 100,
+        completionRate: 0,
         averageOrderValue: 0,
         statusBreakdown: {},
         revenueByDate: [],
@@ -188,6 +182,8 @@ export async function getDashboardData() {
     };
   }
 }
+
+
 
 
 export async function getDashboardStatsAction(rawInput: {

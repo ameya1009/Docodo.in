@@ -80,17 +80,12 @@ export async function getBusinessSubscription(businessId: string, client: any = 
       });
       await recalculateEntitlements(businessId, client);
     } catch (createErr) {
-      return {
-        id: `sub_virtual_pilot_${businessId}`,
-        businessId,
-        planId: PLAN_IDS.PILOT,
-        status: SUBSCRIPTION_STATES.ACTIVE,
-        provider: "SYSTEM",
-        currentPeriodStart: periodStart,
-        currentPeriodEnd: periodEnd,
-      };
+      console.error("[Entitlements] Failed to persist Pilot subscription:", createErr);
+      throw createErr;
     }
+
   }
+
 
   // Monthly rollover for Pilot
   if (sub.planId === PLAN_IDS.PILOT && new Date(sub.currentPeriodEnd) < now) {

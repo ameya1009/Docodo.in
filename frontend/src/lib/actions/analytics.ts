@@ -114,7 +114,10 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     for (const b of bookings) {
-      if (b.paymentStatus === "PAID" || b.status === "CONFIRMED" || b.status === "COMPLETED") {
+      const isPaid = b.paymentStatus === "PAID" || b.paidAmount > 0;
+      const isNotCancelled = b.status !== "CANCELLED" && b.status !== "NO_SHOW";
+
+      if (isPaid && isNotCancelled) {
         const amount = b.paidAmount > 0 ? b.paidAmount : b.price;
         grossRevenue += amount;
 
@@ -126,10 +129,11 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
         }
       }
 
-      if (b.status === "COMPLETED" || b.status === "CONFIRMED") {
+      if ((b.status === "COMPLETED" || b.status === "CONFIRMED") && isNotCancelled) {
         completedBookings++;
       }
     }
+
 
     const avgLTV = customerCount > 0 ? Math.round(grossRevenue / customerCount) : 0;
     const conversionRate = totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0;

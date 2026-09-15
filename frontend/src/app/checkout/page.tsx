@@ -52,9 +52,10 @@ function CheckoutContent() {
 
     if (status === "unauthenticated" || !session) {
       const planQ = selectedPlanId ? `?plan=${selectedPlanId}` : "";
-      router.push(`/auth/signin?callbackUrl=${encodeURIComponent("/checkout" + planQ)}`);
+      router.push(`/auth/login?callbackUrl=${encodeURIComponent("/checkout" + planQ)}`);
       return;
     }
+
 
     if (isFreePilot) {
       router.push("/auth/signup");
