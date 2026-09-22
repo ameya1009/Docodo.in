@@ -3,6 +3,8 @@
 import React from "react";
 import { Lightbulb, ArrowRight, ShieldCheck, Zap } from "lucide-react";
 
+import Link from "next/link";
+
 export default function OpportunitiesPage() {
   const sampleOpps = [
     {
@@ -14,6 +16,7 @@ export default function OpportunitiesPage() {
       solution: "Deploy WhatsApp calendar booking link directly in IG bio & automated DM response.",
       confidence: 0.95,
       reachability: "WhatsApp + IG Verified",
+      outreachHref: "/dashboard/growth-os/outreach",
     },
     {
       id: "opp_2",
@@ -24,6 +27,7 @@ export default function OpportunitiesPage() {
       solution: "Activate automated post-treatment WhatsApp review request sequence.",
       confidence: 0.93,
       reachability: "Phone + Website Verified",
+      outreachHref: "/dashboard/growth-os/campaigns/pune-clinics",
     },
     {
       id: "opp_3",
@@ -34,6 +38,7 @@ export default function OpportunitiesPage() {
       solution: "Deploy customized Docodo AI booking website in under 5 minutes.",
       confidence: 0.96,
       reachability: "Phone Verified",
+      outreachHref: "/dashboard/growth-os/outreach",
     },
   ];
 
@@ -71,10 +76,13 @@ export default function OpportunitiesPage() {
               </div>
             </div>
 
-            <button className="w-full h-9 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2">
+            <Link
+              href={opp.outreachHref}
+              className="w-full h-9 rounded-lg bg-lime-400/15 text-lime-400 hover:bg-lime-400 hover:text-black font-semibold text-xs transition-colors flex items-center justify-center gap-2 border border-lime-400/30"
+            >
               <span>Generate Targeted Outreach Draft</span>
               <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+            </Link>
           </div>
         ))}
       </div>

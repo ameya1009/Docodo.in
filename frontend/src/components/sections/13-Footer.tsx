@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { MessageCircle, Heart, ArrowRight } from "lucide-react";
-import { FOOTER_LINKS, WHATSAPP_LINK } from "@/lib/constants";
+import { FOOTER_LINKS, WHATSAPP_LINK, CONTACT } from "@/lib/constants";
+import { Youtube, Instagram, Linkedin, BookOpen } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -105,6 +106,61 @@ export const Footer = () => {
             <span className="font-display font-black text-base text-[var(--text-primary)]">DOCODO</span>
             <span>• Built with ❤️ for local businesses in India.</span>
           </div>
+
+          {/* Social Links */}
+          <div className="flex items-center gap-4 text-[var(--text-secondary)]">
+            <a
+              href={CONTACT.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-red-500 transition-colors flex items-center gap-1 text-xs"
+              title="Official YouTube Channel"
+            >
+              <Youtube size={16} />
+              <span className="hidden md:inline">YouTube</span>
+            </a>
+            <a
+              href={CONTACT.youtubeSecondary}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-red-400 transition-colors flex items-center gap-1 text-xs"
+              title="Secondary YouTube Channel"
+            >
+              <Youtube size={16} />
+              <span className="hidden md:inline">Channel 2</span>
+            </a>
+            <a
+              href={CONTACT.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-pink-400 transition-colors flex items-center gap-1 text-xs"
+              title="Official Instagram"
+            >
+              <Instagram size={16} />
+              <span className="hidden md:inline">Instagram</span>
+            </a>
+            <a
+              href={CONTACT.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-sky-400 transition-colors flex items-center gap-1 text-xs"
+              title="LinkedIn"
+            >
+              <Linkedin size={16} />
+              <span className="hidden md:inline">LinkedIn</span>
+            </a>
+            <a
+              href={CONTACT.medium}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors flex items-center gap-1 text-xs"
+              title="Engineering Blog"
+            >
+              <BookOpen size={16} />
+              <span className="hidden md:inline">Blog</span>
+            </a>
+          </div>
+
           <div className="font-mono text-[11px]">
             © {new Date().getFullYear()} Docodo.in. All rights reserved.
           </div>
