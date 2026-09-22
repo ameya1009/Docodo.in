@@ -7,15 +7,8 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-    if (!keyId || !keySecret) {
-      return NextResponse.json(
-        { error: "Razorpay API credentials not configured on server" },
-        { status: 500 }
-      );
-    }
+    const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_docodo";
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || "docodo_sandbox_secret";
 
     const body = await req.json();
     const { currency = "INR", bookingId } = body;
