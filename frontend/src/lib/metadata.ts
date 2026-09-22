@@ -89,7 +89,9 @@ export const jsonLd = {
       "url": "https://docodo.in",
       "logo": "https://docodo.in/logo.png",
       "sameAs": [
-        "https://youtube.com/@docodo",
+        "https://www.youtube.com/channel/UCAgiu7bzl3QvGLNKhXcXsxw/",
+        "https://www.youtube.com/channel/UCOxuYbcj1vUjItVTKXd8xgQ/",
+        "https://www.instagram.com/ameyakshirsagar10/",
         "https://linkedin.com/company/docodo",
         "https://twitter.com/docodo_in",
         "https://medium.com/@ameyakshirsagar02"
