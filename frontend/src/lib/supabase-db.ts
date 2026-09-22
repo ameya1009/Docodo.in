@@ -573,35 +573,159 @@ export const db = {
     },
   },
   subscription: {
-    async findUnique({ where }: any): Promise<any> { return null; },
-    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
-    async findMany({ where }: any): Promise<any[]> { return []; },
-    async create({ data }: any): Promise<any> { return { ...data, id: `sub_${Date.now()}` }; },
-    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
-    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `sub_${Date.now()}` }; },
+    async findUnique({ where }: any): Promise<any> {
+      let query = supabaseAdmin.from("Subscription").select("*");
+      if (where.id) query = query.eq("id", where.id);
+      if (where.businessId) query = query.eq("businessId", where.businessId);
+      const { data } = await query.maybeSingle();
+      return data || null;
+    },
+    async findFirst({ where, orderBy }: any): Promise<any> {
+      let query = supabaseAdmin.from("Subscription").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      if (where?.status) query = query.eq("status", where.status);
+      if (orderBy?.createdAt === "desc") query = query.order("createdAt", { ascending: false });
+      const { data } = await query.limit(1).maybeSingle();
+      return data || null;
+    },
+    async findMany({ where }: any): Promise<any[]> {
+      let query = supabaseAdmin.from("Subscription").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      const { data } = await query;
+      return data || [];
+    },
+    async create({ data }: any): Promise<any> {
+      const id = data.id || `sub_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const payload = { ...data, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      const { data: res } = await supabaseAdmin.from("Subscription").insert(payload).select().single();
+      return res || payload;
+    },
+    async update({ where, data }: any): Promise<any> {
+      const { data: res } = await supabaseAdmin.from("Subscription").update({ ...data, updatedAt: new Date().toISOString() }).eq("id", where.id).select().single();
+      return res || { ...data, id: where.id };
+    },
+    async upsert({ where, update, create }: any): Promise<any> {
+      const existing = await db.subscription.findUnique({ where });
+      if (existing) {
+        return db.subscription.update({ where: { id: existing.id }, data: update });
+      }
+      return db.subscription.create({ data: create });
+    },
   },
   businessEntitlement: {
-    async findUnique({ where }: any): Promise<any> { return null; },
-    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
-    async findMany({ where }: any): Promise<any[]> { return []; },
-    async create({ data }: any): Promise<any> { return { ...data, id: `ent_${Date.now()}` }; },
-    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
-    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `ent_${Date.now()}` }; },
+    async findUnique({ where }: any): Promise<any> {
+      let query = supabaseAdmin.from("BusinessEntitlement").select("*");
+      if (where.id) query = query.eq("id", where.id);
+      if (where.businessId) query = query.eq("businessId", where.businessId);
+      const { data } = await query.maybeSingle();
+      return data || null;
+    },
+    async findFirst({ where }: any): Promise<any> {
+      let query = supabaseAdmin.from("BusinessEntitlement").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      const { data } = await query.limit(1).maybeSingle();
+      return data || null;
+    },
+    async findMany({ where }: any): Promise<any[]> {
+      let query = supabaseAdmin.from("BusinessEntitlement").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      const { data } = await query;
+      return data || [];
+    },
+    async create({ data }: any): Promise<any> {
+      const id = data.id || `ent_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const payload = { ...data, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      const { data: res } = await supabaseAdmin.from("BusinessEntitlement").insert(payload).select().single();
+      return res || payload;
+    },
+    async update({ where, data }: any): Promise<any> {
+      const { data: res } = await supabaseAdmin.from("BusinessEntitlement").update({ ...data, updatedAt: new Date().toISOString() }).eq("id", where.id).select().single();
+      return res || { ...data, id: where.id };
+    },
+    async upsert({ where, update, create }: any): Promise<any> {
+      const existing = await db.businessEntitlement.findFirst({ where });
+      if (existing) {
+        return db.businessEntitlement.update({ where: { id: existing.id }, data: update });
+      }
+      return db.businessEntitlement.create({ data: create });
+    },
   },
   usageRecord: {
-    async findUnique({ where }: any): Promise<any> { return null; },
-    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
-    async findMany({ where }: any): Promise<any[]> { return []; },
-    async create({ data }: any): Promise<any> { return { ...data, id: `ur_${Date.now()}` }; },
-    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
-    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `ur_${Date.now()}` }; },
+    async findUnique({ where }: any): Promise<any> {
+      let query = supabaseAdmin.from("UsageRecord").select("*");
+      if (where.id) query = query.eq("id", where.id);
+      const { data } = await query.maybeSingle();
+      return data || null;
+    },
+    async findFirst({ where, orderBy }: any): Promise<any> {
+      let query = supabaseAdmin.from("UsageRecord").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      if (where?.metric) query = query.eq("metric", where.metric);
+      if (orderBy?.createdAt === "desc") query = query.order("createdAt", { ascending: false });
+      const { data } = await query.limit(1).maybeSingle();
+      return data || null;
+    },
+    async findMany({ where }: any): Promise<any[]> {
+      let query = supabaseAdmin.from("UsageRecord").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      if (where?.metric) query = query.eq("metric", where.metric);
+      const { data } = await query;
+      return data || [];
+    },
+    async create({ data }: any): Promise<any> {
+      const id = data.id || `ur_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const payload = { ...data, id, createdAt: new Date().toISOString() };
+      const { data: res } = await supabaseAdmin.from("UsageRecord").insert(payload).select().single();
+      return res || payload;
+    },
+    async update({ where, data }: any): Promise<any> {
+      const { data: res } = await supabaseAdmin.from("UsageRecord").update(data).eq("id", where.id).select().single();
+      return res || { ...data, id: where.id };
+    },
+    async upsert({ where, update, create }: any): Promise<any> {
+      const existing = await db.usageRecord.findFirst({ where });
+      if (existing) {
+        return db.usageRecord.update({ where: { id: existing.id }, data: update });
+      }
+      return db.usageRecord.create({ data: create });
+    },
   },
   conciergeOrder: {
-    async findUnique({ where }: any): Promise<any> { return null; },
-    async findFirst({ where, orderBy }: any): Promise<any> { return null; },
-    async findMany({ where }: any): Promise<any[]> { return []; },
-    async create({ data }: any): Promise<any> { return { ...data, id: `co_${Date.now()}` }; },
-    async update({ where, data }: any): Promise<any> { return { ...data, id: where.id }; },
-    async upsert({ where, update, create }: any): Promise<any> { return { ...create, id: `co_${Date.now()}` }; },
+    async findUnique({ where }: any): Promise<any> {
+      let query = supabaseAdmin.from("ConciergeOrder").select("*");
+      if (where.id) query = query.eq("id", where.id);
+      const { data } = await query.maybeSingle();
+      return data || null;
+    },
+    async findFirst({ where, orderBy }: any): Promise<any> {
+      let query = supabaseAdmin.from("ConciergeOrder").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      if (orderBy?.createdAt === "desc") query = query.order("createdAt", { ascending: false });
+      const { data } = await query.limit(1).maybeSingle();
+      return data || null;
+    },
+    async findMany({ where }: any): Promise<any[]> {
+      let query = supabaseAdmin.from("ConciergeOrder").select("*");
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      const { data } = await query;
+      return data || [];
+    },
+    async create({ data }: any): Promise<any> {
+      const id = data.id || `co_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const payload = { ...data, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      const { data: res } = await supabaseAdmin.from("ConciergeOrder").insert(payload).select().single();
+      return res || payload;
+    },
+    async update({ where, data }: any): Promise<any> {
+      const { data: res } = await supabaseAdmin.from("ConciergeOrder").update({ ...data, updatedAt: new Date().toISOString() }).eq("id", where.id).select().single();
+      return res || { ...data, id: where.id };
+    },
+    async upsert({ where, update, create }: any): Promise<any> {
+      const existing = await db.conciergeOrder.findFirst({ where });
+      if (existing) {
+        return db.conciergeOrder.update({ where: { id: existing.id }, data: update });
+      }
+      return db.conciergeOrder.create({ data: create });
+    },
   },
 };

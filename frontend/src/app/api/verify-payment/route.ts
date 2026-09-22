@@ -134,19 +134,36 @@ export async function POST(req: NextRequest) {
         const isGrowth = planStr.includes("growth") || planStr.includes("pro");
         const normalizedPlan = isDoneForYou || isGrowth ? "PRO" : "STARTER";
 
-        // P0-2: resolvedBusinessId is required — fail with 400 if missing
+        // P0-2: Auto-resolve or create business entity for user
         let resolvedBusinessId = body.businessId;
         if (!resolvedBusinessId && userId) {
           const biz = await prisma.business.findFirst({
             where: { ownerId: userId },
             select: { id: true },
           });
-          resolvedBusinessId = biz?.id;
+          if (biz) {
+            resolvedBusinessId = biz.id;
+          } else {
+            // Auto-provision initial business container so payment is never rejected
+            const newBiz = await prisma.business.create({
+              data: {
+                name: body.notes?.businessName || (session?.user?.name ? `${session.user.name}'s Business` : "My Business"),
+                slug: `biz-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+                industry: "General Service",
+                ownerId: userId,
+                phone: body.notes?.customerPhone || null,
+                email: session?.user?.email || null,
+                onboardingStep: 1,
+                onboardingComplete: false,
+              },
+            });
+            resolvedBusinessId = newBiz.id;
+          }
         }
 
         if (!resolvedBusinessId) {
           return NextResponse.json(
-            { success: false, error: "Business ID is required to provision a SaaS plan. Please ensure you are signed in." },
+            { success: false, error: "Business ID or user session is required to provision a SaaS plan." },
             { status: 400 }
           );
         }
