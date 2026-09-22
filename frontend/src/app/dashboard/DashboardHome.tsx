@@ -23,9 +23,11 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function DashboardHome({ data }: DashboardHomeProps) {
-  const { business, stats, upcomingBookings, recentEnquiries = [] } = data;
+  const { business = {}, stats = {}, upcomingBookings = [], recentEnquiries = [] } = data || {};
   const [copied, setCopied] = React.useState(false);
-  const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/book/${business.slug}`;
+  const businessSlug = business?.slug || "my-business";
+  const businessName = business?.name || "My Business";
+  const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/book/${businessSlug}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(bookingUrl);
@@ -36,7 +38,7 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
   const STAT_CARDS = [
     {
       label: "Today's Bookings",
-      value: stats.todayBookings,
+      value: stats?.todayBookings ?? 0,
       icon: Calendar,
       color: "text-[var(--lime)]",
       bg: "bg-[var(--lime)]/10",
@@ -44,7 +46,7 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
     },
     {
       label: "Revenue This Month",
-      value: formatCurrency(stats.monthlyRevenue),
+      value: formatCurrency(stats?.monthlyRevenue ?? 0),
       icon: TrendingUp,
       color: "text-[var(--success)]",
       bg: "bg-[var(--success)]/10",
@@ -52,7 +54,7 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
     },
     {
       label: "Total Customers",
-      value: stats.customers,
+      value: stats?.customers ?? 0,
       icon: Users,
       color: "text-blue-400",
       bg: "bg-blue-500/10",
@@ -60,7 +62,7 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
     },
     {
       label: "Active Services",
-      value: business.services?.length ?? stats.activeServices ?? 0,
+      value: business?.services?.length ?? stats?.activeServices ?? 0,
       icon: Globe,
       color: "text-purple-400",
       bg: "bg-purple-500/10",
@@ -74,7 +76,7 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-[var(--text-primary)]">
-            Good {getGreeting()}, {data.business.name} 👋
+            Good {getGreeting()}, {businessName} 👋
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
             Here&apos;s your real-time business performance across appointments, CRM, and revenue.

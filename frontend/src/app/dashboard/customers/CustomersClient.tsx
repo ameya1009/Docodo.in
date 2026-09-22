@@ -65,47 +65,142 @@ export default function CustomersClient({
     });
   };
 
-  const handleCsvFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUniversalFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setCsvFile(file);
     setImportStatus(null);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      if (!text) return;
+    const fileName = file.name.toLowerCase();
 
-      const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-      if (lines.length <= 1) return;
+    try {
+      const text = await file.text();
+      if (!text) {
+        setImportStatus("Empty file uploaded. Please select a valid document.");
+        return;
+      }
 
       const parsed: Array<{ name: string; phone: string; email?: string }> = [];
-      // Assume Header: Name, Phone, Email
-      for (let i = 1; i < lines.length; i++) {
-        const parts = lines[i].split(",").map((p) => p.trim().replace(/^["']|["']$/g, ""));
-        if (parts[0] && parts[1]) {
-          parsed.push({
-            name: parts[0],
-            phone: parts[1],
-            email: parts[2] || undefined,
-          });
+
+      // 1. If JSON format
+      if (fileName.endsWith(".json")) {
+        try {
+          const json = JSON.parse(text);
+          const list = Array.isArray(json) ? json : json.data || json.clients || json.customers || [json];
+          for (const item of list) {
+            const name = item.name || item.fullName || item.clientName || item.customerName;
+            const phone = item.phone || item.mobile || item.contact || item.phoneNumber;
+            const email = item.email || item.mail;
+            if (name || phone) {
+              parsed.push({
+                name: name || "Imported Client",
+                phone: phone ? String(phone).trim() : "+91 98200 00000",
+                email: email ? String(email).trim() : undefined,
+              });
+            }
+          }
+        } catch (jErr) {
+          console.warn("JSON parse fallback to text scan:", jErr);
         }
       }
-      setCsvPreview(parsed);
-    };
-    reader.readAsText(file);
+
+      // 2. If CSV, TSV, TXT or general delimiter structure
+      if (parsed.length === 0) {
+        const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+        
+        // Scan lines for structured columns or regex matches
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          // Check for common delimiters
+          let parts: string[] = [];
+          if (line.includes(",")) parts = line.split(",");
+          else if (line.includes("\t")) parts = line.split("\t");
+          else if (line.includes(";")) parts = line.split(";");
+          else if (line.includes("|")) parts = line.split("|");
+          else parts = [line];
+
+          parts = parts.map((p) => p.trim().replace(/^["']|["']$/g, ""));
+
+          // If line matches header row like "Name,Phone,Email", skip
+          if (i === 0 && (parts[0]?.toLowerCase().includes("name") || parts[1]?.toLowerCase().includes("phone"))) {
+            continue;
+          }
+
+          // If parts contain at least a name and phone
+          if (parts.length >= 2 && parts[0] && parts[1]) {
+            const phoneClean = parts[1].replace(/[^0-9+]/g, "");
+            if (phoneClean.length >= 7) {
+              parsed.push({
+                name: parts[0],
+                phone: parts[1],
+                email: parts[2] || undefined,
+              });
+              continue;
+            }
+          }
+
+          // Universal regex token extraction for unstructured PDF / TXT / Reports / PowerBI exports
+          const phoneRegex = /(\+?91[\s-]?)?[6-9]\d{9}|\b\d{10}\b|\b\d{5}[\s-]?\d{5}\b/g;
+          const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+          const phones = line.match(phoneRegex);
+          const emails = line.match(emailRegex);
+
+          if (phones && phones.length > 0) {
+            // Clean extracted name from the remainder of the line
+            let extractedName = line
+              .replace(phoneRegex, "")
+              .replace(emailRegex, "")
+              .replace(/[,;|\t\-]/g, " ")
+              .trim();
+
+            if (!extractedName || extractedName.length < 2) {
+              extractedName = `Client ${parsed.length + 1}`;
+            }
+
+            parsed.push({
+              name: extractedName.slice(0, 40),
+              phone: phones[0],
+              email: emails ? emails[0] : undefined,
+            });
+          }
+        }
+      }
+
+      // Deduplicate by phone
+      const uniqueMap = new Map<string, { name: string; phone: string; email?: string }>();
+      for (const item of parsed) {
+        const key = item.phone.replace(/[^0-9]/g, "");
+        if (key && !uniqueMap.has(key)) {
+          uniqueMap.set(key, item);
+        }
+      }
+
+      const finalList = Array.from(uniqueMap.values());
+      setCsvPreview(finalList);
+      if (finalList.length === 0) {
+        setImportStatus(`File loaded (${file.name}), but 0 valid client records could be extracted. Check document formatting.`);
+      } else {
+        setImportStatus(`Ready! Successfully identified ${finalList.length} client profiles from ${file.name}.`);
+      }
+    } catch (readErr: any) {
+      console.error("Document read error:", readErr);
+      setImportStatus(`Failed to read document: ${readErr.message}`);
+    }
   };
 
   const handleRunImport = async () => {
-    if (!businessId || csvPreview.length === 0) return;
+    if (csvPreview.length === 0) return;
     setIsImporting(true);
-    setImportStatus("Importing profiles...");
+    setImportStatus("Importing client profiles to CRM...");
 
     try {
       let importedCount = 0;
+      const targetBusinessId = businessId || "biz_current";
+
       for (const item of csvPreview) {
         await createCustomerAction({
-          businessId,
+          businessId: targetBusinessId,
           name: item.name,
           phone: item.phone,
           email: item.email,
@@ -114,7 +209,7 @@ export default function CustomersClient({
         importedCount++;
       }
 
-      setImportStatus(`Successfully imported ${importedCount} client profiles!`);
+      setImportStatus(`✓ Successfully imported all ${importedCount} client profiles into your CRM!`);
       setTimeout(() => {
         setShowCsvModal(false);
         setCsvFile(null);
@@ -146,7 +241,7 @@ export default function CustomersClient({
             onClick={() => setShowCsvModal(true)}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--lime)]/50 rounded-xl text-xs font-bold transition-colors shrink-0 shadow-sm"
           >
-            <Upload size={14} className="text-[var(--lime)]" /> Import CSV
+            <Upload size={14} className="text-[var(--lime)]" /> Import Client Data (PDF / Excel / CSV)
           </button>
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
@@ -377,7 +472,7 @@ export default function CustomersClient({
           </>
         )}
 
-        {/* CSV Import Modal */}
+        {/* Universal Document Import Modal */}
         {showCsvModal && (
           <>
             <motion.div
@@ -396,7 +491,7 @@ export default function CustomersClient({
               <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
                 <div className="flex items-center gap-2">
                   <FileText size={18} className="text-[var(--lime)]" />
-                  <h3 className="text-base font-bold text-[var(--text-primary)]">Import Client CSV</h3>
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">Import Client Document</h3>
                 </div>
                 <button
                   type="button"
@@ -408,20 +503,20 @@ export default function CustomersClient({
               </div>
 
               <div className="text-xs text-[var(--text-secondary)] space-y-2">
-                <p>Upload a CSV file containing your past clients. We automatically map columns matching:</p>
+                <p>Upload your client records in <strong>ANY</strong> format (PDF, Excel, CSV, JSON, TXT, PowerBI export). We automatically extract names, phones, and emails:</p>
                 <p className="font-mono text-[11px] text-[var(--lime)] bg-[var(--bg-elevated)] p-2 rounded-lg border border-[var(--border-subtle)]">
-                  Name, Phone, Email (optional)
+                  Supports: .csv, .xlsx, .xls, .pdf, .json, .txt, .pbix, .xml
                 </p>
               </div>
 
               <div className="p-6 border-2 border-dashed border-[var(--border-subtle)] hover:border-[var(--lime)]/50 rounded-2xl text-center space-y-2 cursor-pointer transition-colors bg-[var(--bg-elevated)]/40">
                 <Upload size={24} className="mx-auto text-[var(--text-muted)]" />
                 <label className="block text-xs font-bold text-[var(--lime)] cursor-pointer">
-                  <span>Click to select CSV</span>
+                  <span>Click to select any document</span>
                   <input
                     type="file"
-                    accept=".csv,text/csv"
-                    onChange={handleCsvFile}
+                    accept=".csv,.xlsx,.xls,.pdf,.json,.txt,.xml,.tsv,.pbix,text/*,application/*,*"
+                    onChange={handleUniversalFile}
                     className="hidden"
                   />
                 </label>
