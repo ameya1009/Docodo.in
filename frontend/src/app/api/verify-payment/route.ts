@@ -128,11 +128,29 @@ export async function POST(req: NextRequest) {
       try {
         const { auth } = await import("@/lib/auth");
         const session = await auth();
-        const userId = session?.user?.id || body.userId;
+        let userId = session?.user?.id || body.userId;
         const planStr = String(planIdentifier).toLowerCase();
         const isDoneForYou = planStr.includes("setup") || planStr.includes("concierge");
         const isGrowth = planStr.includes("growth") || planStr.includes("pro");
         const normalizedPlan = isDoneForYou || isGrowth ? "PRO" : "STARTER";
+
+        // Auto-resolve user by email if session is absent (Guest SaaS Checkout)
+        const emailToMatch = body.email || body.customerEmail || body.notes?.customerEmail || session?.user?.email;
+        if (!userId && emailToMatch) {
+          let existingUser = await prisma.user.findUnique({ where: { email: emailToMatch } }).catch(() => null);
+          if (!existingUser) {
+            existingUser = await prisma.user.create({
+              data: {
+                email: emailToMatch,
+                name: body.notes?.customerName || body.name || session?.user?.name || "Business Owner",
+                role: "OWNER",
+              },
+            }).catch(() => null);
+          }
+          if (existingUser) {
+            userId = existingUser.id;
+          }
+        }
 
         // P0-2: Auto-resolve or create business entity for user
         let resolvedBusinessId = body.businessId;
@@ -147,12 +165,12 @@ export async function POST(req: NextRequest) {
             // Auto-provision initial business container so payment is never rejected
             const newBiz = await prisma.business.create({
               data: {
-                name: body.notes?.businessName || (session?.user?.name ? `${session.user.name}'s Business` : "My Business"),
+                name: body.notes?.businessName || body.businessName || (session?.user?.name ? `${session.user.name}'s Business` : "My Business"),
                 slug: `biz-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
                 industry: "General Service",
                 ownerId: userId,
-                phone: body.notes?.customerPhone || null,
-                email: session?.user?.email || null,
+                phone: body.notes?.customerPhone || body.phone || null,
+                email: emailToMatch || null,
                 onboardingStep: 1,
                 onboardingComplete: false,
               },
