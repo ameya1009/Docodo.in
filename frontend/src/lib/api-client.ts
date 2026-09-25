@@ -32,9 +32,45 @@ export interface WhatsAppDispatchParams {
   recipientPhone: string;
   messageType: string;
   customMessage: string;
+  templateName?: string;
+  templateLanguage?: string;
+  templateComponents?: Array<{
+    type: string;
+    parameters: Array<{ type: string; text?: string; [key: string]: any }>;
+  }>;
 }
 
 export class DocodoBackendAPI {
+  /**
+   * Helper to construct a standardized Meta Graph API WhatsApp template payload
+   */
+  static buildWhatsAppTemplatePayload(
+    toPhone: string,
+    templateName: string,
+    bodyParameters: string[] = [],
+    languageCode: string = "en"
+  ) {
+    const cleanPhone = toPhone.replace(/[^0-9]/g, "");
+    return {
+      messaging_product: "whatsapp",
+      to: cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`,
+      type: "template" as const,
+      template: {
+        name: templateName,
+        language: { code: languageCode },
+        components: [
+          {
+            type: "body",
+            parameters: bodyParameters.map((param) => ({
+              type: "text",
+              text: param,
+            })),
+          },
+        ],
+      },
+    };
+  }
+
   /**
    * Dispatch single transactional WhatsApp message with database logging & Meta Graph API
    */
@@ -56,22 +92,66 @@ export class DocodoBackendAPI {
         },
       });
 
-
       if (waToken && waPhoneId && cleanPhone) {
+        const formattedTo = cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`;
         try {
-          await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${waToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
+          if (params.templateName) {
+            const templatePayload = {
               messaging_product: "whatsapp",
-              to: cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`,
-              type: "text",
-              text: { body: params.customMessage },
-            }),
-          });
+              to: formattedTo,
+              type: "template",
+              template: {
+                name: params.templateName,
+                language: { code: params.templateLanguage || "en" },
+                components: params.templateComponents || [
+                  {
+                    type: "body",
+                    parameters: [{ type: "text", text: params.customMessage }],
+                  },
+                ],
+              },
+            };
+
+            const response = await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${waToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(templatePayload),
+            });
+
+            if (!response.ok) {
+              console.warn("[WhatsApp Template Dispatch Warning] Template dispatch failed, falling back to text payload.");
+              await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${waToken}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  messaging_product: "whatsapp",
+                  to: formattedTo,
+                  type: "text",
+                  text: { body: params.customMessage },
+                }),
+              });
+            }
+          } else {
+            await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${waToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                messaging_product: "whatsapp",
+                to: formattedTo,
+                type: "text",
+                text: { body: params.customMessage },
+              }),
+            });
+          }
         } catch (apiErr) {
           console.warn("[WhatsApp API Dispatch Error]:", apiErr);
         }
@@ -83,6 +163,7 @@ export class DocodoBackendAPI {
       return { success: false };
     }
   }
+
   /**
    * Check backend engine health and database connectivity
    */
@@ -233,7 +314,6 @@ Provide engaging, high-converting, concise copy suited for Indian customers.`;
       return { success: false };
     }
   }
-
 
   /**
    * Record transaction into payment reconciliation ledger

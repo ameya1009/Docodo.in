@@ -60,9 +60,9 @@ if (process.env.NODE_ENV !== "production") {
 export const prisma: PrismaClient = new Proxy(rawPrisma, {
   get(target: any, prop: string | symbol) {
     if (prop === "$transaction") {
-      return async (arg: any) => {
+      return async (arg: any, options?: any) => {
         try {
-          return await target.$transaction(arg);
+          return await target.$transaction(arg, options);
         } catch (err: any) {
           if (isDbConnectionError(err)) {
             console.warn("[Prisma Resilient Proxy] Database socket unreachable. Executing transaction via Supabase REST API.");

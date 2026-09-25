@@ -38,7 +38,6 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
   // never forced through Docodo's central Razorpay account.
   const [paymentPreference, setPaymentPreference] = useState<"cash" | "online">("cash");
 
-
   // Enquiry Form State
   const [enquiryForm, setEnquiryForm] = useState({ name: "", phone: "", serviceName: "", message: "" });
   const [enquirySent, setEnquirySent] = useState(false);
@@ -98,7 +97,6 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
     startTransition(async () => {
       try {
         const { createPublicBooking } = await import("@/lib/actions/booking");
-        const { createCheckoutOrder, verifyPayment } = await import("@/lib/actions/checkout");
         
         const booking = await createPublicBooking({
           businessId: business.id,
@@ -112,77 +110,9 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           notes: form.notes || undefined,
         });
 
-        // P0-5: Branch on customer's chosen payment preference
-        if (paymentPreference === "cash" || booking.price === 0) {
-          // Cash/free — no Razorpay, booking already created with PENDING/UNPAID status.
-          // Show success immediately; business owner collects payment at venue.
-          setBookingResult(booking);
-          setStep("success");
-        } else {
-          // Online payment — trigger Razorpay
-          const { loadRazorpayScript } = await import("@/lib/razorpay");
-          const isLoaded = await loadRazorpayScript();
-          if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
-            console.error("Razorpay SDK is not loaded.");
-            alert("Payment gateway is temporarily unavailable. Please check your internet connection or reload the page.");
-            return;
-          }
-
-          const checkoutOrder = await createCheckoutOrder(booking.id);
-          
-          const options = {
-            key: checkoutOrder.keyId,
-            amount: checkoutOrder.amount,
-            currency: checkoutOrder.currency,
-            name: checkoutOrder.businessName,
-            description: `Appointment: ${selectedService.name}`,
-            image: business.logo || undefined,
-            order_id: checkoutOrder.orderId,
-            handler: async function (response: any) {
-              try {
-                await verifyPayment(
-                  booking.id,
-                  response.razorpay_payment_id,
-                  response.razorpay_order_id,
-                  response.razorpay_signature
-                );
-                setBookingResult(booking);
-                setStep("success");
-              } catch (verifyErr: any) {
-                console.error("Payment verification failed", verifyErr);
-                alert("Payment verification failed. If money was deducted, please contact the business.");
-              }
-            },
-            prefill: {
-              name: checkoutOrder.customerName,
-              email: checkoutOrder.customerEmail,
-              contact: checkoutOrder.customerPhone,
-            },
-            notes: {
-              bookingId: booking.id,
-              businessSlug: business.slug,
-              serviceName: selectedService.name,
-            },
-            theme: {
-              color: primaryColor,
-            },
-            modal: {
-              escape: true,
-              backdropclose: false,
-              ondismiss: function () {
-                console.log("Customer closed payment modal without completing transaction.");
-              },
-            },
-          };
-
-          const rzp = new (window as any).Razorpay(options);
-          rzp.on("payment.failed", function (response: any) {
-            console.error("Payment failed:", response.error);
-            alert(`Payment Failed: ${response.error.description || "Transaction could not be completed."}`);
-          });
-          rzp.open();
-        }
-
+        // Direct merchant settlement & venue payment — create booking and proceed without forcing SaaS Razorpay routing
+        setBookingResult(booking);
+        setStep("success");
       } catch (err: any) {
         console.error("Booking verification failed:", err);
         alert(err.message || "We could not process your booking at this time. Please try another slot or refresh.");
@@ -328,6 +258,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                   e.preventDefault();
                   if (!enquiryForm.name.trim() || !enquiryForm.phone.trim()) {
                     setEnquiryError("Please provide your Name and Phone number.");
+                    return;
                   }
                   setEnquiryError("");
                   startTransition(async () => {
@@ -714,7 +645,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                       style={paymentPreference === "cash" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
                     >
                       🏠 Pay at Venue
-                      <span className="block text-xs font-normal opacity-75">Cash on Arrival</span>
+                      <span className="block text-xs font-normal opacity-75">Cash / UPI on Arrival</span>
                     </button>
                     <button
                       type="button"
@@ -727,10 +658,33 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                       )}
                       style={paymentPreference === "online" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
                     >
-                      💳 Pay Online Now
-                      <span className="block text-xs font-normal opacity-75">Razorpay (Secure)</span>
+                      💳 Direct UPI / Online
+                      <span className="block text-xs font-normal opacity-75">Direct to Business</span>
                     </button>
                   </div>
+
+                  {paymentPreference === "online" && (
+                    <div className="mt-3 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-bold text-emerald-800">
+                        <CheckCircle2 size={14} /> Direct Merchant Settlement (0% Platform Fee)
+                      </div>
+                      <p>
+                        Pay directly to <strong>{business.name}</strong>. Scan merchant QR or send to UPI ID on appointment confirmation.
+                      </p>
+                      {business.phone && (
+                        <p className="font-mono bg-emerald-100/70 p-1.5 rounded text-center text-emerald-950 font-bold tracking-wide">
+                          UPI ID: {business.phone.replace(/[^0-9]/g, "")}@upi
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {paymentPreference === "cash" && (
+                    <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 space-y-1">
+                      <p className="font-semibold">🏠 Pay at Venue</p>
+                      <p>Pay cash or scan {business.name}&apos;s direct UPI QR code in person during your visit.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -744,7 +698,6 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               </button>
             </motion.div>
           )}
-
 
           {/* Step 5: Success */}
           {step === "success" && (
@@ -834,7 +787,15 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
       <div className="text-center py-6 mt-4 border-t border-gray-100">
         <p className="text-xs text-gray-400">
           Powered by{" "}
-          <a href="https://docodo.in" className="font-bold" style={{ color: primaryColor }}>Docodo</a>
+          <a
+            href={`https://docodo.in?ref=${business.slug}&utm_source=client_storefront&utm_medium=footer_badge&utm_campaign=powered_by_docodo`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold hover:underline"
+            style={{ color: primaryColor }}
+          >
+            Docodo
+          </a>
           {" "}· AI-powered business platform
         </p>
       </div>
