@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { runSupervisorMissionAction } from "../../../lib/actions/growth-os/supervisor";
 import { SupervisorMissionPlan } from "../../../lib/growth-os/agents/types";
+import { SimulationModeBanner } from "@/components/growth-os/SimulationBanner";
 
 export default function GrowthOSOverviewPage() {
   const [objective, setObjective] = useState(
@@ -43,7 +44,8 @@ export default function GrowthOSOverviewPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <SimulationModeBanner featureName="Social Discovery & Outreach Engine" />
       {/* Top Welcome / Mission Trigger Box */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#121824] via-[#161F2E] to-[#121824] border border-white/10 p-6 md:p-8 shadow-2xl">
         <div className="relative z-10 max-w-3xl space-y-4">

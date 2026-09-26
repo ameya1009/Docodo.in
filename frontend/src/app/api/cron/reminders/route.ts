@@ -110,10 +110,11 @@ export async function GET(request: NextRequest) {
       failed: failedCount,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "Failed to run reminder cron";
     console.error("[Cron Reminder Error]", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to run reminder cron" },
+      { success: false, error: errMessage },
       { status: 500 }
     );
   }

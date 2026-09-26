@@ -230,8 +230,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ status: "AI_REPLY_SENT", provider: aiResult.providerUsed }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "Internal server error";
     console.error("[WhatsApp Webhook Error]", error);
-    return NextResponse.json({ status: "ERROR", error: error.message }, { status: 200 });
+    return NextResponse.json({ status: "ERROR", error: errMessage }, { status: 200 });
   }
 }

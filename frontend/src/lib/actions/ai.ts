@@ -5,9 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
 // Ensure the API key is available
-const genAI = new (GoogleGenerativeAI as any)(process.env.GEMINI_API_KEY || "dummy-key-for-build");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "dummy-key-for-build");
 
-export async function simulateWhatsAppMessage(userMessage: string, history: {role: string, text: string}[], businessSlug?: string) {
+export async function simulateWhatsAppMessage(
+  userMessage: string,
+  history: { role: string; text: string }[],
+  businessSlug?: string
+) {
   try {
     // 1. Fetch Business Context with Multi-Tenant Guard
     let business = null;
@@ -31,14 +35,16 @@ export async function simulateWhatsAppMessage(userMessage: string, history: {rol
     }
 
     // Fetch custom knowledge base FAQs for this business
-    const kbs = await prisma.knowledgeBase.findMany({
-      where: { businessId: business.id },
-      take: 10,
-    }).catch(() => []);
+    const kbs = await prisma.knowledgeBase
+      .findMany({
+        where: { businessId: business.id },
+        take: 10,
+      })
+      .catch(() => []);
 
     // 2. Construct System Prompt with Real Business Data & Knowledge Base
-    const servicesList = business.services.map(s => `- ${s.name} (${s.duration} mins) - ₹${s.price}`).join("\n");
-    const hoursList = business.workingHours.map(h => `${h.day}: ${h.isOpen ? `${h.openTime} - ${h.closeTime}` : "Closed"}`).join("\n");
+    const servicesList = business.services.map((s) => `- ${s.name} (${s.duration} mins) - ₹${s.price}`).join("\n");
+    const hoursList = business.workingHours.map((h) => `${h.day}: ${h.isOpen ? `${h.openTime} - ${h.closeTime}` : "Closed"}`).join("\n");
     const kbList = kbs.length > 0
       ? kbs.map((k) => `Q: ${k.question}\nA: ${k.answer}`).join("\n\n")
       : "";
@@ -58,17 +64,17 @@ If they want to book, invite them to share their preferred date and time or prov
 
     // 3. Initialize Gemini (gemini-1.5-flash for speed and reliability)
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
+
     // Format history for Gemini
-    const contents = history.map(msg => ({
+    const contents = history.map((msg) => ({
       role: msg.role === "in" ? "user" : "model",
-      parts: [{ text: msg.text }]
+      parts: [{ text: msg.text }],
     }));
-    
+
     // Add the new user message
     contents.push({
       role: "user",
-      parts: [{ text: `[SYSTEM CONTEXT: ${systemPrompt}]\n\nUser Message: ${userMessage}` }]
+      parts: [{ text: `[SYSTEM CONTEXT: ${systemPrompt}]\n\nUser Message: ${userMessage}` }],
     });
 
     const result = await model.generateContent({
@@ -76,7 +82,7 @@ If they want to book, invite them to share their preferred date and time or prov
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 150,
-      }
+      },
     });
 
     const aiResponse = result.response.text();
@@ -89,12 +95,11 @@ If they want to book, invite them to share their preferred date and time or prov
         messageType: "NURTURE",
         content: aiResponse,
         status: "DELIVERED",
-      }
+      },
     });
 
     return { response: aiResponse };
-
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Gemini AI Error:", error);
     return { error: "Failed to generate AI response. Make sure GEMINI_API_KEY is set." };
   }
@@ -117,15 +122,15 @@ export async function repurposeContent(urlOrText: string) {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\nInput: ${urlOrText}` }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+      generationConfig: { temperature: 0.7, maxOutputTokens: 800 },
     });
 
     const text = result.response.text().trim();
     // Basic JSON sanitization in case model adds markdown blocks
     const jsonStr = text.replace(/```json/g, "").replace(/```/g, "");
-    
+
     return { assets: JSON.parse(jsonStr) };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Gemini AI Repurpose Error:", error);
     return { error: "Failed to generate. Make sure GEMINI_API_KEY is set." };
   }

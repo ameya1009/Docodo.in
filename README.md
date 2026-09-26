@@ -1,76 +1,131 @@
-# 🚀 DOCODO: The Autonomous AI Operating System for Indian Local Business Commerce
+# 🚀 Docodo.in: The Booking & CRM Operating System for Indian Local Businesses
 
-> **"Do NOT build software. Build outcomes."**  
-> Docodo transforms brick-and-mortar SMBs (salons, clinics, gyms, home contractors, wellness therapists) into AI-driven conversion powerhouses in under 15 minutes—featuring automated WhatsApp NDR defense, live booking funnels, instant Razorpay UPI ledgers, and conversational Google Gemini content generation.
+> **"Turn Indian local service businesses (salons, clinics, gyms, spas, consultancies) into high-converting, automated booking engines in 15 minutes."**
+
+Docodo.in provides local Indian business owners with instant online booking funnels (`/book/[slug]`), direct merchant settlement (0% platform fee direct UPI/cash), automated WhatsApp reminder and lead capture pipelines, multi-provider AI assistants, and customer CRM lifetime value tracking.
 
 ---
 
-## 🏛️ Modular 3-Tier Architecture
+## 🏛️ Real Architecture: Next.js 16 Modular Monolith
 
-Docodo is structured as an Enterprise 3-Tier Monorepo, allowing decoupled cloud containerization (Vercel + Railway/Render + Neon/Supabase Postgres):
+Docodo is architected as a high-performance **Next.js 16 modular monolith** optimized for Vercel edge/serverless execution and PostgreSQL database pooling.
 
-```
+```text
 Docodo.in/
-├── frontend/   # [Tier 1] Next.js 16 (App Router) Mobile-First Responsive UI & Dashboard
-├── backend/    # [Tier 2] Express + TypeScript Microservice Engine (Gemini AI, WhatsApp NDR, COD Ledgers)
-└── database/   # [Tier 3] Prisma 7 PostgreSQL Master Schema, Migrations & Demonstration Seeders
+├── frontend/                     # Next.js 16 (App Router) Unified Full-Stack Application
+│   ├── prisma/                   # Prisma 7 PostgreSQL Schema & Seeder
+│   │   ├── schema.prisma         # Relational data model (Multi-tenant Business, Bookings, Customers, CRM, Subscriptions)
+│   │   └── seed.ts               # Demo data seeder for local businesses
+│   └── src/
+│       ├── app/                  # Next.js App Router (30+ Pages & API Routes)
+│       │   ├── (auth)/           # Authentication flows (NextAuth v5 + credentials/Google)
+│       │   ├── api/              # Serverless API Routes
+│       │   │   ├── create-order/ # Docodo SaaS subscription order creation
+│       │   │   ├── verify-payment/# HMAC-SHA256 signature verification & auto-provisioning
+│       │   │   ├── webhooks/     # Razorpay & WhatsApp Meta Cloud webhooks
+│       │   │   └── cron/         # 24-hour pre-appointment reminder workers
+│       │   ├── book/[slug]/      # Public mobile-optimized customer booking page
+│       │   ├── checkout/         # SaaS plan checkout (Starter, Growth, Concierge)
+│       │   ├── dashboard/        # Merchant Operating System (Bookings, CRM, WhatsApp, Growth OS)
+│       │   └── onboarding/       # 15-minute business setup wizard
+│       ├── components/           # React 19 UI component system (Tailwind CSS, Framer Motion, Radix UI)
+│       ├── lib/                  # Core domain engines & server actions
+│       │   ├── actions/          # Next.js Server Actions (Bookings, CRM, AI, Auth)
+│       │   ├── engines/          # Booking engine, multi-provider AI fallback cascade
+│       │   ├── growth-os/        # Omnichannel discovery & content studio (with Simulation Mode)
+│       │   ├── prisma.ts         # Resilient PostgreSQL pool with @prisma/adapter-pg
+│       │   └── razorpay.ts       # Razorpay platform integration
+│       └── tests/                # 17 Vitest test suites (115 unit & integration tests)
+├── docs/                         # System specifications, runbooks, and audit registers
+└── .agents/                      # Autonomous agent roles & workflow playbooks
 ```
 
 ---
 
-### 📱 Tier 1: `@docodo/frontend` (Next.js 16 + Tailwind CSS)
-- **Strict Mobile-First Design System**: Features a persistent, glassmorphic floating **Bottom Navigation Bar** optimized for one-handed thumb ergonomics on smartphones (where 95% of Indian SMB operators manage their business).
-- **Comprehensive SaaS Suites**:
-  - `/onboarding/step/1-4`: 15-minute live onboarding wizard with generative AI hero copy creation.
-  - `/dashboard/whatsapp`: Real-time WhatsApp Automated NDR & No-Show Shield monitor with simulated smartphone chat previews.
-  - `/dashboard/analytics`: Touch-friendly revenue growth charts and conversion KPI cards.
-  - `/book/[slug]`: Ultra-fast customer booking pages with instant calendar confirmation.
+## 💳 Payment Architecture & Separation
 
-### ⚙️ Tier 2: `@docodo/backend-engine` (Node/Express + TypeScript)
-- **Google Gemini AI Hub (`/api/v1/ai/generate`)**: Integrates Google Generative AI (`gemini-2.5-flash`) with intelligent high-converting fallback copy engines to write Instagram ads, SEO meta titles, and 5-star review responses.
-- **WhatsApp Automation Engine (`/api/v1/whatsapp`)**: Webhook dispatcher managing 24-hour appointment reminder buttons, instant booking tickets, and automated review collection.
-- **Financial Ledger & COD Fraud Defense (`/api/v1/ledger`)**: Reconciles physical Cash-on-Delivery collections and automated online payment ledgers.
-- **Connectivity & Resilience**: Connected to Frontend Server Actions via `@docodo/api-client`. Pre-configured with strict CORS security rules and automated offline fallback queueing.
+Docodo strictly isolates platform SaaS subscriptions from merchant appointment revenues:
 
-### 🗄️ Tier 3: `@docodo/database` (Prisma 7 + PostgreSQL)
-- **Universal Edge Postgres Drivers**: Powered by `@prisma/adapter-pg` and native connection pools, fully supporting Neon Serverless SQL and AWS RDS (`sslmode=require`).
-- **One-Click Bootstrap Seeder (`src/seed.ts`)**: Initializes demo accounts, "Docodo Wellness & Spa Mumbai" demonstration catalogues, working hours schedules, VIP customer CRM lists, and WhatsApp transaction histories.
+1. **Docodo SaaS Subscriptions** (Starter ₹999/mo, Growth ₹2,499/mo, Concierge ₹4,999/₹9,999 setup):
+   - Billed via Docodo's central platform Razorpay gateway (`/checkout` $\to$ `/api/create-order` $\to$ `/api/verify-payment`).
+   - Secured with timing-safe HMAC-SHA256 verification (`crypto.timingSafeEqual`).
+   - Auto-provisions user business accounts and tier entitlements upon verified payment.
+
+2. **Merchant Client Bookings** (Haircuts, doctor visits, personal training):
+   - End-customers booking on `/book/[slug]` pay **directly to the merchant** (0% platform fee).
+   - Defaults to **Pay at Venue** (Cash / In-person UPI QR scan) or **Direct UPI** to merchant's registered business phone/VPA.
+   - Merchant funds never touch Docodo's central Razorpay account.
 
 ---
 
-## ⚡ Quickstart Setup Guide
+## 🤖 Multi-Provider AI Fallback Cascade
 
-### 1️⃣ Initialize Database Layer
-```bash
-cd database
-npm install
-npm run push         # Sync relational schema to your Postgres URL
-npm run generate     # Generate TypeScript ORM clients
-npm run seed         # Populate realistic demonstration data
+Docodo powers customer chats, WhatsApp auto-replies, and marketing copy generation through an autonomous zero-downtime AI cascade:
+
+```
+Groq Llama 3.3 70B ──(HTTP 429/Error)──> Google Gemini 2.5 Flash ──> Cerebras Llama 3.3 ──> Meta AI / OpenCode ──> Local Heuristic Fallback
 ```
 
-### 2️⃣ Start Backend Automation Engine
+- Automatic 60s provider cooldowns on rate limits.
+- Supports English, Hindi, and Hinglish for Indian customer conversations.
+- Instant 1-click human staff takeover (`isBotPaused`).
+
+---
+
+## ⚡ Local Development Setup
+
+### 1. Prerequisites
+- Node.js 20+
+- PostgreSQL 15+ (or cloud instance via Supabase, Neon, or Railway)
+
+### 2. Install Dependencies & Generate Prisma Client
 ```bash
-cd ../backend
+cd frontend
 npm install
 npx prisma generate
-npm run dev          # Starts Express microservices on http://localhost:5000
 ```
 
-### 3️⃣ Start Mobile-First Frontend OS
+### 3. Configure Environment Variables
+Copy `.env.example` to `frontend/.env.local` and configure your credentials:
 ```bash
-cd ../frontend
-npm install
-npm run dev          # Starts Next.js dashboard on http://localhost:3000
+cp .env.example frontend/.env.local
+```
+
+### 4. Run Migrations & Start Development Server
+```bash
+cd frontend
+npx prisma db push
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🧪 Verification & Test Suite
+
+Run the full automated Vitest test suite (17 suites, 115 tests):
+```bash
+cd frontend
+npm test
+```
+
+Run TypeScript compilation check:
+```bash
+cd frontend
+npx tsc --noEmit
 ```
 
 ---
 
-## 🌐 Production Deployment Guide
-- **Frontend (`/frontend`)**: Deploy directly to Vercel or AWS Amplify. Set Project Root Directory to `frontend`.
-- **Backend (`/backend`)**: Deploy Dockerized container or direct Node builds to Railway, Render, AWS ECS, or Google Cloud Run. Set port to `5000`.
-- **Database (`/database`)**: Connect to any cloud managed PostgreSQL instance (Vercel Postgres, Supabase SQL, Neon Serverless).
+## 🌐 Production Deployment (Vercel)
+
+1. Connect the repository to **Vercel**.
+2. Set **Root Directory** to `frontend`.
+3. Set **Framework Preset** to `Next.js`.
+4. Configure environment variables (`DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `NEXT_PUBLIC_RAZORPAY_KEY_ID`, etc.).
+5. Deploy.
 
 ---
 
-*Built with passion for high-growth Indian commerce outcomes.* 🇮🇳✨
+## 📄 License
+MIT License. Built for high-growth Indian commerce outcomes. 🇮🇳

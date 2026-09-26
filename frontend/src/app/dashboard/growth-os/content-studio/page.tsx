@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sparkles, Calendar, Layers, Copy, Check, Send } from "lucide-react";
 import { contentEngine, DOCODO_CONTENT_PILLARS } from "../../../../lib/growth-os/agents/ContentEngine";
+import { SimulationModeBanner } from "@/components/growth-os/SimulationBanner";
 
 export default function ContentStudioPage() {
   const [selectedPillar, setSelectedPillar] = useState<string>("WhatsApp automation");
@@ -25,6 +26,7 @@ export default function ContentStudioPage() {
 
   return (
     <div className="space-y-6">
+      <SimulationModeBanner featureName="Social Content Adapters (Instagram, LinkedIn, X, Facebook)" />
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Omnichannel Content Studio</h1>
