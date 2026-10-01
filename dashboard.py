@@ -128,7 +128,7 @@ class AKDashboardApp(tk.Tk):
 
         try:
             self.server_process = subprocess.Popen(
-                cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
             )
         except Exception as exc:
             self.update_status(f"Failed to start server: {exc}")
@@ -139,18 +139,14 @@ class AKDashboardApp(tk.Tk):
         threading.Thread(target=self._read_server_output, daemon=True).start()
 
     def _read_server_output(self):
-        if not self.server_process:
+        if not self.server_process or not self.server_process.stdout:
             return
-        if self.server_process.stdout:
-            for line in self.server_process.stdout:
-                self.update_status(line.strip())
-        if self.server_process.stderr:
-            for line in self.server_process.stderr:
-                self.update_status(line.strip())
-        if self.server_process.poll() is not None:
-            self.update_status("AK server stopped.")
-            self.start_button.config(state=tk.NORMAL)
-            self.stop_button.config(state=tk.DISABLED)
+        for line in self.server_process.stdout:
+            if line:
+                self.update_status(line.rstrip())
+        self.update_status("AK server stopped.")
+        self.start_button.config(state=tk.NORMAL)
+        self.stop_button.config(state=tk.DISABLED)
 
     def stop_server(self):
         if self.server_process and self.server_process.poll() is None:

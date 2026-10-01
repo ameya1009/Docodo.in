@@ -42,13 +42,19 @@ async def lifespan(app: FastAPI):
     config = AKConfig.from_env()
     if config.model_path:
         app.state.config = config
-        app.state.model = AKModel(
-            engine=config.engine,
-            model_path=str(config.model_path),
-            temperature=config.temperature,
-            max_tokens=config.max_tokens,
-            threads=config.threads,
-        )
+        try:
+            app.state.model = AKModel(
+                engine=config.engine,
+                model_path=str(config.model_path),
+                temperature=config.temperature,
+                max_tokens=config.max_tokens,
+                threads=config.threads,
+            )
+        except Exception:
+            app.state.model = None
+    else:
+        app.state.config = config
+        app.state.model = None
     yield
 
 
@@ -83,19 +89,34 @@ async def list_models():
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
-    model: AKModel = getattr(app.state, "model", None)
-    if not model:
-        raise HTTPException(status_code=503, detail="Model is not initialized")
+    # 1. Extract direct user query first
+    raw_query = request.prompt
+    if not raw_query and request.messages:
+        # Check last user message for fast command matching
+        for msg in reversed(request.messages):
+            if msg.get("role") == "user":
+                raw_query = msg.get("content", "")
+                break
+        if not raw_query and request.messages:
+            raw_query = request.messages[-1].get("content", "")
 
+    # 2. Check rule-based fast command routing before model check
+    if raw_query:
+        command_response = run_command(raw_query)
+        if command_response is not None:
+            return {"response": command_response, "command": True}
+
+    # 3. Format full prompt for LLM inference
     prompt_text = request.prompt
     if not prompt_text and request.messages:
         prompt_text = build_prompt_from_messages(request.messages)
     if not prompt_text:
         raise HTTPException(status_code=400, detail="prompt or messages are required")
 
-    command_response = run_command(prompt_text)
-    if command_response is not None:
-        return {"response": command_response, "command": True}
+    # 4. Check model availability
+    model: AKModel = getattr(app.state, "model", None)
+    if not model:
+        raise HTTPException(status_code=503, detail="Model is not initialized. Place a supported model in models/ or specify AK_MODEL_PATH.")
 
     try:
         # Offload synchronous model inference to thread pool to prevent blocking event loop
@@ -112,10 +133,6 @@ async def chat(request: ChatRequest):
 
 @app.post("/v1/completions")
 async def completions(request: CompletionRequest):
-    model: AKModel = getattr(app.state, "model", None)
-    if not model:
-        raise HTTPException(status_code=503, detail="Model is not initialized")
-
     prompt_value = request.prompt
     if isinstance(prompt_value, list):
         prompt_value = "\n".join(prompt_value)
@@ -123,6 +140,8 @@ async def completions(request: CompletionRequest):
         raise HTTPException(status_code=400, detail="prompt is required")
 
     prompt_str = str(prompt_value)
+
+    # Check fast commands before model check
     command_response = run_command(prompt_str)
     if command_response is not None:
         return {
@@ -135,6 +154,10 @@ async def completions(request: CompletionRequest):
                 "total_tokens": len(prompt_str.split()) + len(command_response.split()),
             },
         }
+
+    model: AKModel = getattr(app.state, "model", None)
+    if not model:
+        raise HTTPException(status_code=503, detail="Model is not initialized")
 
     try:
         text = await asyncio.to_thread(
@@ -159,24 +182,32 @@ async def completions(request: CompletionRequest):
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request: ChatCompletionRequest):
+    # Extract last user message for fast command check
+    raw_query = None
+    for msg in reversed(request.messages):
+        if msg.get("role") == "user":
+            raw_query = msg.get("content", "")
+            break
+
+    if raw_query:
+        command_response = run_command(raw_query)
+        if command_response is not None:
+            return {
+                "id": "ak-chat-1",
+                "object": "chat.completion",
+                "choices": [{"index": 0, "message": {"role": "assistant", "content": command_response}, "finish_reason": "stop"}],
+                "usage": {
+                    "prompt_tokens": len(raw_query.split()),
+                    "completion_tokens": len(command_response.split()),
+                    "total_tokens": len(raw_query.split()) + len(command_response.split()),
+                },
+            }
+
     model: AKModel = getattr(app.state, "model", None)
     if not model:
         raise HTTPException(status_code=503, detail="Model is not initialized")
 
     prompt_text = build_prompt_from_messages(request.messages)
-    command_response = run_command(prompt_text)
-    if command_response is not None:
-        return {
-            "id": "ak-chat-1",
-            "object": "chat.completion",
-            "choices": [{"index": 0, "message": {"role": "assistant", "content": command_response}, "finish_reason": "stop"}],
-            "usage": {
-                "prompt_tokens": len(prompt_text.split()),
-                "completion_tokens": len(command_response.split()),
-                "total_tokens": len(prompt_text.split()) + len(command_response.split()),
-            },
-        }
-
     try:
         text = await asyncio.to_thread(
             model.generate,
