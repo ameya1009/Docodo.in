@@ -1,0 +1,22 @@
+[project]
+name = "ak"
+version = "0.1.0"
+description = "AK local AI engine with free offline model support"
+authors = ["AK Builder <ak@example.com>"]
+readme = "README.md"
+requires-python = ">=3.11"
+
+[project.dependencies]
+fastapi = "0.111.1"
+uvicorn = {version = "0.23.2", extras = ["standard"]}
+pydantic = "2.6.0"
+aiofiles = "23.2.1"
+llama-cpp-python = "0.1.72"
+gpt4all = "1.0.1"
+transformers = "4.34.0"
+torch = "2.2.0"
+sentencepiece = "0.1.99"
+python-multipart = "0.0.5"
+
+[project.scripts]
+ak = "ak.cli:main"

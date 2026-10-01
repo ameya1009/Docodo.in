@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AK Dashboard</title>
+  <link rel="stylesheet" href="/ui/style.css" />
+</head>
+<body>
+  <div class="dashboard-shell">
+    <aside class="dashboard-sidebar">
+      <div class="brand-panel">
+        <div class="brand-tag">AK</div>
+        <div>
+          <h1>AK</h1>
+          <p>Local AI dashboard with fast chat and model controls.</p>
+        </div>
+      </div>
+
+      <div class="card status-card">
+        <h2>Status</h2>
+        <div id="status-text" class="status-text">Connecting...</div>
+      </div>
+
+      <div class="card settings-card">
+        <h2>Assistant Persona</h2>
+        <select id="persona" class="select-field">
+          <option value="default">AK - Modern AI aide</option>
+          <option value="tech">Tech advisor</option>
+          <option value="creative">Creative storyteller</option>
+          <option value="concise">Concise expert</option>
+          <option value="friendly">Friendly guide</option>
+        </select>
+      </div>
+
+      <div class="card quick-card">
+        <h2>Quick Commands</h2>
+        <button type="button" class="quick-button" data-prompt="Share a friendly productivity tip.">Productivity tip</button>
+        <button type="button" class="quick-button" data-prompt="Summarize the latest technology trends in a few sentences.">Tech trends</button>
+        <button type="button" class="quick-button" data-prompt="Write a short, motivating message in a professional tone.">Motivate me</button>
+      </div>
+
+      <div class="card help-card">
+        <h2>Need help?</h2>
+        <p>Use the chat box to send prompts, or choose a persona and quick prompt to start in one tap.</p>
+      </div>
+    </aside>
+
+    <main class="chat-panel">
+      <header class="chat-header">
+        <div>
+          <p class="eyebrow">AI Chat Assistant</p>
+          <h2>Ask AK anything — local, fast, and modern.</h2>
+        </div>
+        <div class="header-actions">
+          <button id="open-dashboard" type="button" class="ghost-button">Refresh status</button>
+          <button id="clear-chat" type="button" class="ghost-button">Clear chat</button>
+        </div>
+      </header>
+
+      <section id="messages" class="messages"></section>
+
+      <form id="chat-form" class="chat-form">
+        <textarea id="prompt" rows="3" placeholder="Type your question to AK..."></textarea>
+        <div class="form-row">
+          <div class="button-group">
+            <button type="button" id="mic-button" class="action-button">🎙️ Voice</button>
+            <button type="button" id="tts-toggle" class="action-button">🔊 Speak</button>
+          </div>
+          <button type="submit" class="send-button">Send message</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="/ui/app.js"></script>
+</body>
+</html>
