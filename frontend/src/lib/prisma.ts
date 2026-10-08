@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+﻿import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { db } from "./supabase-db";
@@ -26,7 +26,7 @@ function isDbConnectionError(err: any): boolean {
 }
 
 function createPrismaClient(): PrismaClient {
-  const dbUrl = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/docodo";
+  const dbUrl = process.env.DATABASE_URL;`r`n  if (!dbUrl) throw new Error("[Docodo] DATABASE_URL is not set. Configure your Supabase connection in .env.local.");
   
   const isCloudPostgres =
     dbUrl.includes("supabase.co") ||
@@ -119,3 +119,4 @@ export const prisma: PrismaClient = new Proxy(rawPrisma, {
     return modelTarget;
   },
 }) as PrismaClient;
+
