@@ -26,9 +26,13 @@ function isDbConnectionError(err: any): boolean {
 }
 
 function createPrismaClient(): PrismaClient {
-  const dbUrl = process.env.DATABASE_URL || "";
+  const dbUrl =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.PRISMA_DATABASE_URL ||
+    "";
   if (!dbUrl) {
-    console.warn("[Docodo Prisma] Warning: DATABASE_URL is not set.");
+    console.warn("[Docodo Prisma] Warning: No DATABASE_URL, POSTGRES_URL, or PRISMA_DATABASE_URL found in environment.");
   }
 
   const isCloudPostgres =
