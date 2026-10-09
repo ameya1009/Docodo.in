@@ -51,9 +51,10 @@ function CheckoutContent() {
     setErrorMessage("");
 
     if (status === "unauthenticated" || !session) {
-      const planQ = selectedPlanId ? `?plan=${selectedPlanId}` : "";
-      router.push(`/auth/login?callbackUrl=${encodeURIComponent("/checkout" + planQ)}`);
-      return;
+      if (!email.trim()) {
+        setErrorMessage("Please enter your email so we can instantly provision your account after payment.");
+        return;
+      }
     }
 
 
