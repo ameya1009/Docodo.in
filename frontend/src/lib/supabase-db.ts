@@ -608,6 +608,13 @@ export const db = {
       const { data: res } = await supabaseAdmin.from("Subscription").update({ ...data, updatedAt: new Date().toISOString() }).eq("id", where.id).select().single();
       return res || { ...data, id: where.id };
     },
+    async updateMany({ where, data }: any): Promise<{ count: number }> {
+      let query = supabaseAdmin.from("Subscription").update({ ...data, updatedAt: new Date().toISOString() });
+      if (where?.providerSubscriptionId) query = query.eq("providerSubscriptionId", where.providerSubscriptionId);
+      if (where?.businessId) query = query.eq("businessId", where.businessId);
+      const { data: res } = await query.select();
+      return { count: res?.length || 0 };
+    },
     async upsert({ where, update, create }: any): Promise<any> {
       const existing = await db.subscription.findUnique({ where });
       if (existing) {

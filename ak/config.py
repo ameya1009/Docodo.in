@@ -55,6 +55,9 @@ class AKConfig:
         raw_port = os.getenv("AK_PORT")
         try:
             port = int(raw_port) if raw_port else DEFAULT_PORT
+            if port == 3389:
+                logger.warning("Port 3389 conflicts with Windows Remote Desktop, remapping to %d", DEFAULT_PORT)
+                port = DEFAULT_PORT
         except ValueError:
             logger.warning("Invalid AK_PORT %r, falling back to %d", raw_port, DEFAULT_PORT)
             port = DEFAULT_PORT

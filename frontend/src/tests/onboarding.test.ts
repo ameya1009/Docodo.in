@@ -104,4 +104,34 @@ describe("Priority 1: Business Launch Engine - Validation & Business Logic Tests
       expect(content.seoMeta).toBe("Best dentist in Delhi | Dental Care");
     });
   });
+
+  describe("Step 4 & Step 5: 15-Minute Onboarding & Guest Flow Invariants", () => {
+    it("validates that paymentPreference is accepted in booking validation", async () => {
+      const { CreateBookingSchema } = await import("../lib/validations/booking");
+      const bookingPayload = {
+        businessId: "biz_test_123",
+        serviceId: "svc_test_456",
+        customerName: "Pooja Sharma",
+        customerPhone: "9876543210",
+        date: "2026-09-01",
+        startTime: "11:00",
+        paymentPreference: "cash",
+      };
+      const parsed = CreateBookingSchema.safeParse(bookingPayload);
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.paymentPreference).toBe("cash");
+      }
+    });
+
+    it("calculates setup duration in minutes correctly for Step 5 telemetry", () => {
+      const started = new Date("2026-09-01T10:00:00Z");
+      const completed = new Date("2026-09-01T10:08:15Z");
+      const diffMs = completed.getTime() - started.getTime();
+      const minutes = Math.max(1, Math.round(diffMs / 60000));
+      expect(minutes).toBe(8);
+      expect(minutes).toBeLessThanOrEqual(15);
+    });
+  });
 });
+

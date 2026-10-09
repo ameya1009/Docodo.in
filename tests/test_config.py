@@ -49,3 +49,9 @@ def test_config_invalid_env_fallback():
         assert config.temperature == DEFAULT_TEMPERATURE
         assert config.max_tokens == DEFAULT_MAX_TOKENS
         assert config.engine == "llama_cpp"
+
+
+def test_config_rdp_port_collision():
+    with patch.dict(os.environ, {"AK_PORT": "3389"}):
+        config = AKConfig.from_env()
+        assert config.port == DEFAULT_PORT == 8000

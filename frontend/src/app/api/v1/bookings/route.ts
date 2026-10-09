@@ -24,12 +24,23 @@ export async function GET(req: NextRequest) {
       });
       businessId = biz?.id;
     } else if (apiKey) {
-      // In a production setup, verify API key against business
-      const biz = await prisma.business.findFirst({
+      // Disallow IDOR: never accept raw business.id as x-api-key. Require valid server API token.
+      const validToken = process.env.DOCODO_API_KEY || process.env.INTERNAL_API_KEY || process.env.API_SECRET_KEY;
+      if (validToken && apiKey === validToken) {
+        const requestedBizId = searchParams.get("businessId");
+        const biz = slug
+          ? await prisma.business.findUnique({ where: { slug }, select: { id: true } })
+          : requestedBizId
+          ? await prisma.business.findUnique({ where: { id: requestedBizId }, select: { id: true } })
+          : null;
+        businessId = biz?.id;
+      }
+      // legacy IDOR vulnerable lookup removed
+      /*
         where: { id: apiKey },
         select: { id: true },
       });
-      businessId = biz?.id;
+      */
     }
 
     if (!businessId) {

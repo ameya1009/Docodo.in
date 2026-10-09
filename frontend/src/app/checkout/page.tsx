@@ -143,6 +143,10 @@ function CheckoutContent() {
                 razorpay_signature: response.razorpay_signature,
                 planId: plan.id,
                 planName: plan.name,
+                email,
+                name,
+                phone,
+                businessName,
               }),
             });
 

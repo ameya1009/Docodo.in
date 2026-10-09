@@ -275,8 +275,54 @@ export async function save15MinuteOnboardingAction(payload: {
       }
     } catch {}
 
+    // Synchronize entitlements and fallback replicas
+    try {
+      const { recalculateEntitlements } = await import("@/lib/services/entitlement-service");
+      await recalculateEntitlements(businessId, tx).catch(() => null);
+    } catch {}
+
     return { businessId, slug: finalSlug, setupTimeMinutes };
   });
+
+  // Resiliently sync business metadata to Supabase DB
+  try {
+    const { db } = await import("@/lib/supabase-db");
+    const existing = await db.business.findUnique({ where: { id: result.businessId } }).catch(() => null);
+    if (!existing) {
+      await db.business.create({
+        data: {
+          id: result.businessId,
+          ownerId: userId,
+          name: rawName,
+          slug: result.slug,
+          industry: (payload.category || "General").trim(),
+          phone: (payload.phone || "+91 9000000000").trim(),
+          whatsapp: (payload.whatsapp || payload.phone || "+91 9000000000").trim(),
+          address: payload.address?.trim() || null,
+          city: (payload.city || "Pune").trim(),
+          isPublished: true,
+          onboardingComplete: true,
+          onboardingStep: 5,
+        },
+      }).catch(() => null);
+    } else {
+      await db.business.update({
+        where: { id: result.businessId },
+        data: {
+          name: rawName,
+          slug: result.slug,
+          industry: (payload.category || "General").trim(),
+          phone: (payload.phone || "+91 9000000000").trim(),
+          whatsapp: (payload.whatsapp || payload.phone || "+91 9000000000").trim(),
+          address: payload.address?.trim() || null,
+          city: (payload.city || "Pune").trim(),
+          isPublished: true,
+          onboardingComplete: true,
+          onboardingStep: 5,
+        },
+      }).catch(() => null);
+    }
+  } catch {}
 
   revalidatePath("/dashboard");
   revalidatePath(`/book/${result.slug}`);

@@ -28,6 +28,10 @@ export async function POST(req: NextRequest) {
 
     notes = {
       ...notes,
+      customerEmail: notes.customerEmail || body.customerEmail || session?.user?.email || "",
+      customerPhone: notes.customerPhone || body.customerPhone || "",
+      customerName: notes.customerName || body.customerName || session?.user?.name || "",
+      businessName: notes.businessName || body.businessName || "",
       userId: userId || "",
       businessId: businessId || ""
     };
@@ -53,6 +57,9 @@ export async function POST(req: NextRequest) {
         businessId: booking.businessId,
         bookingId: booking.id,
         businessName: booking.business.name,
+        customerName: booking.customerName || notes.customerName || "",
+        customerPhone: booking.customerPhone || notes.customerPhone || "",
+        customerEmail: booking.customerEmail || notes.customerEmail || "",
       };
     }
 

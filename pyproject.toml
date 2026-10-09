@@ -35,3 +35,6 @@ ak = "ak.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["ak*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

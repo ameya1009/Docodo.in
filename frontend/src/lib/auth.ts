@@ -37,7 +37,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const { email, password } = parsed.data;
         const normalizedEmail = email.trim().toLowerCase();
 
-        const user = await db.user.findUnique({ where: { email: normalizedEmail } });
+        let user: any = null;
+        try {
+          const { prisma } = await import("@/lib/prisma");
+          user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+        } catch {
+          user = null;
+        }
+
+        if (!user) {
+          try {
+            user = await db.user.findUnique({ where: { email: normalizedEmail } });
+          } catch {
+            user = null;
+          }
+        }
+
         if (!user || !user.password) return null;
 
         const bcrypt = await import("bcryptjs");
@@ -69,7 +84,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const userId = (token.id as string) || (user?.id as string);
       if (userId && (!token.businessId || token.onboardingComplete === false)) {
         try {
-          const business = await db.business.findFirst({
+          const { prisma } = await import("@/lib/prisma");
+          const business = await prisma.business.findFirst({
             where: { ownerId: userId },
           });
           if (business) {
@@ -77,8 +93,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.businessSlug = business.slug;
             token.onboardingComplete = business.onboardingComplete;
           }
-        } catch (err) {
-          console.warn("[Auth JWT Callback] Failed resolving business for user:", err);
+        } catch {
+          try {
+            const business = await db.business.findFirst({
+              where: { ownerId: userId },
+            });
+            if (business) {
+              token.businessId = business.id;
+              token.businessSlug = business.slug;
+              token.onboardingComplete = business.onboardingComplete;
+            }
+          } catch (err) {
+            console.warn("[Auth JWT Callback] Failed resolving business for user:", err);
+          }
         }
       }
       return token;

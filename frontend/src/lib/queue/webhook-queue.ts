@@ -51,7 +51,18 @@ export class WebhookQueueManager {
       await this.publishToQStash(eventId, eventType, payload);
     } else {
       // Serverless edge background execution
-      queueMicrotask(() => {
+      try {
+        await this.processWorkerJob({
+          eventId,
+          eventType,
+          payload,
+          rawBody,
+          attempts: 1,
+        });
+      } catch (err) {
+        console.error(`[WebhookQueue:CRITICAL] DLQ event ${eventId}:`, err);
+      }
+      /*
         this.processWorkerJob({
           eventId,
           eventType,
@@ -61,7 +72,7 @@ export class WebhookQueueManager {
         }).catch((err) => {
           console.error(`[WebhookQueue:CRITICAL] DLQ event ${eventId}:`, err);
         });
-      });
+      */
     }
 
     return { status: "QUEUED", eventId };
@@ -137,12 +148,30 @@ export class WebhookQueueManager {
         // B. SaaS Subscription & Concierge Provisioning
         const planIdentifier = notes.planId || notes.planName;
         const businessId = notes.businessId;
-        const userId = notes.userId;
+        let userId = notes.userId;
 
         if (planIdentifier) {
           const planStr = String(planIdentifier).toLowerCase();
           const isConcierge = planStr.includes("setup") || planStr.includes("concierge");
           const isGrowth = planStr.includes("growth") || planStr.includes("pro");
+
+          // Auto-resolve or create user by email when userId and businessId are empty in notes
+          const customerEmail = notes.customerEmail || notes.email || paymentEntity?.email || orderEntity?.notes?.customerEmail;
+          if (!userId && customerEmail) {
+            let existingUser = await prisma.user.findUnique({ where: { email: customerEmail } }).catch(() => null);
+            if (!existingUser) {
+              existingUser = await prisma.user.create({
+                data: {
+                  email: customerEmail,
+                  name: notes.customerName || notes.name || paymentEntity?.notes?.customerName || "Business Owner",
+                  role: "OWNER",
+                },
+              }).catch(() => null);
+            }
+            if (existingUser) {
+              userId = existingUser.id;
+            }
+          }
 
           let resolvedBusinessId = businessId;
           if (!resolvedBusinessId && userId) {
@@ -150,7 +179,28 @@ export class WebhookQueueManager {
               where: { ownerId: userId },
               select: { id: true },
             });
-            resolvedBusinessId = biz?.id;
+            if (biz) {
+              resolvedBusinessId = biz.id;
+            } else {
+              const newBiz = await prisma.business.create({
+                data: {
+                  name: notes.businessName || `${notes.customerName || "My"}'s Business`,
+                  slug: `biz-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+                  industry: "General Service",
+                  ownerId: userId,
+                  phone: notes.customerPhone || paymentEntity?.contact || null,
+                  email: customerEmail || null,
+                  onboardingStep: 1,
+                  onboardingComplete: false,
+                },
+              }).catch((e) => {
+                console.warn("[WebhookQueue] Auto-provision business container failed:", e);
+                return null;
+              });
+              if (newBiz) {
+                resolvedBusinessId = newBiz.id;
+              }
+            }
           }
 
           if (resolvedBusinessId) {

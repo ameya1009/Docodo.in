@@ -108,6 +108,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           date: selectedDate,
           startTime: selectedTime,
           notes: form.notes || undefined,
+          paymentPreference: paymentPreference,
         });
 
         // Direct merchant settlement & venue payment — create booking and proceed without forcing SaaS Razorpay routing

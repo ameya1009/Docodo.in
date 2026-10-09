@@ -28,6 +28,7 @@ import {
   save15MinuteOnboardingAction,
   getOnboardingSessionAction,
 } from "@/lib/actions/onboarding";
+import { signIn as clientSignIn } from "next-auth/react";
 import { formatCurrency } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -189,6 +190,34 @@ export default function OnboardingPage() {
     return `Open ${openDays.length} days/wk (${openDays[0].openTime}–${openDays[0].closeTime})`;
   }, [workingHours]);
 
+  const copyLink = async (text: string) => {
+    try {
+      if (typeof navigator !== "undefined" && navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+    } catch (err) {
+      console.warn("Clipboard API write failed, using fallback:", err);
+    }
+    try {
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.style.position = "fixed";
+      el.style.opacity = "0";
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (fallbackErr) {
+      console.error("Clipboard copy failed completely:", fallbackErr);
+    }
+  };
+
   const handleFinishOnboarding = () => {
     setError("");
 
@@ -219,12 +248,29 @@ export default function OnboardingPage() {
         });
 
         if (res.success && "slug" in res && res.slug) {
+          // If guest merchant just registered, sign them in directly on the browser client
+          // to guarantee that the session cookies are set before navigating to /dashboard
+          if (!currentUser && accountEmail.trim() && accountPassword) {
+            try {
+              await clientSignIn("credentials", {
+                email: accountEmail.trim().toLowerCase(),
+                password: accountPassword,
+                redirect: false,
+              });
+            } catch (authErr) {
+              console.warn("[Onboarding clientSignIn note]:", authErr);
+            }
+          }
+
           setPublishedSlug(res.slug);
           setSetupMinutes(res.setupTimeMinutes || 1);
           setStep(5);
         } else {
           const errMsg = "error" in res && res.error ? res.error : "Could not complete setup. Please check your details and try again.";
           setError(errMsg);
+          if ("requiresAuth" in res && res.requiresAuth) {
+            setCurrentUser(null);
+          }
         }
       } catch (err: any) {
         setError(err.message || "Failed to finalize business setup.");
@@ -793,11 +839,7 @@ export default function OnboardingPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${origin}/book/${publishedSlug}`);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                  }}
+                  onClick={() => copyLink(`${origin}/book/${publishedSlug}`)}
                   className="px-3 py-2 bg-lime text-black font-bold text-xs rounded-xl hover:bg-[#bbf04b] transition-colors shrink-0 flex items-center gap-1"
                 >
                   {copied ? <CheckCircle2 size={13} /> : <Copy size={13} />}

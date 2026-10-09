@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       payload.event_id || 
       `${eventType}_${payload.payload?.payment?.entity?.id || payload.payload?.order?.entity?.id || Date.now()}`;
 
-    // 3. Durable Enqueue & Fast Synchronous ACK (< 50ms total latency)
+    // 3. Durable Enqueue & Awaited Worker Processing (prevents serverless microtask freeze)
     const enqueueResult = await WebhookQueueManager.enqueue(
       eventId,
       eventType,

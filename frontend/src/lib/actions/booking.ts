@@ -45,6 +45,7 @@ export async function createPublicBooking(rawInput: {
   startTime: string;
   notes?: string;
   paymentMethod?: "UPI" | "CASH_ON_DELIVERY" | "CARDS" | "NETBANKING";
+  paymentPreference?: string;
 }) {
   const data = CreateBookingSchema.parse(rawInput);
 
@@ -172,6 +173,10 @@ export async function createPublicBooking(rawInput: {
 
 
       // 7. Create the booking.
+      const isPayAtVenue = data.paymentPreference === "cash" || data.paymentPreference === "venue" || data.paymentMethod === "CASH_ON_DELIVERY";
+      const bookingStatus = isPayAtVenue || service.price === 0 ? "CONFIRMED" : "PENDING";
+      const bookingPaymentStatus = service.price === 0 ? "PAID" : "UNPAID";
+      const bookingPaymentMethod = isPayAtVenue ? "CASH_ON_DELIVERY" : (data.paymentMethod ?? "UPI");
       const newBooking = await tx.booking.create({
         data: {
           businessId: data.businessId,
@@ -187,9 +192,9 @@ export async function createPublicBooking(rawInput: {
           duration: service.duration,
           price: service.price,
           notes: data.notes || null,
-          status: service.price > 0 ? "PENDING" : "CONFIRMED",
-          paymentStatus: service.price > 0 ? "UNPAID" : "PAID",
-          paymentMethod: data.paymentMethod ?? "UPI",
+          status: bookingStatus,
+          paymentStatus: bookingPaymentStatus,
+          paymentMethod: bookingPaymentMethod,
         },
         include: { service: true },
       });
