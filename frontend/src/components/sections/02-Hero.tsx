@@ -3,13 +3,23 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { ArrowRight, Play, CheckCircle2, ShieldCheck, Zap, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { HERO_CONTENT, WHATSAPP_LINK } from "@/lib/constants";
 
+// Dynamically import 3D ambient canvas to preserve sub-second initial load and prevent SSR hydration overhead
+const HeroScene = dynamic(
+  () => import("@/components/3d/HeroScene").then((mod) => mod.HeroScene),
+  { ssr: false }
+);
+
 export const Hero = () => {
   return (
     <section className="relative min-h-[90vh] flex flex-col justify-center pt-28 pb-16 overflow-hidden bg-radial-gradient">
+      {/* Interactive 3D Ambient Visual Layer */}
+      <HeroScene />
+
       {/* Background Glow Accents */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-[var(--lime)]/10 blur-[130px] rounded-full pointer-events-none" />
       <div className="absolute top-2/3 right-10 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
