@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { auth, signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { generateSlug } from "@/lib/utils";
@@ -18,9 +18,32 @@ import {
 } from "@/lib/engines/business-launch";
 
 /**
+ * Returns current authenticated session state for the onboarding wizard
+ */
+export async function getOnboardingSessionAction() {
+  try {
+    const session = await auth();
+    if (session?.user?.id) {
+      return {
+        isLoggedIn: true,
+        user: {
+          id: session.user.id,
+          name: session.user.name || "",
+          email: session.user.email || "",
+        },
+      };
+    }
+  } catch (err) {
+    console.warn("[getOnboardingSessionAction Exception]:", err);
+  }
+  return { isLoggedIn: false };
+}
+
+/**
  * 15-MINUTE PROMISE CORE ONBOARDING ACTION
  * Saves business essentials, services, and operating schedule in one atomic transaction,
  * calculating setupTimeMinutes and publishing the booking page immediately.
+ * Seamlessly supports both existing authenticated merchants and first-time guests.
  */
 export async function save15MinuteOnboardingAction(payload: {
   name: string;
@@ -34,21 +57,98 @@ export async function save15MinuteOnboardingAction(payload: {
   services: Array<{ name: string; price: number; duration: number }>;
   workingHours: Array<{ day: string; isOpen: boolean; openTime: string; closeTime: string }>;
   startedAt?: string;
+  accountEmail?: string;
+  accountPassword?: string;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized: please sign in first");
+  let session = await auth();
+  let userId = session?.user?.id;
 
-  const userId = session.user.id;
+  // If user is not yet logged in, attempt to authenticate or create account using provided credentials
+  if (!userId && payload.accountEmail && payload.accountPassword) {
+    const rawEmail = payload.accountEmail.trim().toLowerCase();
+    const rawPassword = payload.accountPassword;
+
+    if (!rawEmail.includes("@")) {
+      return { success: false, error: "Please provide a valid email address." };
+    }
+    if (rawPassword.length < 6) {
+      return { success: false, error: "Password must be at least 6 characters." };
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email: rawEmail } });
+    const bcrypt = await import("bcryptjs");
+
+    if (existingUser) {
+      if (!existingUser.password) {
+        return { success: false, error: "Account exists. Please sign in via the login page." };
+      }
+      const match = await bcrypt.compare(rawPassword, existingUser.password);
+      if (!match) {
+        return { success: false, error: "Incorrect password for this existing account." };
+      }
+      userId = existingUser.id;
+    } else {
+      const hashedPassword = await bcrypt.hash(rawPassword, 12);
+      const newUser = await prisma.user.create({
+        data: {
+          name: payload.name?.trim() || "Business Owner",
+          email: rawEmail,
+          password: hashedPassword,
+        },
+      });
+      userId = newUser.id;
+
+      // Sync to db (supabase REST) if available
+      try {
+        const { db } = await import("@/lib/supabase-db");
+        await db.user.create({
+          data: {
+            id: newUser.id,
+            name: newUser.name || "Business Owner",
+            email: rawEmail,
+            password: hashedPassword,
+          },
+        }).catch(() => null);
+      } catch {}
+    }
+
+    // Auto-sign in the session
+    try {
+      await signIn("credentials", {
+        email: rawEmail,
+        password: rawPassword,
+        redirect: false,
+      });
+    } catch (authErr: any) {
+      if (!authErr?.digest?.startsWith?.("NEXT_REDIRECT")) {
+        console.warn("[Onboarding signIn note]:", authErr?.message);
+      }
+    }
+  }
+
+  if (!userId) {
+    return {
+      success: false,
+      requiresAuth: true,
+      error: "Please enter your email and password to secure your account and publish.",
+    };
+  }
+
   const startedAtDate = payload.startedAt ? new Date(payload.startedAt) : new Date();
   const completedAtDate = new Date();
   const diffMs = completedAtDate.getTime() - startedAtDate.getTime();
   const setupTimeMinutes = Math.max(1, Math.round(diffMs / 60000));
 
-  // Determine base slug
-  let slug = generateSlug(payload.name);
-  const slugConflict = await prisma.business.findUnique({ where: { slug } });
+  const rawName = (payload.name || "My Business").trim();
+  let baseSlug = generateSlug(rawName);
+  if (!baseSlug || baseSlug.trim() === "") {
+    baseSlug = `biz-${Date.now().toString(36)}`;
+  }
+
+  let finalSlugCandidate = baseSlug;
+  const slugConflict = await prisma.business.findUnique({ where: { slug: baseSlug } });
   if (slugConflict && slugConflict.ownerId !== userId) {
-    slug = `${slug}-${Date.now().toString(36)}`;
+    finalSlugCandidate = `${baseSlug}-${Date.now().toString(36).substring(0, 5)}`;
   }
 
   const existingBusiness = await prisma.business.findFirst({
@@ -62,16 +162,16 @@ export async function save15MinuteOnboardingAction(payload: {
 
     if (existingBusiness) {
       businessId = existingBusiness.id;
-      finalSlug = existingBusiness.slug;
+      finalSlug = existingBusiness.slug || finalSlugCandidate;
       await tx.business.update({
         where: { id: businessId },
         data: {
-          name: payload.name.trim(),
-          industry: payload.category.trim(),
-          phone: payload.phone.trim(),
-          whatsapp: payload.whatsapp?.trim() || payload.phone.trim(),
+          name: rawName,
+          industry: (payload.category || "General").trim(),
+          phone: (payload.phone || "+91 9000000000").trim(),
+          whatsapp: (payload.whatsapp || payload.phone || "+91 9000000000").trim(),
           address: payload.address?.trim() || null,
-          city: payload.city.trim(),
+          city: (payload.city || "Pune").trim(),
           instagram: payload.instagram?.trim() || null,
           isPublished: true,
           onboardingComplete: true,
@@ -82,17 +182,17 @@ export async function save15MinuteOnboardingAction(payload: {
         },
       });
     } else {
-      finalSlug = slug;
+      finalSlug = finalSlugCandidate;
       const created = await tx.business.create({
         data: {
           ownerId: userId,
-          name: payload.name.trim(),
+          name: rawName,
           slug: finalSlug,
-          industry: payload.category.trim(),
-          phone: payload.phone.trim(),
-          whatsapp: payload.whatsapp?.trim() || payload.phone.trim(),
+          industry: (payload.category || "General").trim(),
+          phone: (payload.phone || "+91 9000000000").trim(),
+          whatsapp: (payload.whatsapp || payload.phone || "+91 9000000000").trim(),
           address: payload.address?.trim() || null,
-          city: payload.city.trim(),
+          city: (payload.city || "Pune").trim(),
           instagram: payload.instagram?.trim() || null,
           isPublished: true,
           onboardingComplete: true,
@@ -105,40 +205,82 @@ export async function save15MinuteOnboardingAction(payload: {
       businessId = created.id;
     }
 
-    // Replace services with the custom user services
+    // Safely update services
     if (payload.services && payload.services.length > 0) {
-      await tx.service.deleteMany({ where: { businessId } });
-      await tx.service.createMany({
-        data: payload.services.map((svc, idx) => ({
+      try {
+        await tx.booking.updateMany({
+          where: { businessId, serviceId: { not: null } },
+          data: { serviceId: null },
+        });
+      } catch (bkErr) {
+        console.warn("[Onboarding] Service foreign key safeguard:", bkErr);
+      }
+
+      await tx.service.deleteMany({ where: { businessId } }).catch(() => null);
+
+      const validServices = payload.services
+        .filter((s) => s.name && s.name.trim().length > 0)
+        .map((svc, idx) => ({
           businessId,
           name: svc.name.trim(),
-          price: Number(svc.price) || 0,
-          duration: Number(svc.duration) || 60,
+          price: Math.max(0, Number(svc.price) || 0),
+          duration: Math.max(5, Number(svc.duration) || 30),
           order: idx,
           isActive: true,
-        })),
-      });
+        }));
+
+      if (validServices.length > 0) {
+        await tx.service.createMany({ data: validServices });
+      }
     }
 
-    // Replace working hours with the custom user schedule
+    // Safely update working hours with deduplication
     if (payload.workingHours && payload.workingHours.length > 0) {
-      await tx.workingHours.deleteMany({ where: { businessId } });
-      await tx.workingHours.createMany({
-        data: payload.workingHours.map((wh) => ({
+      await tx.workingHours.deleteMany({ where: { businessId } }).catch(() => null);
+
+      const seen = new Set<string>();
+      const validHours = payload.workingHours
+        .filter((wh) => {
+          if (!wh.day || seen.has(wh.day.toUpperCase())) return false;
+          seen.add(wh.day.toUpperCase());
+          return true;
+        })
+        .map((wh) => ({
           businessId,
-          day: wh.day,
-          isOpen: wh.isOpen,
+          day: wh.day.toUpperCase(),
+          isOpen: Boolean(wh.isOpen),
           openTime: wh.openTime || "09:00",
           closeTime: wh.closeTime || "19:00",
-        })),
-      });
+        }));
+
+      if (validHours.length > 0) {
+        await tx.workingHours.createMany({ data: validHours });
+      }
     }
+
+    // Auto-grant free pilot subscription if none exists
+    try {
+      const existingSub = await tx.subscription.findFirst({ where: { businessId } });
+      if (!existingSub) {
+        await tx.subscription.create({
+          data: {
+            businessId,
+            planId: "pilot",
+            status: "ACTIVE",
+            provider: "SYSTEM",
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          },
+        });
+      }
+    } catch {}
 
     return { businessId, slug: finalSlug, setupTimeMinutes };
   });
 
   revalidatePath("/dashboard");
   revalidatePath(`/book/${result.slug}`);
+  revalidatePath("/onboarding");
 
   return { success: true, ...result };
 }

@@ -71,6 +71,26 @@ export default async function BookingPage({ params }: Props) {
     console.warn("[BookingPage Prisma Fallback]:", err);
   }
 
+  // Supabase DB Fallback if Prisma connection failed or returned null
+  if (!business) {
+    try {
+      const { db } = await import("@/lib/supabase-db");
+      business = await db.business.findUnique({
+        where: { slug },
+        include: {
+          services: true,
+          staff: true,
+          workingHours: true,
+        },
+      });
+      if (business && Array.isArray(business.services)) {
+        business.services = business.services.filter((s: any) => s.isActive !== false);
+      }
+    } catch (sbErr) {
+      console.warn("[BookingPage Supabase Fallback Error]:", sbErr);
+    }
+  }
+
   // If business does not exist in DB, show verified Business Not Found state
   if (!business) {
     return (

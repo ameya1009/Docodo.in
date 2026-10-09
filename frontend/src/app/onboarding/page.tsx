@@ -24,7 +24,10 @@ import {
   QrCode,
   Printer,
 } from "lucide-react";
-import { save15MinuteOnboardingAction } from "@/lib/actions/onboarding";
+import {
+  save15MinuteOnboardingAction,
+  getOnboardingSessionAction,
+} from "@/lib/actions/onboarding";
 import { formatCurrency } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -73,10 +76,16 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>("" );
   const [copied, setCopied] = useState(false);
   const [publishedSlug, setPublishedSlug] = useState("");
   const [setupMinutes, setSetupMinutes] = useState<number>(1);
+
+  // Authentication & Guest State
+  const [currentUser, setCurrentUser] = useState<{ id?: string; email?: string; name?: string } | null>(null);
+  const [authMode, setAuthMode] = useState<"signup" | "login">("signup");
+  const [accountEmail, setAccountEmail] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
 
   // Started timestamp telemetry
   const [startedAt, setStartedAt] = useState<string>("");
@@ -87,6 +96,14 @@ export default function OnboardingPage() {
     if (typeof window !== "undefined" && window.location.origin) {
       setOrigin(window.location.origin);
     }
+
+    // Check if session is already active
+    getOnboardingSessionAction().then((res) => {
+      if (res?.isLoggedIn && res?.user) {
+        setCurrentUser(res.user);
+        if (res.user.email) setAccountEmail(res.user.email);
+      }
+    });
   }, []);
 
   // Form State
@@ -174,6 +191,12 @@ export default function OnboardingPage() {
 
   const handleFinishOnboarding = () => {
     setError("");
+
+    if (!currentUser && (!accountEmail.trim() || !accountPassword)) {
+      setError("Please enter your email and password below to secure your business account and publish.");
+      return;
+    }
+
     startTransition(async () => {
       try {
         const res = await save15MinuteOnboardingAction({
@@ -191,14 +214,17 @@ export default function OnboardingPage() {
           })),
           workingHours,
           startedAt,
+          accountEmail: currentUser ? undefined : accountEmail.trim(),
+          accountPassword: currentUser ? undefined : accountPassword,
         });
 
-        if (res.success && res.slug) {
+        if (res.success && "slug" in res && res.slug) {
           setPublishedSlug(res.slug);
           setSetupMinutes(res.setupTimeMinutes || 1);
           setStep(5);
         } else {
-          setError("Could not complete setup. Please try again.");
+          const errMsg = "error" in res && res.error ? res.error : "Could not complete setup. Please check your details and try again.";
+          setError(errMsg);
         }
       } catch (err: any) {
         setError(err.message || "Failed to finalize business setup.");
@@ -625,6 +651,72 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
+              {/* Account Credential Box for Guest Merchants */}
+              {currentUser ? (
+                <div className="p-3.5 bg-emerald-950/40 border border-emerald-800/60 rounded-2xl text-xs text-emerald-300 flex items-center gap-2.5">
+                  <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                  <span>
+                    Linked account: <strong className="text-white">{currentUser.email}</strong>. Your storefront will be linked to this account.
+                  </span>
+                </div>
+              ) : (
+                <div className="p-4 bg-[#0d1117] border border-gray-800 hover:border-lime/40 transition-colors rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={16} className="text-lime" />
+                      <span className="text-xs font-bold text-white">
+                        {authMode === "signup" ? "Create Free Account to Secure Booking System" : "Sign In to Your Existing Account"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode(authMode === "signup" ? "login" : "signup");
+                        setError("");
+                      }}
+                      className="text-[11px] text-lime hover:underline font-semibold"
+                    >
+                      {authMode === "signup" ? "Already registered? Sign In" : "New to Docodo? Create Free Account"}
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        value={accountEmail}
+                        onChange={(e) => setAccountEmail(e.target.value)}
+                        placeholder="owner@yourbusiness.com"
+                        className="w-full px-3 py-2 bg-[#161b22] border border-gray-700 rounded-xl text-white text-xs focus:outline-none focus:border-lime"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
+                        Password *
+                      </label>
+                      <input
+                        type="password"
+                        value={accountPassword}
+                        onChange={(e) => setAccountPassword(e.target.value)}
+                        placeholder="Min 6 characters"
+                        className="w-full px-3 py-2 bg-[#161b22] border border-gray-700 rounded-xl text-white text-xs focus:outline-none focus:border-lime"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-gray-400">
+                    {authMode === "signup"
+                      ? "Free pilot account • Gives you access to bookings, customer records, and WhatsApp automations."
+                      : "Enter your credentials to link this booking page to your existing Docodo dashboard."}
+                  </p>
+                </div>
+              )}
+
               {error && (
                 <div className="p-4 bg-red-950/60 border border-red-800/80 rounded-xl text-red-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -779,7 +871,9 @@ export default function OnboardingPage() {
 
               <button
                 type="button"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => {
+                  window.location.href = "/dashboard";
+                }}
                 className="w-full py-4 bg-lime text-black font-black text-sm rounded-2xl hover:bg-[#bbf04b] transition-colors shadow-xl flex items-center justify-center gap-2"
               >
                 Go to Business Dashboard <ArrowRight size={18} />

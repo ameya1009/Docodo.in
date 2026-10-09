@@ -15,17 +15,19 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
 
-      // Protect dashboard and onboarding routes
-      if (pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding")) {
+      // Protect dashboard routes with explicit host redirect to avoid localhost fallback
+      if (pathname.startsWith("/dashboard")) {
         if (!isLoggedIn) {
-          return false; // Automatically redirects to signIn page
+          const redirectUrl = new URL("/auth/login", nextUrl.origin);
+          redirectUrl.searchParams.set("callbackUrl", pathname);
+          return NextResponse.redirect(redirectUrl);
         }
         return true;
       }
 
       // Redirect logged-in users away from auth pages
       if (pathname.startsWith("/auth/") && isLoggedIn) {
-        return NextResponse.redirect(new URL("/dashboard", url));
+        return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
       }
 
       return true;
