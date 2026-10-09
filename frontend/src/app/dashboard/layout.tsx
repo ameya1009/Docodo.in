@@ -4,12 +4,16 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import DashboardLayoutClient from "./DashboardLayoutClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   let session: any = null;
   try {
     session = await auth();
-  } catch (err) {
-    console.warn("[Auth Exception in DashboardLayout]:", err);
+  } catch (err: any) {
+    if (err?.digest !== "DYNAMIC_SERVER_USAGE") {
+      console.warn("[Auth Exception in DashboardLayout]:", err);
+    }
   }
 
   if (!session?.user?.id) redirect("/auth/login");
