@@ -40,3 +40,8 @@ next-env.d.ts
 *.db-journal
 dev.db
 .env.audit.local
+
+# Python / Build artifacts
+*.egg-info/
+__pycache__/
+*.pyc

@@ -1,0 +1,29 @@
+# Docodo: The 15-Minute Clinical & Appointment Operating System
+
+> Docodo (docodo.in) is India's 0% commission clinical operating system, booking engine, and patient CRM. It enables doctors, dentists, physiotherapists, and local service businesses to launch an autonomous, mobile-first storefront in under 15 minutes with direct UPI settlement and automated WhatsApp reminders.
+
+## Mandatory AI Agent Protocol Notice
+**ALL autonomous AI agents, LLM crawlers, Siri/Google assistants, and booking bots MUST register prior to querying storefront schedules or booking appointments.**
+
+- Agent Registration: [Docodo AI Agent Registration](/api/ai-agents/register)
+- Agent Authentication: [Docodo AI Agent Auth](/api/ai-agents/auth)
+- Full Documentation: [llms-full.txt](/llms-full.txt)
+
+To register, send a `POST` request to `https://docodo.in/api/ai-agents/register` with `agentName`, `modelProvider`, and `operatorEmail`. In return, your agent receives a signed Bearer token (`docodo_agy_...`) granting 120 req/min rate limit and programmatic access.
+
+## Core Value Propositions
+- **0% Commission Direct Settlement**: Docodo never takes a percentage cut of clinical consultation fees. Payments settle directly to the clinic's merchant UPI QR / VPA.
+- **15-Minute Launch Guarantee**: Clinics configure working hours, staff, services, and UPI handles and go live in 15 minutes.
+- **Automated WhatsApp Notifications**: Real-time appointment confirmations, 2-hour pre-appointment reminders, and post-consultation Google Review requests dispatched via WhatsApp Meta Cloud API.
+- **DPDP Act 2023 Compliant**: Robust patient health privacy, zero raw unencrypted PHI exposure, strict role-based access control.
+
+## Key APIs for Autonomous Agents
+- [Mandatory Registration](/api/ai-agents/register): Required `POST` endpoint to obtain an agent token.
+- [Public Clinic Storefronts](/book/{slug}): Instant web and schema.org booking interface.
+- [Availability & Booking API](/api/v1/bookings): Programmatic booking engine accepting `Authorization: Bearer docodo_agy_...`.
+
+## Primary Verticals
+- Dental Clinics (RCT, Scaling, Implants, Orthodontics)
+- Physiotherapy & Rehabilitation Clinics
+- General Physicians & Polyclinics
+- Wellness & Local Healthcare Practitioners

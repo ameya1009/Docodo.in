@@ -137,10 +137,89 @@ export default async function BookingPage({ params }: Props) {
     );
   }
 
+  const isDental =
+    business.industry?.toLowerCase().includes("dent") ||
+    business.name?.toLowerCase().includes("dental") ||
+    business.name?.toLowerCase().includes("dentist");
+
+  const schemaType = isDental ? "Dentist" : "MedicalBusiness";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": schemaType,
+    name: business.name,
+    description: business.seoDesc || business.description || `Book an appointment at ${business.name}`,
+    url: `https://docodo.in/book/${slug}`,
+    telephone: business.phone || undefined,
+    email: business.email || undefined,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: business.address || undefined,
+      addressLocality: business.city || "Pune",
+      addressRegion: "Maharashtra",
+      addressCountry: "IN",
+    },
+    geo:
+      business.latitude && business.longitude
+        ? {
+            "@type": "GeoCoordinates",
+            latitude: business.latitude,
+            longitude: business.longitude,
+          }
+        : undefined,
+    priceRange: "₹₹",
+    openingHoursSpecification: Array.isArray(business.workingHours)
+      ? business.workingHours
+          .filter((wh: any) => !wh.isClosed)
+          .map((wh: any) => ({
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: wh.dayOfWeek,
+            opens: wh.openTime || "09:00",
+            closes: wh.closeTime || "18:00",
+          }))
+      : undefined,
+    makesOffer: Array.isArray(business.services)
+      ? business.services.map((svc: any) => ({
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "MedicalProcedure",
+            name: svc.name,
+            description: svc.description || undefined,
+          },
+          price: svc.price,
+          priceCurrency: "INR",
+        }))
+      : undefined,
+    potentialAction: {
+      "@type": "ReserveAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `https://docodo.in/book/${slug}`,
+        inLanguage: "en-IN",
+        actionPlatform: [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform",
+          "http://schema.org/IOSPlatform",
+          "http://schema.org/AndroidPlatform",
+        ],
+      },
+      result: {
+        "@type": "Reservation",
+        name: `Appointment at ${business.name}`,
+      },
+    },
+  };
+
   return (
-    <BookingPageClient
-      business={business}
-      bookedSlots={bookedSlots}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <BookingPageClient
+        business={business}
+        bookedSlots={bookedSlots}
+      />
+    </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
@@ -49,65 +49,6 @@ export const useLenis = () => {
   return lenis;
 };
 
-// Optimized useInView hook with threshold support
-export const useInView = (options: IntersectionObserverInit = {}) => {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [isInView, setIsInView] = useState(false);
-
-  useEffect(() => {
-    const currentRef = ref.current;
-    if (!currentRef) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsInView(entry.isIntersecting);
-    }, {
-      threshold: 0.1,
-      ...options,
-    });
-
-    observer.observe(currentRef);
-
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
-    };
-  }, [options]);
-
-  return [ref, isInView] as const;
-};
-
-// Throttled useMouseParallax hook preventing state thrashing
-export const useMouseParallax = (strength = 0.05) => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const rafId = useRef<number | null>(null);
-
-  useEffect(() => {
-    // Disable on touch devices
-    if (typeof window !== "undefined" && "ontouchstart" in window) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (rafId.current !== null) return;
-
-      rafId.current = requestAnimationFrame(() => {
-        const { clientX, clientY } = e;
-        const { innerWidth, innerHeight } = window;
-        const x = (clientX / innerWidth - 0.5) * strength;
-        const y = (clientY / innerHeight - 0.5) * strength;
-        setMousePos({ x, y });
-        rafId.current = null;
-      });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
-    };
-  }, [strength]);
-
-  return mousePos;
-};
 
 // useScrollReveal hook with clean unmount and mobile responsiveness
 export const useScrollReveal = () => {

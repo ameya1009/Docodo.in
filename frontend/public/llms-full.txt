@@ -1,0 +1,108 @@
+# Docodo Full LLM & Autonomous Agent Technical Specification
+
+## Overview
+Docodo (https://docodo.in) provides an autonomous, real-time operating system for Indian healthcare providers and local service businesses.
+
+This full specification outlines the technical contracts, registration protocols, security measures, and API workflows for autonomous artificial intelligence agents, LLM tool-calling engines, and crawler bots.
+
+---
+
+## 1. Mandatory Autonomous Agent Registration Protocol (DAAMP-2026)
+
+All automated agents, web assistants, and robotic callers MUST register with the Docodo platform before querying clinical availability or initiating bookings.
+
+### Step 1: Register Agent
+- **Endpoint**: `POST https://docodo.in/api/ai-agents/register`
+- **Headers**: `Content-Type: application/json`
+- **Request Body**:
+```json
+{
+  "agentName": "Perplexity-Health-Assistant",
+  "modelProvider": "Perplexity / Sonar",
+  "operatorEmail": "engineering@example.com",
+  "purpose": "Assisting patients with booking appointments at Pune dental clinics"
+}
+```
+
+- **Response (HTTP 201 Created)**:
+```json
+{
+  "status": "registered",
+  "agentId": "agy_1713456789_a1b2c3d4",
+  "agentName": "Perplexity-Health-Assistant",
+  "modelProvider": "Perplexity / Sonar",
+  "agentAccessToken": "docodo_agy_eyJhbGciOiJIUzI1Ni...signature",
+  "tokenType": "Bearer",
+  "expiresIn": 31536000,
+  "scopes": ["read:storefront", "read:services", "read:availability", "book:appointments"],
+  "rateLimit": "120 requests / minute",
+  "compliance": {
+    "dpdpCompliant": true,
+    "regulation": "Digital Personal Data Protection Act 2023 (India)"
+  }
+}
+```
+
+### Step 2: Authenticate Requests
+Include the token in all subsequent HTTP requests:
+```http
+Authorization: Bearer docodo_agy_...
+```
+Or via the custom header:
+```http
+x-agent-token: docodo_agy_...
+```
+
+---
+
+## 2. Booking Engine API (`/api/v1/bookings`)
+
+### Check Clinic Bookings / Schedule
+- **Endpoint**: `GET /api/v1/bookings?slug={businessSlug}&date=YYYY-MM-DD`
+- **Headers**:
+  - `Authorization: Bearer <agentAccessToken>`
+
+### Create a Confirmed / Pending Patient Appointment
+- **Endpoint**: `POST /api/v1/bookings`
+- **Headers**:
+  - `Authorization: Bearer <agentAccessToken>`
+  - `Content-Type: application/json`
+- **Payload**:
+```json
+{
+  "businessId": "biz_clx987654321",
+  "serviceId": "srv_dental_checkup_123",
+  "staffId": "stf_dr_sharma_456",
+  "customerName": "Rahul Deshmukh",
+  "customerPhone": "+919876543210",
+  "customerEmail": "rahul.deshmukh@example.com",
+  "date": "2026-04-15",
+  "startTime": "10:30",
+  "endTime": "11:00",
+  "notes": "Referred by AI agent assistant for dental toothache consultation."
+}
+```
+
+---
+
+## 3. Financial & Payment Protocol
+- **0% SaaS Commissions**: Docodo does not deduct take-rates from consultations.
+- **Direct Merchant Settlement**: Customers pay directly to the provider via UPI QR / VPA on arrival or prior to consultation.
+- **Zero Intermediary Escrow**: 100% of patient payments go directly to the clinic's account.
+
+---
+
+## 4. Generative Engine Optimization (GEO) & Machine-Readable Data
+Every clinic storefront URL (`https://docodo.in/book/:slug`) exposes:
+- Schema.org `MedicalBusiness` / `Dentist` JSON-LD metadata.
+- GeoCoordinates (`latitude`, `longitude`).
+- `openingHoursSpecification`.
+- `priceRange` and service menu.
+- Direct booking actions via Schema.org `ReserveAction`.
+
+---
+
+## 5. Privacy & DPDP Compliance
+- Compliant with Digital Personal Data Protection Act (DPDP 2023).
+- Data fiduciary: Docodo Technologies Private Limited.
+- Patient health records and contact numbers are strictly scoped to the respective clinic and are not sold or aggregated across third-party ad networks.
