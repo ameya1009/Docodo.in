@@ -32,7 +32,9 @@ function createPrismaClient(): PrismaClient {
     process.env.PRISMA_DATABASE_URL ||
     "";
   if (!dbUrl) {
-    console.warn("[Docodo Prisma] Warning: No DATABASE_URL, POSTGRES_URL, or PRISMA_DATABASE_URL found in environment.");
+    if (process.env.NODE_ENV !== "test" && !process.env.VITEST) {
+      console.info("[Docodo Prisma] Direct Postgres URL not configured; using resilient Supabase PostgREST proxy.");
+    }
   }
 
   const isCloudPostgres =

@@ -6,6 +6,7 @@ import { ScrollProgress, PageTransition } from "@/components/layout/LayoutEffect
 import { LayoutProvider } from "@/components/layout/LayoutProvider";
 import { AuthProvider } from "@/components/providers/SessionProvider";
 import { OfflineDetector } from "@/components/ui/OfflineDetector";
+import { DocodoQABot } from "@/components/ui/DocodoQABot";
 
 const unbounded = Unbounded({
   subsets: ["latin"],
@@ -54,6 +55,7 @@ export default function RootLayout({
             </PageTransition>
           </LayoutProvider>
         </AuthProvider>
+        <DocodoQABot />
       </body>
     </html>
   );

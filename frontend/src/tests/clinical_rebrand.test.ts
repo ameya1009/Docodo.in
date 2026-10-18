@@ -40,15 +40,15 @@ describe("Clinical Rebrand, SEO & Security Verification Tests", () => {
       const graph = jsonLd["@graph"];
       expect(Array.isArray(graph)).toBe(true);
 
-      const softwareApp = graph.find((node: any) => node["@type"] === "SoftwareApplication");
+      const softwareApp = graph.find((node: any) => node["@type"] === "SoftwareApplication") as any;
       expect(softwareApp).toBeDefined();
-      expect(softwareApp.featureList).toContain("Patient Relationship Management (CRM)");
-      expect(softwareApp.featureList).toContain("Automated WhatsApp Appointment & Token Workflows");
-      expect(softwareApp.featureList).toContain("Real-Time Clinical Consultation & Revenue Dashboard");
+      expect(softwareApp?.featureList).toContain("Patient Relationship Management (CRM)");
+      expect(softwareApp?.featureList).toContain("Automated WhatsApp Appointment & Token Workflows");
+      expect(softwareApp?.featureList).toContain("Real-Time Clinical Consultation & Revenue Dashboard");
 
-      const faq = graph.find((node: any) => node["@type"] === "FAQPage");
+      const faq = graph.find((node: any) => node["@type"] === "FAQPage") as any;
       expect(faq).toBeDefined();
-      expect(faq.mainEntity.length).toBeGreaterThanOrEqual(4);
+      expect(faq?.mainEntity?.length).toBeGreaterThanOrEqual(4);
     });
   });
 
