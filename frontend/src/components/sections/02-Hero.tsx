@@ -3,22 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
-import { ArrowRight, Play, CheckCircle2, ShieldCheck, Zap, Sparkles } from "lucide-react";
+import { ArrowRight, Play, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { HERO_CONTENT, WHATSAPP_LINK } from "@/lib/constants";
-import { HeroInteractiveShowcase } from "./HeroInteractiveShowcase";
-
-const HeroScene = dynamic(
-  () => import("@/components/3d/HeroScene").then((m) => m.HeroScene),
-  { ssr: false }
-);
+import { HERO_CONTENT } from "@/lib/constants";
+import { MockupVideoShowcase } from "./MockupVideoShowcase";
 
 export const Hero = () => {
   return (
     <section className="relative min-h-[90vh] flex flex-col justify-center pt-28 pb-16 overflow-hidden bg-radial-gradient">
-      {/* 3D Clinical Interactive Scene */}
-      <HeroScene />
 
       {/* Luminous White Glow Accents */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-white/[0.06] blur-[140px] rounded-full pointer-events-none" />
@@ -100,8 +92,8 @@ export const Hero = () => {
           </motion.div>
         </div>
 
-        {/* Real Interactive 3D Product Engine & Live Composition */}
-        <HeroInteractiveShowcase />
+        {/* Clinic SaaS Mockup Video & Interactive Product Walkthrough */}
+        <MockupVideoShowcase />
       </div>
     </section>
   );
