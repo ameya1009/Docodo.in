@@ -64,6 +64,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           image: user.image,
+          role: user.role || "OWNER",
+          plan: user.plan || "PILOT",
         };
       },
     }),
@@ -72,26 +74,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, trigger, session }) {
       if (user?.id) {
         token.id = user.id;
+        token.role = (user as any).role || "OWNER";
+        token.plan = (user as any).plan || "PILOT";
       }
 
       if (trigger === "update" && session?.businessId) {
         token.businessId = session.businessId;
         token.businessSlug = session.businessSlug;
         token.onboardingComplete = session.onboardingComplete ?? true;
+        if (session.plan) token.plan = session.plan;
       }
 
-      // If businessId is not yet on the token, dynamically resolve it from the database
+      // If businessId or plan is not yet on the token, dynamically resolve it from the database
       const userId = (token.id as string) || (user?.id as string);
-      if (userId && (!token.businessId || token.onboardingComplete === false)) {
+      if (userId && (!token.businessId || !token.plan || token.onboardingComplete === false)) {
         try {
           const { prisma } = await import("@/lib/prisma");
-          const business = await prisma.business.findFirst({
-            where: { ownerId: userId },
-          });
+          const [business, userDb] = await Promise.all([
+            prisma.business.findFirst({ where: { ownerId: userId } }),
+            prisma.user.findUnique({ where: { id: userId }, select: { plan: true, role: true } }),
+          ]);
           if (business) {
             token.businessId = business.id;
             token.businessSlug = business.slug;
             token.onboardingComplete = business.onboardingComplete;
+          }
+          if (userDb?.plan) {
+            token.plan = userDb.plan;
           }
         } catch {
           try {
@@ -116,6 +125,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (typeof token.businessId === "string") session.user.businessId = token.businessId;
         if (typeof token.businessSlug === "string") session.user.businessSlug = token.businessSlug;
         if (typeof token.onboardingComplete === "boolean") session.user.onboardingComplete = token.onboardingComplete;
+        if (typeof token.plan === "string") session.user.plan = token.plan;
+        if (typeof token.role === "string") session.user.role = token.role;
       }
       return session;
     },

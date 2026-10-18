@@ -28,17 +28,23 @@ export const Nav = () => {
         : "bg-transparent h-20"
     )}>
       <div className="container h-full flex items-center justify-between">
-        {/* Left: Logo */}
+        {/* Left: Logo - Illuminating Pure White Bulb Aesthetic */}
         <Link href="/" className="flex items-center gap-3 group">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--lime)] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--lime)]"></span>
-          </span>
-          <span className="font-display font-black text-2xl tracking-tight text-[var(--text-primary)] group-hover:text-[var(--lime)] transition-colors">
+          <div className="relative flex items-center justify-center">
+            {/* Luminous corona radiating like an incandescent bulb */}
+            <span className="absolute -inset-1 rounded-full bg-white/40 blur-md animate-pulse pointer-events-none" />
+            <div className="relative w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-[0_0_15px_#ffffff,0_0_30px_rgba(255,255,255,0.85),0_0_50px_rgba(255,255,255,0.45)]">
+              {/* Internal Filament & Sparkle */}
+              <div className="w-2.5 h-2.5 rounded-full bg-black flex items-center justify-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+              </div>
+            </div>
+          </div>
+          <span className="font-display font-black text-2xl tracking-tight text-white drop-shadow-[0_0_16px_rgba(255,255,255,0.9)] group-hover:drop-shadow-[0_0_25px_rgba(255,255,255,1)] transition-all">
             DOCODO
           </span>
-          <span className="hidden sm:inline-block text-[10px] uppercase font-mono font-bold tracking-widest px-2 py-0.5 rounded-full bg-[var(--lime-ghost)] text-[var(--lime)] border border-[var(--lime)]/30">
-            India V1
+          <span className="hidden sm:inline-block text-[10px] uppercase font-mono font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/30 shadow-[0_0_12px_rgba(255,255,255,0.25)]">
+            Clinical OS
           </span>
         </Link>
 
@@ -182,7 +188,7 @@ export const Nav = () => {
 
               <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-[var(--border-subtle)]">
                 <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="secondary" size="lg" className="w-full">Merchant Login</Button>
+                  <Button variant="secondary" size="lg" className="w-full">Doctor / Practice Login</Button>
                 </Link>
                 <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="primary" size="lg" className="w-full shadow-[var(--lime-glow-sm)]">

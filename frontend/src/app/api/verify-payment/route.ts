@@ -123,6 +123,7 @@ export async function POST(req: NextRequest) {
 
     // Handle SaaS Subscription or Concierge plan purchase
     let updatedPlanResult: string | undefined;
+    let activationUrl: string | undefined;
     const planIdentifier = body.planId || body.planName;
     if (planIdentifier) {
       try {
@@ -136,6 +137,7 @@ export async function POST(req: NextRequest) {
 
         // Auto-resolve user by email if session is absent (Guest SaaS Checkout)
         const emailToMatch = body.email || body.customerEmail || body.notes?.customerEmail || session?.user?.email;
+
         if (!userId && emailToMatch) {
           let existingUser = await prisma.user.findUnique({ where: { email: emailToMatch } }).catch(() => null);
           if (!existingUser) {
@@ -144,11 +146,53 @@ export async function POST(req: NextRequest) {
                 email: emailToMatch,
                 name: body.notes?.customerName || body.name || session?.user?.name || "Business Owner",
                 role: "OWNER",
+                plan: normalizedPlan,
               },
             }).catch(() => null);
+
+            // Also create in Supabase DB for resilient fallback
+            try {
+              const { db } = await import("@/lib/supabase-db");
+              await db.user.create({
+                data: {
+                  id: existingUser?.id,
+                  email: emailToMatch,
+                  name: body.notes?.customerName || body.name || session?.user?.name || "Business Owner",
+                  role: "OWNER",
+                  plan: normalizedPlan,
+                },
+              });
+            } catch (sbErr) {
+              console.warn("[Payment Verify] Supabase user sync handled:", sbErr);
+            }
           }
           if (existingUser) {
             userId = existingUser.id;
+          }
+        }
+
+        // Generate password activation token for guest checkout or passwordless users
+        if (emailToMatch) {
+          try {
+            const resetToken = crypto.randomBytes(32).toString("hex");
+            const expires = new Date(Date.now() + 7 * 24 * 3600 * 1000); // 7 days token validity
+
+            await prisma.verificationToken.deleteMany({
+              where: { identifier: emailToMatch },
+            }).catch(() => null);
+
+            await prisma.verificationToken.create({
+              data: {
+                identifier: emailToMatch,
+                token: resetToken,
+                expires,
+              },
+            });
+
+            const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+            activationUrl = `${appUrl}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(emailToMatch)}&welcome=true`;
+          } catch (tokErr) {
+            console.warn("[Payment Verify] Activation token generation handled:", tokErr);
           }
         }
 
@@ -215,6 +259,31 @@ export async function POST(req: NextRequest) {
           updatedPlanResult = "STARTER";
         }
 
+        // Dispatch Welcome Email with Tax Invoice to Client
+        if (emailToMatch) {
+          const finalAmount = isDoneForYou ? 4999 : normalizedPlan === "PRO" ? 2499 : 999;
+          const displayPlan = isDoneForYou 
+            ? "Concierge Practice Setup" 
+            : normalizedPlan === "PRO" 
+              ? "Growth / Pro Practice OS" 
+              : "Starter Practice OS";
+
+          import("@/lib/services/invoice-email-service").then(({ sendWelcomeWithInvoiceEmail }) => {
+            sendWelcomeWithInvoiceEmail({
+              clientName: body.name || session?.user?.name || "Doctor / Practice Owner",
+              clientEmail: emailToMatch,
+              clientPhone: body.phone || body.notes?.customerPhone,
+              businessName: body.businessName || body.notes?.businessName || "My Clinic",
+              planId: normalizedPlan,
+              planName: displayPlan,
+              amountPaid: finalAmount,
+              paymentId: razorpay_payment_id,
+              orderId: finalOrderId,
+              activationUrl,
+            }).catch((err) => console.warn("[Welcome Invoice Email] Dispatch failed:", err));
+          });
+        }
+
         import("@/lib/notifications").then(({ sendAdminNotification }) => {
           sendAdminNotification("PAYMENT", {
             type: isDoneForYou ? "DONE_FOR_YOU_SETUP_PURCHASE" : "SAAS_PLAN_PURCHASE",
@@ -240,6 +309,7 @@ export async function POST(req: NextRequest) {
       order_id: finalOrderId,
       booking_id: bookingIdResult,
       plan: updatedPlanResult,
+      activation_url: (typeof activationUrl !== "undefined" ? activationUrl : undefined),
     });
   } catch (error: any) {
     console.error("[Razorpay Verify] Error processing verification:", error);

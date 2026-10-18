@@ -34,10 +34,18 @@ export async function signUpAction(formData: FormData) {
 
   let exists = null;
   try {
-    exists = await db.user.findUnique({ where: { email } });
-  } catch (dbErr: any) {
-    console.error("[SignUpAction] DB Lookup Error:", dbErr);
-    return { error: "Database service error. Please check your Supabase connection." };
+    const { prisma } = await import("@/lib/prisma");
+    exists = await prisma.user.findUnique({ where: { email } }).catch(() => null);
+  } catch {
+    exists = null;
+  }
+
+  if (!exists) {
+    try {
+      exists = await db.user.findUnique({ where: { email } }).catch(() => null);
+    } catch (dbErr: any) {
+      console.warn("[SignUpAction] DB Lookup Warning:", dbErr);
+    }
   }
 
   if (exists) {
@@ -47,15 +55,28 @@ export async function signUpAction(formData: FormData) {
   const bcrypt = await import("bcryptjs");
   const hashed = await bcrypt.hash(password, 12);
 
+  let createdId: string | undefined;
   try {
-    await db.user.create({
+    const { prisma } = await import("@/lib/prisma");
+    const created = await prisma.user.create({
       data: { name, email, password: hashed },
     });
+    createdId = created.id;
+  } catch (pErr) {
+    console.warn("[SignUpAction] Prisma create fallback:", pErr);
+  }
+
+  try {
+    await db.user.create({
+      data: { id: createdId, name, email, password: hashed },
+    });
   } catch (dbErr: any) {
-    console.error("[SignUpAction] DB Create Error:", dbErr);
-    return {
-      error: "Failed to create user in database. Please check database permissions."
-    };
+    console.warn("[SignUpAction] Supabase DB create error (handled):", dbErr);
+    if (!createdId) {
+      return {
+        error: "Failed to create user in database. Please verify your connection."
+      };
+    }
   }
 
   // Auto sign-in after signup with redirect: false for seamless client router navigation
@@ -135,12 +156,29 @@ export async function requestPasswordResetAction(formData: FormData) {
   const email = sanitizeEmail(parsed.data.email);
 
   try {
-    const user = await db.user.findUnique({ where: { email } });
+    let user = null;
+    try {
+      user = await prisma.user.findUnique({ where: { email } });
+    } catch {
+      user = null;
+    }
+    if (!user) {
+      try {
+        user = await db.user.findUnique({ where: { email } });
+      } catch {
+        user = null;
+      }
+    }
+
     if (user) {
       const resetToken = crypto.randomBytes(32).toString("hex");
       const expires = new Date(Date.now() + 3600 * 1000); // 1 hour expiration
 
       try {
+        await prisma.verificationToken.deleteMany({
+          where: { identifier: email },
+        }).catch(() => null);
+
         await prisma.verificationToken.create({
           data: {
             identifier: email,
@@ -155,29 +193,18 @@ export async function requestPasswordResetAction(formData: FormData) {
       const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
       const resetUrl = `${appUrl}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
 
-      // P0-7: Actually send the email via Resend instead of console.log
+      const { generateForgotPasswordHtml } = await import("@/lib/services/invoice-email-service");
+      const html = generateForgotPasswordHtml({ resetUrl, email });
+
       if (resend) {
         await resend.emails.send({
-          from: "Docodo <noreply@docodo.in>",
+          from: "Docodo Security <security@docodo.in>",
           to: [email],
-          subject: "Reset your Docodo password",
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
-              <h2 style="color: #0f172a; margin-bottom: 8px;">Reset your password</h2>
-              <p style="color: #475569; font-size: 15px;">Hi there,</p>
-              <p style="color: #475569; font-size: 15px;">We received a request to reset the password for your Docodo account. Click the button below to choose a new password. This link expires in 1 hour.</p>
-              <div style="text-align: center; margin: 32px 0;">
-                <a href="${resetUrl}" style="background-color: #2563EB; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
-                  Reset Password
-                </a>
-              </div>
-              <p style="color: #94a3b8; font-size: 13px;">If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
-              <p style="color: #94a3b8; font-size: 13px;">Or copy this link: ${resetUrl}</p>
-            </div>
-          `,
+          subject: "Reset your Docodo Clinical OS password",
+          html,
         }).catch((err) => console.error("[Password Reset] Resend email failed:", err));
       } else {
-        console.warn("[Password Reset] RESEND_API_KEY not configured — email not sent. Reset URL:", resetUrl);
+        console.warn("[Password Reset] RESEND_API_KEY not configured — email logged in sandbox mode. Reset URL:", resetUrl);
       }
     }
 
@@ -216,14 +243,23 @@ export async function resetPasswordAction(token: string, email: string, newPassw
       return { error: "This reset link has expired. Please request a new one." };
     }
 
-    // Hash the new password and update the user
+    // Hash the new password and update the user in both Prisma and Supabase
     const bcrypt = await import("bcryptjs");
     const hashed = await bcrypt.hash(newPassword, 12);
 
     await prisma.user.update({
       where: { email: sanitized },
       data: { password: hashed },
-    });
+    }).catch(() => null);
+
+    try {
+      await db.user.update({
+        where: { email: sanitized },
+        data: { password: hashed },
+      });
+    } catch (sbErr) {
+      console.warn("[Reset Password] Supabase update handled:", sbErr);
+    }
 
     // Delete the used token
     await prisma.verificationToken.delete({

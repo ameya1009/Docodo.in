@@ -9,13 +9,20 @@ import { Button } from "@/components/ui/Button";
 import { HERO_CONTENT, WHATSAPP_LINK } from "@/lib/constants";
 import { HeroInteractiveShowcase } from "./HeroInteractiveShowcase";
 
+const HeroScene = dynamic(
+  () => import("@/components/3d/HeroScene").then((m) => m.HeroScene),
+  { ssr: false }
+);
+
 export const Hero = () => {
   return (
     <section className="relative min-h-[90vh] flex flex-col justify-center pt-28 pb-16 overflow-hidden bg-radial-gradient">
+      {/* 3D Clinical Interactive Scene */}
+      <HeroScene />
 
-      {/* Background Glow Accents */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-[var(--lime)]/10 blur-[130px] rounded-full pointer-events-none" />
-      <div className="absolute top-2/3 right-10 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
+      {/* Luminous White Glow Accents */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-white/[0.06] blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute top-2/3 right-10 w-[300px] h-[300px] bg-white/[0.04] blur-[110px] rounded-full pointer-events-none" />
 
       <div className="container relative z-10">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
@@ -24,11 +31,11 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--bg-surface)] border border-[var(--lime)]/30 text-xs font-semibold mb-6 shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/25 text-xs font-semibold mb-6 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
           >
-            <span className="flex h-2 w-2 rounded-full bg-[var(--lime)] animate-pulse" />
-            <span className="text-[var(--lime)] font-bold">{HERO_CONTENT.pilotBadge}</span>
-            <span className="text-[var(--border-default)]">•</span>
+            <span className="flex h-2 w-2 rounded-full bg-white shadow-[0_0_8px_#ffffff] animate-pulse" />
+            <span className="text-white font-bold">{HERO_CONTENT.pilotBadge}</span>
+            <span className="text-white/30">•</span>
             <span className="text-[var(--text-secondary)]">Zero Complexity</span>
           </motion.div>
 
@@ -37,10 +44,10 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-display font-black text-4xl sm:text-6xl md:text-7xl tracking-tight text-[var(--text-primary)] leading-[1.08] mb-6"
+            className="font-display font-black text-4xl sm:text-6xl md:text-7xl tracking-tight text-white leading-[1.08] mb-6"
           >
             {HERO_CONTENT.headline.line1}{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--lime)] via-lime-300 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
               {HERO_CONTENT.headline.line2}
             </span>
           </motion.h1>

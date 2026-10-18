@@ -122,6 +122,22 @@ export const PREBUILT_AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       { id: "node-2", type: "NOTIFICATION", name: "Send Friendly Reschedule Link", config: { channel: "WHATSAPP" } },
     ],
   },
+  {
+    id: "auto-hindu-festival-birthday-greetings",
+    name: "Indian Hindu Calendar Festivals & Patient Birthday Greetings",
+    category: "CLINIC",
+    description: "Daily automated scan that detects Hindu festivals (Diwali, Holi, Gudi Padwa, Ganesh Chaturthi, Navratri) and patient birthdays, dispatching warm personalized clinical wishes via WhatsApp & Email.",
+    trigger: "DAILY_CALENDAR_AUDIT_09AM",
+    actions: ["Scan Hindu Festival Schedule", "Check Patient Birthdays", "Generate Clinical Festive Wish", "Dispatch WhatsApp & Email"],
+    isActive: true,
+    metrics: { runsCount: 520, successRate: 99.8 },
+    nodes: [
+      { id: "node-1", type: "TRIGGER", name: "Daily 09:00 AM Cron Schedule", config: { schedule: "0 9 * * *" } },
+      { id: "node-2", type: "CONDITION", name: "Check Hindu Calendar & Patient DOB", config: { engine: "hindu-calendar-greetings" } },
+      { id: "node-3", type: "AI", name: "Personalize Doctor Health Blessing", config: { tone: "warm_respectful" } },
+      { id: "node-4", type: "NOTIFICATION", name: "Dispatch WhatsApp & Email Greeting", config: { channel: "MULTI_CHANNEL" } },
+    ],
+  },
 ];
 
 /**
@@ -134,7 +150,10 @@ export function parseNaturalLanguageAutomation(prompt: string): AutomationTempla
   let trigger = "BOOKING_CREATED";
   let triggerName = "When a Booking is Created";
 
-  if (cleanPrompt.includes("cancel") || cleanPrompt.includes("cancelled")) {
+  if (cleanPrompt.includes("birthday") || cleanPrompt.includes("festival") || cleanPrompt.includes("diwali") || cleanPrompt.includes("greetings") || cleanPrompt.includes("hindu")) {
+    trigger = "DAILY_CALENDAR_AUDIT_09AM";
+    triggerName = "Daily 09:00 AM Hindu Calendar & Birthday Check";
+  } else if (cleanPrompt.includes("cancel") || cleanPrompt.includes("cancelled")) {
     trigger = "BOOKING_CANCELLED";
     triggerName = "When a Booking is Cancelled";
   } else if (cleanPrompt.includes("complete") || cleanPrompt.includes("finished") || cleanPrompt.includes("after service")) {

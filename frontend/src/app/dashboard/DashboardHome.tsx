@@ -5,10 +5,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Calendar, Users, TrendingUp, Globe, ArrowRight, Clock,
-  CheckCircle2, AlertCircle, Sparkles, Copy, ExternalLink, Activity, Award, MessageSquare, Phone
+  CheckCircle2, AlertCircle, Sparkles, Copy, ExternalLink, Activity, Award, MessageSquare, Phone,
+  Crown, Gift, Flame, PartyPopper, Heart, Send, Check, ShieldCheck
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ActionCenter } from "./ActionCenter";
+import { getHinduCalendarStatus } from "@/lib/engines/hindu-calendar-greetings";
 
 interface DashboardHomeProps {
   data: any;
@@ -89,6 +91,214 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
           <Calendar size={15} /> New Appointment
         </Link>
       </div>
+
+      {/* Tiered Plan Clinical Status Banner */}
+      {(() => {
+        const rawPlan = String(data?.subscription?.planId || "PILOT").toUpperCase();
+        const isPilot = rawPlan === "PILOT";
+        const isStarter = rawPlan === "STARTER";
+        const isGrowth = rawPlan === "GROWTH" || rawPlan === "PRO";
+        const isConcierge = rawPlan === "CONCIERGE" || rawPlan.includes("SETUP");
+
+        return (
+          <div className="p-6 bg-[#09090B] border border-white/20 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-white/[0.03] rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {isPilot && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white border border-white/20 text-xs font-mono font-bold">
+                      <Sparkles size={13} className="text-white" /> PILOT PRACTICE (FREE COMMUNITY TIER)
+                    </span>
+                  )}
+                  {isStarter && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-black text-xs font-mono font-black shadow-[0_0_15px_rgba(255,255,255,0.7)]">
+                      <ShieldCheck size={13} /> STARTER PRACTICE OS (PAID · UNLIMITED)
+                    </span>
+                  )}
+                  {isGrowth && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-black text-xs font-mono font-black shadow-[0_0_20px_#ffffff]">
+                      <Crown size={14} /> GROWTH CLINICAL ENTERPRISE (PAID · ALL ENGINES UNLOCKED)
+                    </span>
+                  )}
+                  {isConcierge && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-black text-xs font-mono font-black shadow-[0_0_20px_#ffffff]">
+                      <Award size={14} /> CONCIERGE CERTIFIED PRACTICE (MANAGED &amp; CUSTOM DOMAIN)
+                    </span>
+                  )}
+                  <span className="text-xs font-mono text-zinc-400">
+                    ● Direct UPI Settlement Active · 0% Aggregator Commission
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-bold text-white font-display">
+                  {isPilot && "Doctor Pilot Sandbox Active · 50 Monthly Consultations Included"}
+                  {isStarter && "Single-Doctor Clinical Workspace · Unlimited Bookings & Instant UPI Tokens"}
+                  {isGrowth && "Multi-Doctor Specialty Enterprise · Automated 24h Reminders & AI Marketing Suite"}
+                  {isConcierge && "VIP Managed Practice Setup · Custom Domain & Dedicated Specialist Assigned"}
+                </h3>
+
+                <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
+                  {isPilot && "You are operating on the complimentary Pilot tier with a 50 monthly appointment cap. Upgrade to Starter or Growth to unlock unlimited patient volume, custom branding, and automated follow-ups."}
+                  {isStarter && "Includes unlimited patient appointments, direct Razorpay UPI settlement to your clinic's bank account, digital OPD tokens, and Google Maps routing."}
+                  {isGrowth && "Includes multi-doctor calendars (Physician, Dental, Derma), automated 24h WhatsApp reminders, pre-op fasting guides, post-visit review marketing, and AI content engines."}
+                  {isConcierge && "Includes 30-day Growth Suite access, personalized domain mapping, and ongoing practice onboarding management from Ameya Kshirsagar."}
+                </p>
+              </div>
+
+              {/* Action according to tier */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                {isPilot && (
+                  <Link
+                    href="/checkout?plan=starter"
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white text-black font-black text-xs hover:brightness-110 shadow-[0_0_20px_rgba(255,255,255,0.7)] transition-all flex items-center justify-center gap-2"
+                  >
+                    Upgrade to Starter (₹999/mo) <ArrowRight size={15} />
+                  </Link>
+                )}
+                <Link
+                  href="/pricing"
+                  className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all flex items-center justify-center gap-1.5"
+                >
+                  View Plan Capabilities
+                </Link>
+              </div>
+            </div>
+
+            {/* Feature Highlights Grid */}
+            <div className="mt-6 pt-5 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-black/60 border border-white/10">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase block">Monthly Slot Capacity</span>
+                <span className="font-bold text-white mt-0.5 block">{isPilot ? "50 Appointments" : "Unlimited Bookings"}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-black/60 border border-white/10">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase block">Aggregator Commission</span>
+                <span className="font-bold text-white mt-0.5 block">0% Take-Rate (Direct Bank)</span>
+              </div>
+              <div className="p-3 rounded-xl bg-black/60 border border-white/10">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase block">WhatsApp Automation</span>
+                <span className="font-bold text-white mt-0.5 block">{isPilot ? "Standard Receipts" : "24h Reminders & Reviews"}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-black/60 border border-white/10">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase block">Compliance Standard</span>
+                <span className="font-bold text-white mt-0.5 block">DPDP Act 2023 Encrypted</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Indian Hindu Calendar Festivals & Patient Birthday Automation Panel */}
+      {(() => {
+        const festStatus = getHinduCalendarStatus(new Date(), businessName);
+        return (
+          <div className="p-6 bg-[#09090B] border border-white/20 rounded-3xl shadow-xl space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white text-black flex items-center justify-center shadow-[0_0_15px_#ffffff]">
+                  <Flame size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                    Indian Hindu Calendar Festivals &amp; Patient Birthday Automation
+                  </h3>
+                  <p className="text-xs text-zinc-400">
+                    Automated, respectful festive blessings and birthday wishes sent from {businessName}
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-mono text-zinc-400 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                {new Date().toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Left Column: Festival Engine */}
+              <div className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold uppercase text-zinc-400 flex items-center gap-1.5">
+                    <Sparkles size={13} className="text-white" /> Hindu Festival Status
+                  </span>
+                  {festStatus.festivalToday ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-white text-black font-mono font-black text-[10px]">
+                      FESTIVAL TODAY
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-zinc-300 font-mono text-[10px]">
+                      REGULAR OPD SCHEDULE
+                    </span>
+                  )}
+                </div>
+
+                {festStatus.festivalToday ? (
+                  <div className="space-y-2">
+                    <h4 className="text-base font-bold text-white">
+                      {festStatus.festivalToday.name} ({festStatus.festivalToday.hindiName})
+                    </h4>
+                    <p className="text-xs text-zinc-300 bg-white/5 p-3 rounded-xl border border-white/10 font-sans leading-relaxed">
+                      &ldquo;{festStatus.festivalGreetingText}&rdquo;
+                    </p>
+                    <p className="text-[11px] text-zinc-400">
+                      💡 <strong>Clinical Health Tip:</strong> {festStatus.festivalToday.healthTip}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-xs text-zinc-300">
+                      No Hindu festival matches today&apos;s date. Routine OPD schedules and follow-up reminders are running uninterrupted.
+                    </p>
+                    {festStatus.upcomingFestivals.length > 0 && (
+                      <div className="mt-3 p-3 bg-white/5 rounded-xl border border-white/10 space-y-1 text-xs">
+                        <span className="text-[10px] font-mono text-zinc-400 uppercase block">Next Auspicious Festival</span>
+                        <p className="font-bold text-white">{festStatus.upcomingFestivals[0].name} ({festStatus.upcomingFestivals[0].startDate})</p>
+                        <p className="text-[11px] text-zinc-400">{festStatus.upcomingFestivals[0].healthTip}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Birthday Automation Engine */}
+              <div className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold uppercase text-zinc-400 flex items-center gap-1.5">
+                    <Gift size={13} className="text-white" /> Patient Birthday Greetings
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono text-[10px] border border-white/20">
+                    AUTO SCAN 09:00 AM
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-300">
+                    Patients with birthdays recorded in your CRM automatically receive personalized clinical wishes and an annual preventive check-up link.
+                  </p>
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-1.5 text-xs">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase block">Clinical Birthday Template Preview</span>
+                    <p className="text-zinc-200 italic leading-relaxed">
+                      &ldquo;Dear Patient, Happy Birthday! 🎂 {businessName} wishes you vibrant health, vitality, and longevity on your special day. Thank you for entrusting us with your healthcare!&rdquo;
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between">
+                    <span className="text-[11px] font-mono text-zinc-400">
+                      Channel: WhatsApp &amp; Email
+                    </span>
+                    <Link
+                      href="/api/cron/greetings"
+                      target="_blank"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-black font-black text-xs rounded-xl hover:brightness-110 transition-all shadow-[0_0_10px_rgba(255,255,255,0.4)]"
+                    >
+                      <Send size={12} /> Test Greetings Dispatch
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

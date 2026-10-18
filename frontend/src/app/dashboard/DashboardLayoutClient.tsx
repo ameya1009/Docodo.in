@@ -7,21 +7,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Calendar, Users, Globe, Sparkles,
   Settings, LogOut, Menu, X, ChevronRight, Bell, ExternalLink,
-  MessageSquare, BarChart3, Zap
+  MessageSquare, BarChart3, Zap, ShieldCheck, Crown, Lock
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true, mobileNav: true },
-  { href: "/dashboard/bookings", label: "Bookings", icon: Calendar, mobileNav: true },
-  { href: "/dashboard/customers", label: "Customers", icon: Users, mobileNav: true },
-  { href: "/dashboard/whatsapp", label: "WhatsApp", icon: MessageSquare, mobileNav: true },
-  { href: "/dashboard/automations", label: "Automations", icon: Zap, mobileNav: true },
-  { href: "/dashboard/ai-content", label: "AI Suite", icon: Sparkles, mobileNav: true },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, mobileNav: false },
-  { href: "/dashboard/website", label: "Website", icon: Globe, mobileNav: false },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings, mobileNav: false },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true, mobileNav: true, minPlan: "PILOT" },
+  { href: "/dashboard/bookings", label: "Bookings", icon: Calendar, mobileNav: true, minPlan: "PILOT" },
+  { href: "/dashboard/customers", label: "Customers", icon: Users, mobileNav: true, minPlan: "PILOT" },
+  { href: "/dashboard/whatsapp", label: "WhatsApp", icon: MessageSquare, mobileNav: true, minPlan: "STARTER" },
+  { href: "/dashboard/automations", label: "Automations", icon: Zap, mobileNav: true, minPlan: "GROWTH" },
+  { href: "/dashboard/ai-content", label: "AI Suite", icon: Sparkles, mobileNav: true, minPlan: "GROWTH" },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, mobileNav: false, minPlan: "GROWTH" },
+  { href: "/dashboard/website", label: "Website", icon: Globe, mobileNav: false, minPlan: "PILOT" },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, mobileNav: false, minPlan: "PILOT" },
 ];
 
 interface SidebarContentProps {
@@ -29,6 +29,7 @@ interface SidebarContentProps {
   businessName?: string;
   businessSlug?: string;
   pathname: string;
+  plan?: string;
   onClose?: () => void;
 }
 
@@ -37,8 +38,10 @@ function SidebarContent({
   businessName,
   businessSlug,
   pathname,
+  plan = "PILOT",
   onClose,
 }: SidebarContentProps) {
+  const currentPlan = plan.toUpperCase();
   const isActive = (item: (typeof NAV_ITEMS)[0]) => {
     if (item.exact) return pathname === item.href;
     return pathname.startsWith(item.href);
@@ -47,11 +50,50 @@ function SidebarContent({
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-[var(--border-subtle)] space-y-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xl font-black text-[var(--lime)] font-display">Docodo</span>
+            {businessName && (
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate max-w-[170px]">{businessName}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Plan Status Banner */}
         <div>
-          <span className="text-xl font-black text-[var(--lime)] font-display">Docodo</span>
-          {businessName && (
-            <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate max-w-[170px]">{businessName}</p>
+          {currentPlan === "PILOT" && (
+            <div className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/10 text-xs">
+              <span className="font-mono text-[10px] text-zinc-400 font-bold">PILOT (50 CAP)</span>
+              <Link href="/pricing" onClick={onClose} className="text-[10px] font-black text-black bg-white hover:brightness-110 px-2 py-0.5 rounded-md transition-all shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+                Upgrade →
+              </Link>
+            </div>
+          )}
+          {currentPlan === "STARTER" && (
+            <div className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/10 text-xs">
+              <span className="font-mono text-[10px] text-white font-bold flex items-center gap-1">
+                <ShieldCheck size={11} className="text-white" /> STARTER OS
+              </span>
+              <Link href="/checkout?plan=growth" onClick={onClose} className="text-[10px] font-bold text-white bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-md transition-all">
+                Go Pro →
+              </Link>
+            </div>
+          )}
+          {(currentPlan === "GROWTH" || currentPlan === "PRO") && (
+            <div className="flex items-center justify-between p-2 rounded-xl bg-white/10 border border-white/20 text-xs">
+              <span className="font-mono text-[10px] text-white font-black flex items-center gap-1 shadow-[0_0_10px_#ffffff]">
+                <Crown size={12} className="text-white" /> GROWTH PRO
+              </span>
+              <span className="text-[9px] font-mono text-zinc-400">UNLIMITED</span>
+            </div>
+          )}
+          {currentPlan === "CONCIERGE" && (
+            <div className="flex items-center justify-between p-2 rounded-xl bg-white/15 border border-white/30 text-xs">
+              <span className="font-mono text-[10px] text-white font-black flex items-center gap-1 shadow-[0_0_15px_#ffffff]">
+                <Sparkles size={12} className="text-white" /> CONCIERGE VIP
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -61,6 +103,9 @@ function SidebarContent({
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = isActive(item);
+          const isGrowthLocked = item.minPlan === "GROWTH" && (currentPlan === "PILOT" || currentPlan === "STARTER");
+          const isStarterLocked = item.minPlan === "STARTER" && currentPlan === "PILOT";
+
           return (
             <Link
               key={item.href}
@@ -75,7 +120,17 @@ function SidebarContent({
             >
               <Icon size={18} className="shrink-0" />
               <span className="truncate">{item.label}</span>
-              {active && <ChevronRight size={15} className="ml-auto opacity-70" />}
+              {isGrowthLocked && (
+                <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-zinc-400 font-bold border border-white/10">
+                  PRO
+                </span>
+              )}
+              {isStarterLocked && !isGrowthLocked && (
+                <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-zinc-400 font-bold border border-white/10">
+                  PLUS
+                </span>
+              )}
+              {active && !isGrowthLocked && !isStarterLocked && <ChevronRight size={15} className="ml-auto opacity-70" />}
             </Link>
           );
         })}
@@ -136,6 +191,7 @@ interface DashboardLayoutClientProps {
   user: { name?: string | null; email?: string | null; image?: string | null };
   businessName?: string;
   businessSlug?: string;
+  plan?: string;
 }
 
 export default function DashboardLayoutClient({
@@ -143,6 +199,7 @@ export default function DashboardLayoutClient({
   user,
   businessName,
   businessSlug,
+  plan = "PILOT",
 }: DashboardLayoutClientProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -157,6 +214,7 @@ export default function DashboardLayoutClient({
           businessName={businessName}
           businessSlug={businessSlug}
           pathname={pathname}
+          plan={plan}
         />
       </aside>
 

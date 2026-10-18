@@ -10,35 +10,40 @@
    ============================================================ */
 
 :root {
-  /* ── Background Palette ─────────────────────────── */
-  --bg-void:       #080807;
-  --bg-deep:       #0D0D0C;
-  --bg-surface:    #141412;
-  --bg-elevated:   #1C1C1A;
-  --bg-invert:     #F0EDE6;
+  /* ── Background Palette (Pure Void Blacks & Surgical Clinical Dark) ─ */
+  --bg-void:       #000000;
+  --bg-deep:       #050505;
+  --bg-surface:    #0A0A0A;
+  --bg-elevated:   #121212;
+  --bg-invert:     #FFFFFF;
 
-  /* ── Border ─────────────────────────────────────── */
-  --border-subtle:  rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.10);
-  --border-strong:  rgba(255, 255, 255, 0.18);
+  /* ── Border (Ultra-refined surgical hairline borders) ─────────────────── */
+  --border-subtle:  rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.16);
+  --border-strong:  rgba(255, 255, 255, 0.32);
 
-  /* ── Lime (Primary Accent) ───────────────────────── */
-  --lime:           #C8F135;
-  --lime-hover:     #D9FF4A;
-  --lime-dim:       #8FAA1E;
-  --lime-ghost:     rgba(200, 241, 53, 0.08);
-  --lime-glow-sm:   0 0 20px rgba(200, 241, 53, 0.25);
-  --lime-glow-md:   0 0 40px rgba(200, 241, 53, 0.20), 0 0 80px rgba(200, 241, 53, 0.08);
-  --lime-glow-lg:   0 0 80px rgba(200, 241, 53, 0.25), 0 0 160px rgba(200, 241, 53, 0.10);
+  /* ── Pure Luminous White / Bulb Radiant Glow (Primary Accent) ─────────── */
+  --lime:           #FFFFFF;
+  --lime-hover:     #F4F4F5;
+  --lime-dim:       #A1A1AA;
+  --lime-ghost:     rgba(255, 255, 255, 0.08);
+  --lime-glow-sm:   0 0 16px rgba(255, 255, 255, 0.75);
+  --lime-glow-md:   0 0 32px rgba(255, 255, 255, 0.85), 0 0 64px rgba(255, 255, 255, 0.35);
+  --lime-glow-lg:   0 0 55px rgba(255, 255, 255, 0.95), 0 0 110px rgba(255, 255, 255, 0.5);
 
-  /* ── Teal (Secondary Accent) ─────────────────────── */
-  --teal:           #00FFAA;
+  /* ── Bulb Radiant Glow Tokens ─────────────────────────────────────────── */
+  --bulb-core:      #FFFFFF;
+  --bulb-glow:      0 0 12px #FFFFFF, 0 0 25px rgba(255, 255, 255, 0.9), 0 0 50px rgba(255, 255, 255, 0.5);
+  --bulb-glow-lg:   0 0 20px #FFFFFF, 0 0 45px rgba(255, 255, 255, 0.95), 0 0 90px rgba(255, 255, 255, 0.6);
+
+  /* ── Surgical Chrome & Silver (Secondary Accent) ──────────────────────── */
+  --teal:           #E4E4E7;
 
   /* ── Text ───────────────────────────────────────── */
-  --text-primary:   #F0EDE6;
-  --text-secondary: #A8A89E;
-  --text-muted:     #6A6A62;
-  --text-disabled:  #3A3A34;
+  --text-primary:   #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted:     #71717A;
+  --text-disabled:  #3F3F46;
 
   /* ── Semantic ───────────────────────────────────── */
   --success:        #22C55E;
@@ -150,8 +155,8 @@ html.lenis {
 
 /* ── Selection ───────────────────────────────────────── */
 ::selection {
-  background: rgba(200, 241, 53, 0.2);
-  color: var(--lime);
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
 }
 
 /* ── Links ───────────────────────────────────────────── */
@@ -159,7 +164,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Focus Ring ──────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid rgba(200, 241, 53, 0.6);
+  outline: 2px solid rgba(255, 255, 255, 0.8);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
@@ -187,23 +192,23 @@ body::after {
   .container { padding: 0 var(--space-8); }
 }
 
-/* ── Utility: Gradient Text (Lime) ─────────────────────── */
+/* ── Utility: Gradient Text (Luminous Monochrome) ─────── */
 .text-lime-gradient {
-  background: linear-gradient(135deg, var(--lime) 0%, #F0FF90 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 50%, #A1A1AA 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Utility: Lime Glow Border ──────────────────────────── */
+/* ── Utility: Bulb Glow Border ─────────────────────────── */
 .lime-glow-border {
-  border: 1px solid rgba(200, 241, 53, 0.3);
-  box-shadow: var(--lime-glow-sm), inset 0 0 30px rgba(200, 241, 53, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.04);
 }
 
 /* ── Utility: Glass ─────────────────────────────────────── */
 .glass {
-  background: rgba(20, 20, 18, 0.6);
+  background: rgba(10, 10, 10, 0.7);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--border-default);

@@ -206,8 +206,26 @@ export async function getDashboardData() {
     );
     const monthlyRevenue = calculateTotalRevenue(monthlyRecords);
 
+    let subscription: any = null;
+    try {
+      subscription = await prisma.subscription.findFirst({
+        where: { businessId: business.id },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (subErr) {
+      console.warn("[getDashboardData] Subscription query:", subErr);
+    }
+
+    const rawPlan = subscription?.planId || user?.plan || "PILOT";
+    const normalizedPlan = String(rawPlan).toUpperCase();
+
     return {
       business: business || {},
+      subscription: {
+        planId: normalizedPlan,
+        status: subscription?.status || "ACTIVE",
+        currentPeriodEnd: subscription?.currentPeriodEnd || null,
+      },
       upcomingBookings: upcomingBookings || [],
       recentBookings: (business && business.bookings) || [],
       recentEnquiries: recentEnquiries || [],

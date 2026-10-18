@@ -38,10 +38,10 @@ export const BuiltForLocals = () => {
             🎯 Tailored Workflows
           </span>
           <h2 className="text-3xl sm:text-5xl font-display font-black text-[var(--text-primary)] tracking-tight mb-4">
-            Built Specifically for Local Service Businesses
+            Tailored for Doctors, Dentists & Outpatient Clinics
           </h2>
           <p className="text-base sm:text-lg text-[var(--text-secondary)]">
-            Because a pitch to a hair salon should not be identical to a dental clinic.
+            Customized consultation workflows, OPD slot buffers, and zero-aggregator private booking links for medical practices.
           </p>
         </div>
 

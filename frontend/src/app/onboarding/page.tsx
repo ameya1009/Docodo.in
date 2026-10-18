@@ -32,34 +32,40 @@ import { signIn as clientSignIn } from "next-auth/react";
 import { formatCurrency } from "@/lib/utils";
 
 const CATEGORIES = [
-  { id: "Salon", label: "Salon & Styling", icon: "💇", defaultServices: [
-    { name: "Haircut", price: 500, duration: 45 },
-    { name: "Hair Spa", price: 1200, duration: 60 },
-    { name: "Facial", price: 1500, duration: 60 },
+  { id: "General Physician", label: "General Physician & OPD", icon: "🩺", defaultServices: [
+    { name: "Doctor Consultation", price: 600, duration: 20 },
+    { name: "Follow-up Review", price: 300, duration: 15 },
+    { name: "Detailed Health Check", price: 1500, duration: 45 },
   ]},
-  { id: "Clinic", label: "Clinic & Healthcare", icon: "🩺", defaultServices: [
-    { name: "General Consultation", price: 600, duration: 30 },
-    { name: "Specialist Review", price: 1200, duration: 45 },
-    { name: "Follow-up Checkup", price: 400, duration: 20 },
+  { id: "Dental", label: "Dental Clinic", icon: "🦷", defaultServices: [
+    { name: "Dental Consultation", price: 500, duration: 30 },
+    { name: "Scaling & Cleaning", price: 1200, duration: 45 },
+    { name: "Root Canal Evaluation", price: 800, duration: 30 },
   ]},
-  { id: "Spa", label: "Spa & Wellness", icon: "💆", defaultServices: [
-    { name: "Full Body Massage", price: 2000, duration: 60 },
-    { name: "Aromatherapy Session", price: 2500, duration: 75 },
-    { name: "Foot Reflexology", price: 900, duration: 45 },
+  { id: "Dermatology", label: "Dermatology & Skin", icon: "✨", defaultServices: [
+    { name: "Skin Consultation", price: 800, duration: 30 },
+    { name: "Acne Assessment", price: 1000, duration: 30 },
+    { name: "Laser / Skin Therapy", price: 2500, duration: 45 },
   ]},
-  { id: "Gym", label: "Gym & Fitness", icon: "🏋️", defaultServices: [
-    { name: "Personal Training Session", price: 800, duration: 60 },
-    { name: "Fitness Assessment", price: 500, duration: 45 },
-    { name: "Trial Workout Class", price: 300, duration: 45 },
+  { id: "Physiotherapy", label: "Physiotherapy & Rehab", icon: "🏃", defaultServices: [
+    { name: "Initial Assessment", price: 700, duration: 45 },
+    { name: "Pain Relief Session", price: 1000, duration: 45 },
+    { name: "Post-Op Rehab", price: 1200, duration: 60 },
   ]},
-  { id: "Yoga Studio", label: "Yoga & Meditation", icon: "🧘", defaultServices: [
-    { name: "Private Yoga Class", price: 1000, duration: 60 },
-    { name: "Meditation & Breathwork", price: 600, duration: 45 },
-    { name: "Group Pass Consultation", price: 300, duration: 30 },
+  { id: "Pediatrics", label: "Pediatrics & Child Care", icon: "👶", defaultServices: [
+    { name: "Child OPD Consultation", price: 700, duration: 20 },
+    { name: "Vaccination Slot", price: 500, duration: 15 },
+    { name: "Growth & Wellness Check", price: 900, duration: 30 },
   ]},
-  { id: "Other", label: "Other Services", icon: "✨", defaultServices: [
-    { name: "Standard Consultation", price: 500, duration: 45 },
-    { name: "Full Service Package", price: 1500, duration: 60 },
+  { id: "Ayurveda", label: "Ayurveda & Wellness", icon: "🌿", defaultServices: [
+    { name: "Nadi Parikshan", price: 600, duration: 30 },
+    { name: "Panchakarma Consultation", price: 1500, duration: 45 },
+    { name: "Dietary & Lifestyle Review", price: 500, duration: 20 },
+  ]},
+  { id: "Specialist", label: "Specialist & Polyclinic", icon: "🏥", defaultServices: [
+    { name: "Specialist Consultation", price: 1000, duration: 30 },
+    { name: "Second Opinion Review", price: 1500, duration: 45 },
+    { name: "Procedure Consultation", price: 2000, duration: 60 },
   ]},
 ];
 
@@ -110,7 +116,7 @@ export default function OnboardingPage() {
   // Form State
   const [info, setInfo] = useState({
     name: "",
-    category: "Salon",
+    category: "General Physician",
     phone: "",
     whatsapp: "",
     city: "Pune",
@@ -119,9 +125,9 @@ export default function OnboardingPage() {
   });
 
   const [services, setServices] = useState<Array<{ name: string; price: number; duration: number }>>([
-    { name: "Haircut", price: 500, duration: 45 },
-    { name: "Hair Spa", price: 1200, duration: 60 },
-    { name: "Facial", price: 1500, duration: 60 },
+    { name: "Doctor Consultation", price: 600, duration: 20 },
+    { name: "Follow-up Review", price: 300, duration: 15 },
+    { name: "Detailed Health Check", price: 1500, duration: 45 },
   ]);
 
   const [workingHours, setWorkingHours] = useState<Array<{ day: string; isOpen: boolean; openTime: string; closeTime: string }>>([
@@ -363,7 +369,7 @@ export default function OnboardingPage() {
                   type="text"
                   value={info.name}
                   onChange={(e) => setInfo({ ...info, name: e.target.value })}
-                  placeholder="e.g. Test Salon Pune"
+                  placeholder="e.g. Dr. Sharma Dental Clinic Pune"
                   className="w-full px-4 py-3 bg-[#0d1117] border border-gray-800 rounded-xl text-white text-sm focus:outline-none focus:border-lime"
                   required
                 />
@@ -657,7 +663,7 @@ export default function OnboardingPage() {
               <div className="p-5 bg-white text-gray-900 rounded-3xl shadow-xl space-y-4">
                 <div className="flex items-center justify-between border-b pb-3">
                   <div>
-                    <h2 className="text-xl font-black">{info.name || "Test Salon Pune"}</h2>
+                    <h2 className="text-xl font-black">{info.name || "Dr. Sharma Dental Clinic Pune"}</h2>
                     <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                       <MapPin size={12} /> {info.city || "Pune"} · {info.category}
                     </p>

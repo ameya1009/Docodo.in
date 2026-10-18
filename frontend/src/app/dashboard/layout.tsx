@@ -19,11 +19,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session?.user?.id) redirect("/auth/login");
 
   let business: any = null;
+  let subscription: any = null;
   try {
     business = await prisma.business.findFirst({
       where: { ownerId: session.user.id },
-      select: { name: true, slug: true, onboardingComplete: true },
+      select: { id: true, name: true, slug: true, onboardingComplete: true },
     });
+    if (business) {
+      subscription = await prisma.subscription.findFirst({
+        where: { businessId: business.id },
+        orderBy: { createdAt: "desc" },
+      });
+    }
   } catch (err) {
     console.warn("[Prisma Exception in DashboardLayout]:", err);
   }
@@ -31,12 +38,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // If business query failed or onboarding pending
   const businessName = business?.name || "My Business";
   const businessSlug = business?.slug || "my-business";
+  const rawPlan = subscription?.planId || session.user?.plan || "PILOT";
+  const plan = String(rawPlan).toUpperCase();
 
   return (
     <DashboardLayoutClient
       user={session.user}
       businessName={businessName}
       businessSlug={businessSlug}
+      plan={plan}
     >
       {children}
     </DashboardLayoutClient>

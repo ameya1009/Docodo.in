@@ -156,6 +156,7 @@ function CheckoutContent() {
                 plan: plan.name,
                 paymentId: response.razorpay_payment_id,
                 orderId: response.razorpay_order_id,
+                activationUrl: verifyData.activation_url,
               });
             } else {
               setErrorMessage(verifyData.error || "Payment verification failed. Please contact support.");
@@ -217,7 +218,15 @@ function CheckoutContent() {
             </div>
           </div>
 
-          <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center items-center">
+            {paymentSuccess.activationUrl && (
+              <a
+                href={paymentSuccess.activationUrl}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white text-black font-black text-sm hover:brightness-110 shadow-[0_0_20px_rgba(255,255,255,0.8)] transition-all flex items-center justify-center gap-2"
+              >
+                Set Password &amp; Open Workspace <ArrowRight size={16} />
+              </a>
+            )}
             <Button
               variant="primary"
               size="lg"
