@@ -1,6 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { SITE_CONFIG, defaultMetadata, jsonLd } from "../lib/metadata";
 import { HERO_CONTENT, PROBLEM_SECTION, PRICING_PLANS } from "../lib/constants";
+
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(() => Promise.resolve({ get: vi.fn(), set: vi.fn(), delete: vi.fn() })),
+}));
+
+vi.mock("@/lib/auth", () => ({
+  auth: vi.fn(() => Promise.resolve(null)),
+}));
 
 describe("Clinical Rebrand, SEO & Security Verification Tests", () => {
   describe("1. Top 1% SEO & Metadata Coverage (CRM, Automation, Marketing, Dashboard)", () => {

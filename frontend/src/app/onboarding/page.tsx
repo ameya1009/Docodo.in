@@ -140,19 +140,33 @@ export default function OnboardingPage() {
     { day: "SUN", isOpen: false, openTime: "10:00", closeTime: "20:00" },
   ]);
 
+  const [hasCustomizedServices, setHasCustomizedServices] = useState(false);
+
   const handleCategorySelect = (catId: string) => {
     const found = CATEGORIES.find((c) => c.id === catId);
     setInfo((prev) => ({ ...prev, category: catId }));
     if (found?.defaultServices) {
-      setServices(found.defaultServices);
+      if (!hasCustomizedServices) {
+        setServices(found.defaultServices);
+      } else {
+        const confirmOverwrite = typeof window !== "undefined"
+          ? window.confirm("Switching specialty will update your consultation template. Do you want to load the default consultations for this specialty?")
+          : false;
+        if (confirmOverwrite) {
+          setServices(found.defaultServices);
+          setHasCustomizedServices(false);
+        }
+      }
     }
   };
 
   const handleAddService = () => {
-    setServices((prev) => [...prev, { name: "New Service", price: 500, duration: 45 }]);
+    setHasCustomizedServices(true);
+    setServices((prev) => [...prev, { name: "New Consultation", price: 500, duration: 30 }]);
   };
 
   const handleUpdateService = (index: number, field: string, value: any) => {
+    setHasCustomizedServices(true);
     setServices((prev) =>
       prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
     );
@@ -163,6 +177,7 @@ export default function OnboardingPage() {
       alert("You must have at least one service.");
       return;
     }
+    setHasCustomizedServices(true);
     setServices((prev) => prev.filter((_, i) => i !== index));
   };
 
