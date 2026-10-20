@@ -39,6 +39,50 @@ describe("Docodo Growth OS — Omnichannel Acquisition Platform Test Suite", () 
       expect(email).toBeDefined();
       expect(email?.capabilities.canGetAnalytics).toBe(true);
     });
+
+    it("generates 1-click wa.me click-to-chat links with clean phone and encoded message", async () => {
+      const wa = AdapterRegistry.getAdapter("whatsapp");
+      expect(wa).toBeDefined();
+      if (wa && wa.sendOutreach) {
+        const res = await wa.sendOutreach({
+          recipient: "+91 98220 11223",
+          channel: "whatsapp",
+          body: "Hello Dr. Sharma, check out Docodo!",
+        });
+        expect(res.success).toBe(true);
+        expect(res.clickToChatUrl).toBe(
+          "https://wa.me/919822011223?text=Hello%20Dr.%20Sharma%2C%20check%20out%20Docodo!"
+        );
+      }
+
+      // Test Indian mobile phone edge cases: 10 digits, leading 0, and punctuation
+      const { WhatsAppAdapter } = await import("../lib/growth-os/adapters/WhatsAppAdapter");
+      expect(WhatsAppAdapter.buildClickToChatUrl("98220 11223", "Test")).toBe(
+        "https://wa.me/919822011223?text=Test"
+      );
+      expect(WhatsAppAdapter.buildClickToChatUrl("09822011223", "Test")).toBe(
+        "https://wa.me/919822011223?text=Test"
+      );
+      expect(WhatsAppAdapter.buildClickToChatUrl("+91-98220-11223", "Hello World")).toBe(
+        "https://wa.me/919822011223?text=Hello%20World"
+      );
+    });
+
+    it("handles email dispatch via Resend or fallback cleanly", async () => {
+      const email = AdapterRegistry.getAdapter("email");
+      expect(email).toBeDefined();
+      expect(typeof email?.isConfigured()).toBe("boolean");
+      if (email && email.sendOutreach) {
+        const res = await email.sendOutreach({
+          recipient: "doctor@example.com",
+          channel: "email",
+          subject: "Growth for your clinic",
+          body: "Hello Doctor",
+        });
+        expect(res.success).toBe(true);
+        expect(res.status).toBe("SENT");
+      }
+    });
   });
 
   describe("2. Entity Resolution & Identity Merging", () => {

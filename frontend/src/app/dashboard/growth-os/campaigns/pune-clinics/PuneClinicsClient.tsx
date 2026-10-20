@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { PersonalizedOutreachDraft } from "@/lib/growth-os/campaigns/pune_clinics_100";
 import { dispatchPuneClinicsBatchAction, BatchDispatchResult } from "@/lib/actions/growth-os/dispatch-campaign";
+import { WhatsAppAdapter } from "@/lib/growth-os/adapters/WhatsAppAdapter";
 
 interface Props {
   initialDrafts: PersonalizedOutreachDraft[];
@@ -209,12 +210,24 @@ export default function PuneClinicsClient({ initialDrafts }: Props) {
                     </span>
                   </td>
                   <td className="p-3 text-right">
-                    <button
-                      onClick={() => setSelectedDraft(draft)}
-                      className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] transition font-medium"
-                    >
-                      Preview Copy
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <a
+                        href={WhatsAppAdapter.buildClickToChatUrl(draft.phone, draft.whatsappMessage)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-semibold transition shadow-sm whitespace-nowrap"
+                        title={`Chat directly with ${draft.doctor} on WhatsApp`}
+                      >
+                        <span>💬</span>
+                        <span>Chat on WhatsApp (1-Click)</span>
+                      </a>
+                      <button
+                        onClick={() => setSelectedDraft(draft)}
+                        className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[11px] transition font-medium whitespace-nowrap"
+                      >
+                        Preview Copy
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -317,9 +330,7 @@ export default function PuneClinicsClient({ initialDrafts }: Props) {
                 <a
                   href={
                     activeTab === "whatsapp"
-                      ? `https://wa.me/${selectedDraft.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                          selectedDraft.whatsappMessage
-                        )}`
+                      ? WhatsAppAdapter.buildClickToChatUrl(selectedDraft.phone, selectedDraft.whatsappMessage)
                       : `mailto:${selectedDraft.email}?subject=${encodeURIComponent(
                           selectedDraft.emailSubject
                         )}&body=${encodeURIComponent(selectedDraft.emailBody)}`

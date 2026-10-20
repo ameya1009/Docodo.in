@@ -1,7 +1,11 @@
 import asyncio
 from contextlib import asynccontextmanager
+import json
+import os
 from pathlib import Path
 from typing import Any
+import urllib.error
+import urllib.request
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -16,7 +20,7 @@ from .model import AKModel
 
 class ChatRequest(BaseModel):
     prompt: str | None = None
-    messages: list[dict[str, str]] | None = None
+    messages: list[dict[str, Any]] | None = None
     temperature: float | None = None
     max_tokens: int | None = None
 
@@ -31,7 +35,7 @@ class CompletionRequest(BaseModel):
 
 class ChatCompletionRequest(BaseModel):
     model: str | None = None
-    messages: list[dict[str, str]]
+    messages: list[dict[str, Any]]
     max_tokens: int | None = None
     temperature: float | None = None
     n: int | None = 1
@@ -74,16 +78,84 @@ async def get_index():
         return HTMLResponse(f.read())
 
 
+def _proxy_chat_completion(
+    messages: list[dict[str, Any]],
+    model: str | None = None,
+    temperature: float | None = None,
+    max_tokens: int | None = None,
+) -> dict[str, Any]:
+    openrouter_key = os.getenv("OPENROUTER_API_KEY")
+    openai_key = os.getenv("OPENAI_API_KEY")
+
+    if openrouter_key:
+        raw_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+        clean_url = raw_url.rstrip("/")
+        url = clean_url if clean_url.endswith("/chat/completions") else f"{clean_url}/chat/completions"
+        api_key = openrouter_key
+        default_model = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
+        target_model = model or default_model
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://docodo.in",
+            "X-Title": "AK Local AI",
+            "User-Agent": "AK-Local-AI/0.1.0",
+        }
+    elif openai_key:
+        raw_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        clean_url = raw_url.rstrip("/")
+        url = clean_url if clean_url.endswith("/chat/completions") else f"{clean_url}/chat/completions"
+        api_key = openai_key
+        target_model = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "User-Agent": "AK-Local-AI/0.1.0",
+        }
+    else:
+        raise HTTPException(
+            status_code=503,
+            detail="Model is not initialized. Place a supported model in models/ or specify OPENROUTER_API_KEY / OPENAI_API_KEY.",
+        )
+
+    body: dict[str, Any] = {
+        "model": target_model,
+        "messages": messages,
+    }
+    if temperature is not None:
+        body["temperature"] = temperature
+    if max_tokens is not None:
+        body["max_tokens"] = max_tokens
+
+    data_bytes = json.dumps(body).encode("utf-8")
+    req = urllib.request.Request(url, data=data_bytes, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            resp_data = resp.read().decode("utf-8")
+            return json.loads(resp_data)
+    except urllib.error.HTTPError as err:
+        err_body = err.read().decode("utf-8", errors="replace")
+        raise HTTPException(status_code=err.code, detail=f"Proxy LLM request failed: {err_body}")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Proxy error: {str(exc)}")
+
+
 @app.get("/api/models")
 async def list_models():
     cfg: AKConfig = getattr(app.state, "config", None) or AKConfig.from_env()
+    model = getattr(app.state, "model", None)
+    has_proxy = bool(os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"))
+    mode = "offline" if (model or cfg.model_path) else ("proxy" if has_proxy else "offline")
     return {
-        "mode": "offline",
+        "mode": mode,
         "engine": cfg.engine,
         "model_path": str(cfg.model_path) if cfg.model_path else None,
         "temperature": cfg.temperature,
         "max_tokens": cfg.max_tokens,
         "threads": cfg.threads,
+        "proxy_active": has_proxy and not model,
     }
 
 
@@ -110,13 +182,25 @@ async def chat(request: ChatRequest):
     prompt_text = request.prompt
     if not prompt_text and request.messages:
         prompt_text = build_prompt_from_messages(request.messages)
-    if not prompt_text:
+    if not prompt_text and not request.messages:
         raise HTTPException(status_code=400, detail="prompt or messages are required")
 
-    # 4. Check model availability
+    # 4. Check model availability; fallback to OpenRouter/OpenAI proxy if model is None
     model: AKModel = getattr(app.state, "model", None)
     if not model:
-        raise HTTPException(status_code=503, detail="Model is not initialized. Place a supported model in models/ or specify AK_MODEL_PATH.")
+        proxy_messages = request.messages if request.messages else [{"role": "user", "content": prompt_text or ""}]
+        proxy_data = await asyncio.to_thread(
+            _proxy_chat_completion,
+            proxy_messages,
+            None,
+            request.temperature,
+            request.max_tokens,
+        )
+        choices = proxy_data.get("choices", [])
+        first_choice = choices[0] if (choices and isinstance(choices, list) and isinstance(choices[0], dict)) else {}
+        msg = first_choice.get("message") or {}
+        text = msg.get("content") or first_choice.get("text") or ""
+        return {"response": text, "command": False}
 
     try:
         # Offload synchronous model inference to thread pool to prevent blocking event loop
@@ -157,7 +241,28 @@ async def completions(request: CompletionRequest):
 
     model: AKModel = getattr(app.state, "model", None)
     if not model:
-        raise HTTPException(status_code=503, detail="Model is not initialized")
+        proxy_messages = [{"role": "user", "content": prompt_str}]
+        proxy_data = await asyncio.to_thread(
+            _proxy_chat_completion,
+            proxy_messages,
+            request.model,
+            request.temperature,
+            request.max_tokens,
+        )
+        choices = proxy_data.get("choices", [])
+        first_choice = choices[0] if (choices and isinstance(choices, list) and isinstance(choices[0], dict)) else {}
+        msg = first_choice.get("message") or {}
+        text = msg.get("content") or first_choice.get("text") or ""
+        return {
+            "id": proxy_data.get("id", "ak-proxy-completion-1"),
+            "object": "text_completion",
+            "choices": [{"text": text, "index": 0, "finish_reason": "stop"}],
+            "usage": proxy_data.get("usage", {
+                "prompt_tokens": len(prompt_str.split()),
+                "completion_tokens": len(text.split()),
+                "total_tokens": len(prompt_str.split()) + len(text.split()),
+            }),
+        }
 
     try:
         text = await asyncio.to_thread(
@@ -205,7 +310,35 @@ async def chat_completions(request: ChatCompletionRequest):
 
     model: AKModel = getattr(app.state, "model", None)
     if not model:
-        raise HTTPException(status_code=503, detail="Model is not initialized")
+        proxy_data = await asyncio.to_thread(
+            _proxy_chat_completion,
+            request.messages,
+            request.model,
+            request.temperature,
+            request.max_tokens,
+        )
+        if "choices" in proxy_data and proxy_data["choices"]:
+            if isinstance(proxy_data["choices"], list) and len(proxy_data["choices"]) > 0:
+                first = proxy_data["choices"][0]
+                if isinstance(first, dict) and isinstance(first.get("message"), dict):
+                    return proxy_data
+
+        choices = proxy_data.get("choices", [])
+        first_choice = choices[0] if (choices and isinstance(choices, list) and isinstance(choices[0], dict)) else {}
+        msg = first_choice.get("message") or {}
+        content = msg.get("content") or first_choice.get("text") or ""
+        prompt_words = sum(len(str(m.get("content") or "").split()) for m in request.messages if isinstance(m, dict))
+        completion_words = len(content.split())
+        return {
+            "id": proxy_data.get("id", "ak-proxy-chat-1"),
+            "object": "chat.completion",
+            "choices": [{"index": 0, "message": {"role": "assistant", "content": content}, "finish_reason": "stop"}],
+            "usage": proxy_data.get("usage", {
+                "prompt_tokens": prompt_words,
+                "completion_tokens": completion_words,
+                "total_tokens": prompt_words + completion_words,
+            }),
+        }
 
     prompt_text = build_prompt_from_messages(request.messages)
     try:

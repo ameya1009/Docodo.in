@@ -108,6 +108,7 @@ export interface OutreachResult {
   sentAt?: string;
   error?: string;
   status: "SENT" | "QUEUED" | "FAILED" | "OPT_OUT";
+  clickToChatUrl?: string;
 }
 
 export interface AdCampaignPayload {
