@@ -16,6 +16,13 @@ if (process.env.NODE_ENV === "production") {
   if (!process.env.AUTH_URL || process.env.AUTH_URL.includes("localhost")) {
     process.env.AUTH_URL = "https://docodo.in";
   }
+} else {
+  if (process.env.NEXTAUTH_URL?.includes("docodo.in")) {
+    delete process.env.NEXTAUTH_URL;
+  }
+  if (process.env.AUTH_URL?.includes("docodo.in")) {
+    delete process.env.AUTH_URL;
+  }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -87,7 +94,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       // If businessId or plan is not yet on the token, dynamically resolve it from the database
       const userId = (token.id as string) || (user?.id as string);
-      if (userId && (!token.businessId || !token.plan || token.onboardingComplete === false)) {
+      if (userId && (!token.businessId || !token.plan)) {
         try {
           const { prisma } = await import("@/lib/prisma");
           const [business, userDb] = await Promise.all([
@@ -102,15 +109,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (userDb?.plan) {
             token.plan = userDb.plan;
           }
+          if (userDb?.role) {
+            token.role = userDb.role;
+          }
         } catch {
           try {
-            const business = await db.business.findFirst({
-              where: { ownerId: userId },
-            });
+            const [business, userDb] = await Promise.all([
+              db.business.findFirst({ where: { ownerId: userId } }),
+              db.user.findUnique({ where: { id: userId } }),
+            ]);
             if (business) {
               token.businessId = business.id;
               token.businessSlug = business.slug;
               token.onboardingComplete = business.onboardingComplete;
+            }
+            if (userDb?.plan) {
+              token.plan = userDb.plan;
+            }
+            if (userDb?.role) {
+              token.role = userDb.role;
             }
           } catch (err) {
             console.warn("[Auth JWT Callback] Failed resolving business for user:", err);

@@ -35,11 +35,31 @@ export default async function DashboardLayout({ children }: { children: React.Re
     console.warn("[Prisma Exception in DashboardLayout]:", err);
   }
 
+  if (!business) {
+    try {
+      const { db } = await import("@/lib/supabase-db");
+      business = await db.business.findFirst({
+        where: { ownerId: session.user.id },
+      });
+    } catch (err) {
+      console.warn("[Supabase DB Exception in DashboardLayout]:", err);
+    }
+  }
+
   // If business query failed or onboarding pending
   const businessName = business?.name || "My Business";
   const businessSlug = business?.slug || "my-business";
-  const rawPlan = subscription?.planId || session.user?.plan || "PILOT";
-  const plan = String(rawPlan).toUpperCase();
+
+  const rawCandidate = session.user?.plan || subscription?.planId || "PILOT";
+  const cleanPlan = String(rawCandidate).toLowerCase();
+  let plan = "PILOT";
+  if (cleanPlan.includes("concierge") || cleanPlan.includes("setup")) {
+    plan = "CONCIERGE";
+  } else if (cleanPlan.includes("growth") || cleanPlan.includes("pro")) {
+    plan = "GROWTH";
+  } else if (cleanPlan.includes("starter")) {
+    plan = "STARTER";
+  }
 
   return (
     <DashboardLayoutClient

@@ -32,7 +32,25 @@ function SignupForm() {
           return;
         }
         if (result?.success) {
-          router.push(result.redirectTo || "/onboarding");
+          const plan = searchParams?.get("plan");
+          const callbackUrl = searchParams?.get("callbackUrl");
+          let destination = result.redirectTo || "/onboarding";
+          if (result.redirectTo?.startsWith("/auth")) {
+            const params = new URLSearchParams();
+            params.set("registered", "true");
+            if (plan) params.set("plan", plan);
+            if (callbackUrl) {
+              params.set("callbackUrl", callbackUrl);
+            } else if (plan && plan !== "pilot") {
+              params.set("callbackUrl", `/checkout?plan=${encodeURIComponent(plan)}`);
+            }
+            destination = `/auth/login?${params.toString()}`;
+          } else if (plan && plan !== "pilot") {
+            destination = `/checkout?plan=${encodeURIComponent(plan)}`;
+          } else if (callbackUrl && !callbackUrl.startsWith("/auth")) {
+            destination = callbackUrl;
+          }
+          router.push(destination);
           router.refresh();
         }
       } catch (err: any) {
@@ -109,7 +127,18 @@ function SignupForm() {
 
       <p className="text-center text-sm text-[var(--text-muted)] mt-6">
         Already have an account?{" "}
-        <Link href="/auth/login" className="text-[var(--lime)] font-semibold hover:underline">Sign in</Link>
+        <Link
+          href={
+            searchParams?.get("plan")
+              ? `/auth/login?plan=${encodeURIComponent(searchParams.get("plan")!)}`
+              : searchParams?.get("callbackUrl")
+              ? `/auth/login?callbackUrl=${encodeURIComponent(searchParams.get("callbackUrl")!)}`
+              : "/auth/login"
+          }
+          className="text-[var(--lime)] font-semibold hover:underline"
+        >
+          Sign in
+        </Link>
       </p>
     </div>
   );

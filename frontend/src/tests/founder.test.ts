@@ -19,11 +19,6 @@ const TEST_FOUNDER_SECRET = "test-founder-secret-for-vitest-only";
 process.env.FOUNDER_PASSWORD = TEST_FOUNDER_PASSWORD;
 process.env.FOUNDER_SECRET = TEST_FOUNDER_SECRET;
 
-afterAll(() => {
-  delete process.env.FOUNDER_PASSWORD;
-  delete process.env.FOUNDER_SECRET;
-});
-
 import {
   FOUNDER_CONFIG,
   verifyFounderCredentials,
@@ -31,8 +26,12 @@ import {
   verifyFounderToken,
 } from "../lib/founder-auth";
 
-
 describe("Founder Security & Authentication Suite", () => {
+  afterAll(() => {
+    delete process.env.FOUNDER_PASSWORD;
+    delete process.env.FOUNDER_SECRET;
+  });
+
   it("authenticates valid founder email and password with constant-time equality", () => {
     const isValid = verifyFounderCredentials(FOUNDER_CONFIG.email, TEST_FOUNDER_PASSWORD);
     expect(isValid).toBe(true);

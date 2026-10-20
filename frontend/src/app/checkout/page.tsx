@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { loadRazorpayScript } from "@/lib/razorpay";
 import { PRICING_PLANS } from "@/lib/constants";
+import { resolvePlan } from "@/lib/plans-config";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 
@@ -41,8 +42,16 @@ function CheckoutContent() {
     }
   }, [planParam]);
 
+  useEffect(() => {
+    if (session?.user) {
+      if (session.user.name && !name) setName(session.user.name);
+      if (session.user.email && !email) setEmail(session.user.email);
+    }
+  }, [session]);
+
   // Find selected plan details
-  const plan = PRICING_PLANS.find((p) => p.id === selectedPlanId) || PRICING_PLANS[1]; // default to Starter
+  const resolvedCommercialPlan = resolvePlan(selectedPlanId);
+  const plan = PRICING_PLANS.find((p) => p.id === resolvedCommercialPlan.id) || PRICING_PLANS[1];
   const isFreePilot = plan.id === "pilot" || plan.price === "₹0";
   const priceNum = parseInt(plan.price.replace(/[^0-9]/g, ""), 10) || 999;
 
@@ -267,7 +276,7 @@ function CheckoutContent() {
                 type="button"
                 onClick={() => setSelectedPlanId(p.id)}
                 className={`py-2 px-3 rounded-xl text-xs font-bold transition-all text-center ${
-                  selectedPlanId === p.id
+                  plan.id === p.id
                     ? "bg-[var(--lime)] text-black shadow-md"
                     : "text-[var(--text-secondary)] hover:text-white"
                 }`}

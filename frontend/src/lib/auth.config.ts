@@ -25,8 +25,8 @@ export const authConfig: NextAuthConfig = {
         return true;
       }
 
-      // Redirect logged-in users away from auth pages
-      if (pathname.startsWith("/auth/") && isLoggedIn) {
+      // Redirect logged-in users away from login/signup auth pages
+      if ((pathname === "/auth/login" || pathname === "/auth/signup") && isLoggedIn) {
         return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
       }
 

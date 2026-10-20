@@ -21,6 +21,15 @@ describe("Priority 3: Booking Engine - Validation & Mathematical Collision Tests
         paymentMethod: "UPI" as const,
       };
       expect(CreateBookingSchema.safeParse(payload).success).toBe(true);
+
+      // Verify CASH_ON_DELIVERY
+      expect(CreateBookingSchema.safeParse({ ...payload, paymentMethod: "CASH_ON_DELIVERY", paymentPreference: "cash" }).success).toBe(true);
+      // Verify CARDS
+      expect(CreateBookingSchema.safeParse({ ...payload, paymentMethod: "CARDS", paymentPreference: "online" }).success).toBe(true);
+      // Verify NETBANKING
+      expect(CreateBookingSchema.safeParse({ ...payload, paymentMethod: "NETBANKING", paymentPreference: "online" }).success).toBe(true);
+      // Verify FREE
+      expect(CreateBookingSchema.safeParse({ ...payload, paymentMethod: "FREE" }).success).toBe(true);
     });
 
     it("rejects improperly formatted date and time strings", () => {

@@ -19,11 +19,19 @@ export async function POST(req: NextRequest) {
     let businessId = body.businessId;
 
     if (!businessId && userId) {
-      const biz = await prisma.business.findFirst({
-        where: { ownerId: userId },
-        select: { id: true }
-      });
-      businessId = biz?.id;
+      try {
+        const biz = await prisma.business.findFirst({
+          where: { ownerId: userId },
+          select: { id: true }
+        });
+        businessId = biz?.id;
+      } catch {
+        try {
+          const { db } = await import("@/lib/supabase-db");
+          const biz = await db.business.findFirst({ where: { ownerId: userId } });
+          businessId = biz?.id;
+        } catch {}
+      }
     }
 
     notes = {
@@ -37,12 +45,19 @@ export async function POST(req: NextRequest) {
     };
 
     // If bookingId is provided, look up booking details
-    let booking = null;
+    let booking: any = null;
     if (bookingId) {
-      booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        include: { business: true, service: true },
-      });
+      try {
+        booking = await prisma.booking.findUnique({
+          where: { id: bookingId },
+          include: { business: true, service: true },
+        });
+      } catch {
+        try {
+          const { db } = await import("@/lib/supabase-db");
+          booking = await db.booking.findUnique({ where: { id: bookingId } });
+        } catch {}
+      }
 
       if (!booking) {
         return NextResponse.json({ error: "Booking not found" }, { status: 404 });
@@ -81,12 +96,25 @@ export async function POST(req: NextRequest) {
 
     const order = await razorpay.orders.create(orderOptions);
 
-    // If booking exists, update razorpayOrderId on booking record
+    // If booking exists, update razorpayOrderId on booking record across Prisma and Supabase
     if (booking) {
-      await prisma.booking.update({
-        where: { id: booking.id },
-        data: { razorpayOrderId: order.id },
-      });
+      try {
+        await prisma.booking.update({
+          where: { id: booking.id },
+          data: { razorpayOrderId: order.id },
+        });
+      } catch (pErr) {
+        console.warn("[Razorpay API] Prisma booking update fallback:", pErr);
+      }
+      try {
+        const { db } = await import("@/lib/supabase-db");
+        await db.booking.update({
+          where: { id: booking.id },
+          data: { razorpayOrderId: order.id },
+        });
+      } catch (sbErr) {
+        console.warn("[Razorpay API] Supabase booking update fallback:", sbErr);
+      }
     }
 
     return NextResponse.json({

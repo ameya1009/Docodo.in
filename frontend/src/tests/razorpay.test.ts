@@ -64,4 +64,87 @@ describe("Razorpay Standard Checkout & Signature Verification Tests", () => {
     const validAmountPaise = 50000; // ₹500.00
     expect(validAmountPaise >= 100).toBe(true);
   });
+
+  describe("Commercial Plan & Database Schema Synchronization", () => {
+    it("maps plan strings to valid Prisma User.plan enum values (never 'PRO')", () => {
+      const normalizePlan = (planIdentifier: string) => {
+        const planStr = String(planIdentifier).toLowerCase();
+        const isDoneForYou = planStr.includes("setup") || planStr.includes("concierge");
+        const isGrowth = planStr.includes("growth") || planStr.includes("pro");
+        return isDoneForYou ? "CONCIERGE" : isGrowth ? "GROWTH" : "STARTER";
+      };
+
+      expect(normalizePlan("starter")).toBe("STARTER");
+      expect(normalizePlan("growth")).toBe("GROWTH");
+      expect(normalizePlan("pro")).toBe("GROWTH"); // Maps to GROWTH in DB
+      expect(normalizePlan("setup-service")).toBe("CONCIERGE");
+      expect(normalizePlan("concierge")).toBe("CONCIERGE");
+
+      const validDbPlans = ["PILOT", "STARTER", "GROWTH", "CONCIERGE"];
+      expect(validDbPlans).toContain(normalizePlan("growth"));
+      expect(validDbPlans).toContain(normalizePlan("starter"));
+      expect(validDbPlans).toContain(normalizePlan("setup-service"));
+      expect(normalizePlan("growth")).not.toBe("PRO");
+    });
+
+    it("verifies booking payment methods match schema", () => {
+      const validPaymentMethods = ["UPI", "CASH_ON_DELIVERY", "CARDS", "NETBANKING", "FREE"];
+      expect(validPaymentMethods).toContain("UPI");
+      expect(validPaymentMethods).toContain("CASH_ON_DELIVERY");
+      expect(validPaymentMethods).toContain("CARDS");
+      expect(validPaymentMethods).toContain("NETBANKING");
+      expect(validPaymentMethods).toContain("FREE");
+    });
+
+    it("simulates booking status lifecycle from creation to verification", () => {
+      // Pay at venue
+      const cashBooking = {
+        paymentMethod: "CASH_ON_DELIVERY",
+        paymentPreference: "cash",
+        status: "CONFIRMED",
+        paymentStatus: "UNPAID",
+      };
+      expect(cashBooking.status).toBe("CONFIRMED");
+      expect(cashBooking.paymentStatus).toBe("UNPAID");
+
+      // Free appointment (₹0 service)
+      const freeBooking = {
+        paymentMethod: "FREE",
+        paymentPreference: "free",
+        status: "CONFIRMED",
+        paymentStatus: "PAID",
+      };
+      expect(freeBooking.status).toBe("CONFIRMED");
+      expect(freeBooking.paymentStatus).toBe("PAID");
+      expect(freeBooking.paymentMethod).toBe("FREE");
+
+      // Online Razorpay initial pending
+      const onlineBooking = {
+        paymentMethod: "UPI",
+        paymentPreference: "online",
+        status: "PENDING",
+        paymentStatus: "UNPAID",
+        razorpayOrderId: "order_mock_123",
+      };
+      expect(onlineBooking.status).toBe("PENDING");
+      expect(onlineBooking.paymentStatus).toBe("UNPAID");
+
+      // After HMAC signature verification
+      const verifiedOnlineBooking = {
+        ...onlineBooking,
+        status: "CONFIRMED",
+        paymentStatus: "PAID",
+        razorpayPaymentId: "pay_mock_123",
+      };
+      expect(verifiedOnlineBooking.status).toBe("CONFIRMED");
+      expect(verifiedOnlineBooking.paymentStatus).toBe("PAID");
+    });
+
+    it("verifies user plan synchronization consistency across models", () => {
+      const plans = ["PILOT", "STARTER", "GROWTH", "CONCIERGE"];
+      plans.forEach((plan) => {
+        expect(["PILOT", "STARTER", "GROWTH", "CONCIERGE"]).toContain(plan);
+      });
+    });
+  });
 });

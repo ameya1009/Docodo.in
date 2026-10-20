@@ -94,6 +94,8 @@ export async function save15MinuteOnboardingAction(payload: {
           name: payload.name?.trim() || "Business Owner",
           email: rawEmail,
           password: hashedPassword,
+          role: "OWNER",
+          plan: "PILOT",
         },
       });
       userId = newUser.id;
@@ -107,6 +109,8 @@ export async function save15MinuteOnboardingAction(payload: {
             name: newUser.name || "Business Owner",
             email: rawEmail,
             password: hashedPassword,
+            role: "OWNER",
+            plan: "PILOT",
           },
         }).catch(() => null);
       } catch {}

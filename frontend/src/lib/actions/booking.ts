@@ -44,7 +44,7 @@ export async function createPublicBooking(rawInput: {
   date: string;
   startTime: string;
   notes?: string;
-  paymentMethod?: "UPI" | "CASH_ON_DELIVERY" | "CARDS" | "NETBANKING";
+  paymentMethod?: "UPI" | "CASH_ON_DELIVERY" | "CARDS" | "NETBANKING" | "FREE";
   paymentPreference?: string;
 }) {
   const data = CreateBookingSchema.parse(rawInput);
@@ -173,10 +173,11 @@ export async function createPublicBooking(rawInput: {
 
 
       // 7. Create the booking.
-      const isPayAtVenue = data.paymentPreference === "cash" || data.paymentPreference === "venue" || data.paymentMethod === "CASH_ON_DELIVERY";
-      const bookingStatus = isPayAtVenue || service.price === 0 ? "CONFIRMED" : "PENDING";
-      const bookingPaymentStatus = service.price === 0 ? "PAID" : "UNPAID";
-      const bookingPaymentMethod = isPayAtVenue ? "CASH_ON_DELIVERY" : (data.paymentMethod ?? "UPI");
+      const isFree = service.price === 0 || data.paymentMethod === "FREE";
+      const isPayAtVenue = !isFree && (data.paymentPreference === "cash" || data.paymentPreference === "venue" || data.paymentMethod === "CASH_ON_DELIVERY");
+      const bookingStatus = isPayAtVenue || isFree ? "CONFIRMED" : "PENDING";
+      const bookingPaymentStatus = isFree ? "PAID" : "UNPAID";
+      const bookingPaymentMethod = isFree ? "FREE" : isPayAtVenue ? "CASH_ON_DELIVERY" : (data.paymentMethod ?? "UPI");
       const newBooking = await tx.booking.create({
         data: {
           businessId: data.businessId,
@@ -208,6 +209,34 @@ export async function createPublicBooking(rawInput: {
       isolationLevel: "Serializable",
     }
   );
+
+  // Resiliently sync booking record to Supabase DB
+  try {
+    const { db } = await import("@/lib/supabase-db");
+    await db.booking.create({
+      data: {
+        id: booking.booking.id,
+        businessId: data.businessId,
+        serviceId: data.serviceId,
+        staffId: data.staffId || null,
+        customerId: booking.booking.customerId || null,
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+        customerEmail: data.customerEmail || null,
+        date: data.date,
+        startTime: data.startTime,
+        endTime: booking.booking.endTime,
+        duration: booking.booking.duration,
+        price: booking.booking.price,
+        notes: data.notes || null,
+        status: booking.booking.status,
+        paymentStatus: booking.booking.paymentStatus,
+        paymentMethod: booking.booking.paymentMethod,
+      },
+    }).catch(() => null);
+  } catch (sbErr) {
+    console.warn("[createPublicBooking] Supabase booking sync handled:", sbErr);
+  }
 
   // Non-blocking notifications
   DocodoBackendAPI.verifyNDRBooking({

@@ -59,7 +59,7 @@ export async function signUpAction(formData: FormData) {
   try {
     const { prisma } = await import("@/lib/prisma");
     const created = await prisma.user.create({
-      data: { name, email, password: hashed },
+      data: { name, email, password: hashed, role: "OWNER", plan: "PILOT" },
     });
     createdId = created.id;
   } catch (pErr) {
@@ -68,7 +68,7 @@ export async function signUpAction(formData: FormData) {
 
   try {
     await db.user.create({
-      data: { id: createdId, name, email, password: hashed },
+      data: { id: createdId, name, email, password: hashed, role: "OWNER", plan: "PILOT" },
     });
   } catch (dbErr: any) {
     console.warn("[SignUpAction] Supabase DB create error (handled):", dbErr);
@@ -91,11 +91,7 @@ export async function signUpAction(formData: FormData) {
     if (isNextRedirect(err)) {
       return { success: true, redirectTo: "/onboarding" };
     }
-    if (err instanceof AuthError) {
-      return { success: true, redirectTo: "/auth/login", message: "Account created! Please sign in." };
-    }
-    // Even if auto-sign-in has an issue, account creation succeeded
-    return { success: true, redirectTo: "/auth/login", message: "Account created successfully! Please sign in." };
+    return { success: true, redirectTo: "/auth/login?registered=true", message: "Account created successfully! Please sign in." };
   }
 }
 

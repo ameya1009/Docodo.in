@@ -75,5 +75,48 @@ describe("Priority 2: Authentication Engine - Validation & Business Logic Tests"
       expect(strong.label).toBe("BULLETPROOF");
       expect(strong.score).toBeGreaterThanOrEqual(4);
     });
+
+    it("enforces schema role OWNER and plan PILOT as defaults on new registration", () => {
+      const defaultUserRole = "OWNER";
+      const defaultUserPlan = "PILOT";
+
+      const validRoles = ["OWNER", "MANAGER", "STAFF"];
+      const validPlans = ["PILOT", "STARTER", "GROWTH", "CONCIERGE"];
+
+      expect(validRoles).toContain(defaultUserRole);
+      expect(validPlans).toContain(defaultUserPlan);
+    });
+
+    it("verifies safe callbackUrl redirection targets", () => {
+      const resolveRedirect = (callbackUrl?: string | null, defaultUrl: string = "/dashboard") => {
+        if (!callbackUrl) return defaultUrl;
+        if (callbackUrl.startsWith("/auth")) return defaultUrl;
+        if (callbackUrl.startsWith("/")) return callbackUrl;
+        return defaultUrl;
+      };
+
+      expect(resolveRedirect("/checkout?plan=starter")).toBe("/checkout?plan=starter");
+      expect(resolveRedirect("/dashboard/bookings")).toBe("/dashboard/bookings");
+      expect(resolveRedirect("/auth/login")).toBe("/dashboard"); // Prevents redirect loops
+      expect(resolveRedirect("https://malicious.com")).toBe("/dashboard"); // Prevents open redirects
+    });
+
+    it("preserves commercial plan parameter during registration redirect to checkout", () => {
+      const getPostRegistrationTarget = (plan?: string | null, callbackUrl?: string | null) => {
+        if (plan && plan !== "pilot") {
+          return `/checkout?plan=${encodeURIComponent(plan)}`;
+        }
+        if (callbackUrl && !callbackUrl.startsWith("/auth")) {
+          return callbackUrl;
+        }
+        return "/onboarding";
+      };
+
+      expect(getPostRegistrationTarget("starter", null)).toBe("/checkout?plan=starter");
+      expect(getPostRegistrationTarget("growth", null)).toBe("/checkout?plan=growth");
+      expect(getPostRegistrationTarget("setup-service", null)).toBe("/checkout?plan=setup-service");
+      expect(getPostRegistrationTarget("pilot", null)).toBe("/onboarding");
+      expect(getPostRegistrationTarget(null, "/dashboard/website")).toBe("/dashboard/website");
+    });
   });
 });

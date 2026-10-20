@@ -116,22 +116,24 @@ export async function provisionStarter(businessId: string, metadata: Provisionin
     }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
   }
 
-  if (metadata.userId) {
+  const targetUserId = metadata.userId || (await client.business.findUnique({
+    where: { id: businessId },
+    select: { ownerId: true },
+  }).catch(() => null))?.ownerId;
+
+  if (targetUserId) {
     await client.user.update({
-      where: { id: metadata.userId },
+      where: { id: targetUserId },
       data: { plan: "STARTER" },
     }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
-  } else {
-    const biz = await client.business.findUnique({
-      where: { id: businessId },
-      select: { ownerId: true },
-    }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
-    if (biz?.ownerId) {
-      await client.user.update({
-        where: { id: biz.ownerId },
+
+    try {
+      const { db } = await import("@/lib/supabase-db");
+      await db.user.update({
+        where: { id: targetUserId },
         data: { plan: "STARTER" },
-      }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
-    }
+      });
+    } catch {}
   }
 
   await recalculateEntitlements(businessId, client);
@@ -186,6 +188,14 @@ export async function provisionGrowth(businessId: string, metadata: Provisioning
       where: { id: targetUserId },
       data: { plan: "GROWTH" },
     }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
+
+    try {
+      const { db } = await import("@/lib/supabase-db");
+      await db.user.update({
+        where: { id: targetUserId },
+        data: { plan: "GROWTH" },
+      });
+    } catch {}
   }
 
   await recalculateEntitlements(businessId, client);
@@ -261,8 +271,16 @@ export async function provisionConcierge(businessId: string, metadata: Provision
   if (targetUserId) {
     await client.user.update({
       where: { id: targetUserId },
-      data: { plan: "GROWTH" },
+      data: { plan: "CONCIERGE" },
     }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
+
+    try {
+      const { db } = await import("@/lib/supabase-db");
+      await db.user.update({
+        where: { id: targetUserId },
+        data: { plan: "CONCIERGE" },
+      });
+    } catch {}
   }
 
   await recalculateEntitlements(businessId, client);
@@ -303,6 +321,31 @@ export async function downgradeSubscription(businessId: string, targetPlanId: Pl
       currentPeriodEnd: periodEnd,
     },
   }).catch((err: any) => { console.error('[provisioning]', err); throw err; });
+
+  const biz = await client.business.findUnique({
+    where: { id: businessId },
+    select: { ownerId: true },
+  }).catch(() => null);
+
+  const targetPlanUser =
+    targetPlanId === PLAN_IDS.GROWTH ? "GROWTH" :
+    targetPlanId === PLAN_IDS.STARTER ? "STARTER" :
+    targetPlanId === PLAN_IDS.CONCIERGE ? "CONCIERGE" : "PILOT";
+
+  if (biz?.ownerId) {
+    await client.user.update({
+      where: { id: biz.ownerId },
+      data: { plan: targetPlanUser },
+    }).catch(() => null);
+
+    try {
+      const { db } = await import("@/lib/supabase-db");
+      await db.user.update({
+        where: { id: biz.ownerId },
+        data: { plan: targetPlanUser },
+      });
+    } catch {}
+  }
 
   await recalculateEntitlements(businessId, client);
   return { success: true, plan: targetPlanId };

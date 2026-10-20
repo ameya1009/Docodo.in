@@ -103,7 +103,7 @@ export const db = {
         email: data.email.toLowerCase().trim(),
         password: data.password || null,
         role: data.role || "OWNER",
-        plan: data.plan || "STARTER",
+        plan: data.plan || "PILOT",
         updatedAt: now,
       };
 

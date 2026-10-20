@@ -4,13 +4,15 @@ import React, { useState, useTransition, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShieldCheck, AlertCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShieldCheck, AlertCircle, CheckCircle2 } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlError = searchParams?.get("error");
+  const registered = searchParams?.get("registered");
+  const reset = searchParams?.get("reset");
 
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState(
@@ -18,11 +20,19 @@ function LoginForm() {
       ? "Authentication session expired or failed. Please sign in."
       : ""
   );
+  const [successMsg, setSuccessMsg] = useState(
+    registered
+      ? "Account created successfully! Please sign in with your password."
+      : reset
+      ? "Password reset successfully! Please sign in with your new password."
+      : ""
+  );
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setSuccessMsg("");
     const fd = new FormData(e.currentTarget);
     startTransition(async () => {
       try {
@@ -32,7 +42,13 @@ function LoginForm() {
           return;
         }
         if (result?.success) {
-          router.push(result.redirectTo || "/dashboard");
+          const callbackUrl = searchParams?.get("callbackUrl");
+          const plan = searchParams?.get("plan");
+          let destination = callbackUrl && !callbackUrl.startsWith("/auth") ? callbackUrl : (result.redirectTo || "/dashboard");
+          if (!callbackUrl && plan && plan !== "pilot") {
+            destination = `/checkout?plan=${encodeURIComponent(plan)}`;
+          }
+          router.push(destination);
           router.refresh();
         }
       } catch (err: any) {
@@ -110,6 +126,18 @@ function LoginForm() {
             </div>
           </div>
 
+          {/* Success Feedback */}
+          {successMsg && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-emerald-400 text-xs bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 font-medium flex items-start gap-2"
+            >
+              <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-emerald-400" />
+              <span>{successMsg}</span>
+            </motion.div>
+          )}
+
           {/* Error Feedback */}
           {error && (
             <motion.div
@@ -142,7 +170,16 @@ function LoginForm() {
 
       <p className="text-center text-sm text-[var(--text-muted)] mt-6">
         Don&apos;t have an account yet?{" "}
-        <Link href="/auth/signup" className="text-[var(--lime)] font-semibold hover:underline">
+        <Link
+          href={
+            searchParams?.get("plan")
+              ? `/auth/signup?plan=${encodeURIComponent(searchParams.get("plan")!)}`
+              : searchParams?.get("callbackUrl")
+              ? `/auth/signup?callbackUrl=${encodeURIComponent(searchParams.get("callbackUrl")!)}`
+              : "/auth/signup"
+          }
+          className="text-[var(--lime)] font-semibold hover:underline"
+        >
           Create account (15 mins)
         </Link>
       </p>

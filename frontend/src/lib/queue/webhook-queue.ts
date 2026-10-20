@@ -154,6 +154,7 @@ export class WebhookQueueManager {
           const planStr = String(planIdentifier).toLowerCase();
           const isConcierge = planStr.includes("setup") || planStr.includes("concierge");
           const isGrowth = planStr.includes("growth") || planStr.includes("pro");
+          const normalizedPlan = isConcierge ? "CONCIERGE" : isGrowth ? "GROWTH" : "STARTER";
 
           // Auto-resolve or create user by email when userId and businessId are empty in notes
           const customerEmail = notes.customerEmail || notes.email || paymentEntity?.email || orderEntity?.notes?.customerEmail;
@@ -165,8 +166,35 @@ export class WebhookQueueManager {
                   email: customerEmail,
                   name: notes.customerName || notes.name || paymentEntity?.notes?.customerName || "Business Owner",
                   role: "OWNER",
+                  plan: normalizedPlan,
                 },
               }).catch(() => null);
+
+              try {
+                const { db } = await import("@/lib/supabase-db");
+                await db.user.create({
+                  data: {
+                    id: existingUser?.id,
+                    email: customerEmail,
+                    name: notes.customerName || notes.name || paymentEntity?.notes?.customerName || "Business Owner",
+                    role: "OWNER",
+                    plan: normalizedPlan,
+                  },
+                }).catch(() => null);
+              } catch {}
+            } else {
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { plan: normalizedPlan },
+              }).catch(() => null);
+
+              try {
+                const { db } = await import("@/lib/supabase-db");
+                await db.user.update({
+                  where: { id: existingUser.id },
+                  data: { plan: normalizedPlan },
+                }).catch(() => null);
+              } catch {}
             }
             if (existingUser) {
               userId = existingUser.id;
