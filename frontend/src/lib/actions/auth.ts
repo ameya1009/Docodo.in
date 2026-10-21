@@ -53,7 +53,7 @@ export async function signUpAction(formData: FormData) {
   }
 
   const bcrypt = await import("bcryptjs");
-  const hashed = await bcrypt.hash(password, 12);
+  const hashed = await bcrypt.hash(password, 10);
 
   let createdId: string | undefined;
   try {
@@ -241,7 +241,7 @@ export async function resetPasswordAction(token: string, email: string, newPassw
 
     // Hash the new password and update the user in both Prisma and Supabase
     const bcrypt = await import("bcryptjs");
-    const hashed = await bcrypt.hash(newPassword, 12);
+    const hashed = await bcrypt.hash(newPassword, 10);
 
     await prisma.user.update({
       where: { email: sanitized },

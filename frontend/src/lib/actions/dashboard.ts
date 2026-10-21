@@ -446,6 +446,7 @@ export async function getBookings(date?: string) {
 
   return prisma.booking.findMany({
     where,
+    take: 50,
     include: { service: true, staff: true, customer: true },
     orderBy: [{ date: "asc" }, { startTime: "asc" }],
   });
@@ -457,6 +458,7 @@ export async function getCustomers() {
 
   return prisma.customer.findMany({
     where: { businessId: business.id },
+    take: 50,
     orderBy: { createdAt: "desc" },
     include: {
       bookings: {

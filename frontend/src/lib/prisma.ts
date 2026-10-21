@@ -47,9 +47,9 @@ function createPrismaClient(): PrismaClient {
   const pool = new Pool({
     connectionString: dbUrl,
     ssl: isCloudPostgres ? { rejectUnauthorized: false } : undefined,
-    max: 10,
+    max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 3000,
+    connectionTimeoutMillis: 10000,
   });
 
   const adapter = new PrismaPg(pool);
@@ -62,28 +62,16 @@ function createPrismaClient(): PrismaClient {
 
 const rawPrisma = globalThis.__prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__prisma = rawPrisma;
-}
+// Ensure globalThis.__prisma is assigned in all environments to prevent connection pool proliferation under high concurrency / serverless lambdas.
+globalThis.__prisma = rawPrisma;
 
 export const prisma: PrismaClient = new Proxy(rawPrisma, {
   get(target: any, prop: string | symbol) {
     if (prop === "$transaction") {
       return async (arg: any, options?: any) => {
-        try {
-          return await target.$transaction(arg, options);
-        } catch (err: any) {
-          if (isDbConnectionError(err)) {
-            console.warn("[Prisma Resilient Proxy] Database socket unreachable. Executing transaction via Supabase REST API.");
-            if (typeof arg === "function") {
-              return await arg(prisma);
-            }
-            if (Array.isArray(arg)) {
-              return await Promise.all(arg);
-            }
-          }
-          throw err;
-        }
+        // Under high concurrency, do NOT fall back to un-isolated PostgREST queries on failure;
+        // throw the transaction error directly so callers can safely retry against the real database.
+        return await target.$transaction(arg, options);
       };
     }
 

@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
 
       revalidatePath(`/book/${updatedBooking.business.slug}`);
       revalidatePath("/dashboard/bookings");
-      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/usage");
     }
 
     // Handle SaaS Subscription or Concierge plan purchase

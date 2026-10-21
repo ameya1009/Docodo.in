@@ -88,7 +88,7 @@ export async function save15MinuteOnboardingAction(payload: {
       }
       userId = existingUser.id;
     } else {
-      const hashedPassword = await bcrypt.hash(rawPassword, 12);
+      const hashedPassword = await bcrypt.hash(rawPassword, 10);
       const newUser = await prisma.user.create({
         data: {
           name: payload.name?.trim() || "Business Owner",
@@ -146,13 +146,14 @@ export async function save15MinuteOnboardingAction(payload: {
   const rawName = (payload.name || "My Business").trim();
   let baseSlug = generateSlug(rawName);
   if (!baseSlug || baseSlug.trim() === "") {
-    baseSlug = `biz-${Date.now().toString(36)}`;
+    baseSlug = `biz-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
   }
 
   let finalSlugCandidate = baseSlug;
   const slugConflict = await prisma.business.findUnique({ where: { slug: baseSlug } });
   if (slugConflict && slugConflict.ownerId !== userId) {
-    finalSlugCandidate = `${baseSlug}-${Date.now().toString(36).substring(0, 5)}`;
+    const entropy = Math.random().toString(36).substring(2, 7);
+    finalSlugCandidate = `${baseSlug}-${Date.now().toString(36)}-${entropy}`;
   }
 
   const existingBusiness = await prisma.business.findFirst({
@@ -359,9 +360,13 @@ export async function saveBusinessInfo(rawInput: {
 
   // Ensure slug uniqueness across other tenants
   let slug = generateSlug(data.name);
+  if (!slug || slug.trim() === "") {
+    slug = `biz-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+  }
   const slugConflict = await prisma.business.findUnique({ where: { slug } });
   if (slugConflict && slugConflict.ownerId !== userId) {
-    slug = `${slug}-${Date.now().toString(36)}`;
+    const entropy = Math.random().toString(36).substring(2, 7);
+    slug = `${slug}-${Date.now().toString(36)}-${entropy}`;
   }
 
   let business;

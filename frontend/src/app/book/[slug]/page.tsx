@@ -1,20 +1,58 @@
-import React from "react";
+import React, { cache } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import BookingPageClient from "./BookingPageClient";
 import type { Metadata } from "next";
 
+export const revalidate = 30; // Storefront ISR: 30s cache protects DB from read bursts
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
+// React cache() deduplicates business fetching between generateMetadata and BookingPage within a single request
+const getCachedBusiness = cache(async (slug: string) => {
+  let business: any = null;
+  try {
+    business = await prisma.business.findUnique({
+      where: { slug },
+      include: {
+        services: { where: { isActive: true }, orderBy: { order: "asc" } },
+        staff: { where: { isActive: true } },
+        workingHours: true,
+      },
+    });
+  } catch (err) {
+    console.warn("[BookingPage Prisma Fallback]:", err);
+  }
+
+  // Supabase DB Fallback if Prisma connection failed or returned null
+  if (!business) {
+    try {
+      const { db } = await import("@/lib/supabase-db");
+      business = await db.business.findUnique({
+        where: { slug },
+        include: {
+          services: true,
+          staff: true,
+          workingHours: true,
+        },
+      });
+      if (business && Array.isArray(business.services)) {
+        business.services = business.services.filter((s: any) => s.isActive !== false);
+      }
+    } catch (sbErr) {
+      console.warn("[BookingPage Supabase Fallback Error]:", sbErr);
+    }
+  }
+
+  return business;
+});
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { slug } = await params;
-    const business = await prisma.business.findUnique({
-      where: { slug },
-      select: { name: true, industry: true, city: true, seoDesc: true, description: true },
-    });
+    const business = await getCachedBusiness(slug);
 
     if (!business) {
       return {
@@ -41,21 +79,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BookingPage({ params }: Props) {
   const { slug } = await params;
-
-  let business: any = null;
+  const business = await getCachedBusiness(slug);
   let bookedSlots: any[] = [];
 
-  try {
-    business = await prisma.business.findUnique({
-      where: { slug },
-      include: {
-        services: { where: { isActive: true }, orderBy: { order: "asc" } },
-        staff: { where: { isActive: true } },
-        workingHours: true,
-      },
-    });
-
-    if (business) {
+  if (business) {
+    try {
       const today = new Date().toISOString().split("T")[0];
       const in30 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
       bookedSlots = await prisma.booking.findMany({
@@ -66,28 +94,8 @@ export default async function BookingPage({ params }: Props) {
         },
         select: { date: true, startTime: true, endTime: true, staffId: true },
       });
-    }
-  } catch (err) {
-    console.warn("[BookingPage Prisma Fallback]:", err);
-  }
-
-  // Supabase DB Fallback if Prisma connection failed or returned null
-  if (!business) {
-    try {
-      const { db } = await import("@/lib/supabase-db");
-      business = await db.business.findUnique({
-        where: { slug },
-        include: {
-          services: true,
-          staff: true,
-          workingHours: true,
-        },
-      });
-      if (business && Array.isArray(business.services)) {
-        business.services = business.services.filter((s: any) => s.isActive !== false);
-      }
-    } catch (sbErr) {
-      console.warn("[BookingPage Supabase Fallback Error]:", sbErr);
+    } catch (err) {
+      console.warn("[BookingPage bookedSlots query error]:", err);
     }
   }
 

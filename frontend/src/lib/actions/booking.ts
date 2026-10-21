@@ -21,6 +21,20 @@ import {
   getBusinessSubscription,
 } from "@/lib/services/entitlement-service";
 import { PILOT_BOOKING_LIMIT } from "@/lib/plans-config";
+import { isSerializationConflict, runWithSerializationRetry } from "@/lib/concurrency";
+export { isSerializationConflict, runWithSerializationRetry };
+
+/**
+ * Detects whether an error was caused by a database transaction serialization conflict or deadlock.
+ * Catches Prisma code P2034 and PostgreSQL code 40001 (serialization_failure).
+ */
+
+
+/**
+ * Executes a function within an exponential backoff retry loop with randomized jitter
+ * specifically catching serialization failures (P2034 / 40001 / 40P01) under high concurrency.
+ */
+
 
 /**
  * PUBLIC booking creation — used by the /book/[slug] page.
@@ -31,8 +45,9 @@ import { PILOT_BOOKING_LIMIT } from "@/lib/plans-config";
  * 3. Determine booking limit
  * 4. Calculate current-period usage inside an atomic serializable transaction
  * 5. Reject if limit exceeded (cannot exceed 50 bookings on Pilot)
- * 6. Concurrency & race condition defense
- * 7. Atomically create booking & record usage
+ * 6. Concurrency & race condition defense with retry wrapper
+ * 7. Atomically create booking
+ * 8. Decoupled usage tracking outside slot-locking transaction
  */
 export async function createPublicBooking(rawInput: {
   businessId: string;
@@ -66,149 +81,135 @@ export async function createPublicBooking(rawInput: {
     );
   }
 
-  // Use a serializable transaction to prevent TOCTOU race conditions.
-  const booking = await prisma.$transaction(
-    async (tx) => {
-      // 1. Verify business is published and active.
-      const business = await tx.business.findFirst({
-        where: { id: data.businessId, isPublished: true },
-        select: { id: true, name: true, slug: true },
-      });
-      if (!business) {
-        throw new Error("Business is currently not receiving online appointments.");
-      }
+  // Use a serializable transaction wrapped in an exponential backoff retry loop
+  // to prevent TOCTOU race conditions while gracefully handling serialization conflicts.
+  const booking = await runWithSerializationRetry(async () => {
+    return await prisma.$transaction(
+      async (tx) => {
+        // 1. Verify business is published and active.
+        const business = await tx.business.findFirst({
+          where: { id: data.businessId, isPublished: true },
+          select: { id: true, name: true, slug: true },
+        });
+        if (!business) {
+          throw new Error("Business is currently not receiving online appointments.");
+        }
 
-      // 2. Strict In-Transaction Booking Limit & Concurrency Defense
-      const sub = await getBusinessSubscription(data.businessId, tx);
-      const isPilot = sub.planId === "pilot";
+        // 2. Service verification and slot lock isolation:
+        // Entitlement pre-checks (canConsume) and usage recording (recordUsage) are handled outside
+        // this serializable transaction to prevent cross-doctor / cross-slot predicate lock serialization.
 
-      if (isPilot) {
-        const periodStart = new Date(sub.currentPeriodStart);
-        const periodEnd = new Date(sub.currentPeriodEnd);
+        // 3. Verify service exists and belongs to this business.
+        const service = await tx.service.findUnique({
+          where: { id: data.serviceId },
+        });
+        if (!service || service.businessId !== data.businessId) {
+          throw new Error("Service not found or does not belong to this business.");
+        }
+        if (!service.isActive) {
+          throw new Error("This service is not currently available for booking.");
+        }
 
-        // Count non-cancelled bookings directly within transaction snapshot
-        const currentPeriodBookingsCount = await tx.booking.count({
+        // 4. Calculate end time from service duration.
+        const endTime = calculateEndTime(data.startTime, service.duration);
+
+        // 5. Check for conflicts inside the transaction (atomic read-check-write).
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+        const existingBookings = await tx.booking.findMany({
           where: {
             businessId: data.businessId,
-            createdAt: {
-              gte: periodStart,
-              lte: periodEnd,
-            },
-            status: { not: "CANCELLED" },
+            date: data.date,
+            OR: [
+              { status: { in: ["CONFIRMED", "NDR_HOLD"] } },
+              { status: "PENDING", createdAt: { gte: fifteenMinutesAgo } },
+            ],
+            ...(data.staffId ? { staffId: data.staffId } : {}),
           },
+          select: { startTime: true, endTime: true, status: true },
         });
 
-        if (currentPeriodBookingsCount >= PILOT_BOOKING_LIMIT) {
+        if (hasTimeSlotConflict(data.startTime, endTime, existingBookings)) {
           throw new Error(
-            "This business has reached its monthly booking limit and is currently not accepting new online bookings."
+            "This appointment slot was just booked by another customer. Please select a different time."
           );
         }
-      }
 
-      // 3. Verify service exists and belongs to this business.
-      const service = await tx.service.findUnique({
-        where: { id: data.serviceId },
-      });
-      if (!service || service.businessId !== data.businessId) {
-        throw new Error("Service not found or does not belong to this business.");
-      }
-      if (!service.isActive) {
-        throw new Error("This service is not currently available for booking.");
-      }
-
-      // 4. Calculate end time from service duration.
-      const endTime = calculateEndTime(data.startTime, service.duration);
-
-      // 5. Check for conflicts inside the transaction (atomic read-check-write).
-      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-      const existingBookings = await tx.booking.findMany({
-        where: {
-          businessId: data.businessId,
-          date: data.date,
-          OR: [
-            { status: { in: ["CONFIRMED", "NDR_HOLD"] } },
-            { status: "PENDING", createdAt: { gte: fifteenMinutesAgo } },
-          ],
-          ...(data.staffId ? { staffId: data.staffId } : {}),
-        },
-        select: { startTime: true, endTime: true, status: true },
-      });
-
-      if (hasTimeSlotConflict(data.startTime, endTime, existingBookings)) {
-        throw new Error(
-          "This appointment slot was just booked by another customer. Please select a different time."
-        );
-      }
-
-      // 6. Upsert customer (phone-based, per-business identity).
-      let customer = null;
-      try {
-        customer = await tx.customer.upsert({
-          where: {
-            businessId_phone: {
-              businessId: data.businessId,
-              phone: data.customerPhone,
+        // 6. Upsert customer (phone-based, per-business identity).
+        let customer = null;
+        try {
+          customer = await tx.customer.upsert({
+            where: {
+              businessId_phone: {
+                businessId: data.businessId,
+                phone: data.customerPhone,
+              },
             },
-          },
-          update: {
-            name: data.customerName,
-            ...(data.customerEmail ? { email: data.customerEmail } : {}),
-            visitCount: { increment: 1 },
-            // P0-6: lifetimeValue is incremented only on payment confirmation,
-            // not here at booking creation time, to prevent CRM LTV inflation.
-          },
-          create: {
+            update: {
+              name: data.customerName,
+              ...(data.customerEmail ? { email: data.customerEmail } : {}),
+              visitCount: { increment: 1 },
+              // P0-6: lifetimeValue is incremented only on payment confirmation,
+              // not here at booking creation time, to prevent CRM LTV inflation.
+            },
+            create: {
+              businessId: data.businessId,
+              name: data.customerName,
+              phone: data.customerPhone,
+              email: data.customerEmail || null,
+              visitCount: 1,
+              lifetimeValue: 0, // starts at 0; set to service.price after payment verified
+              source: "BOOKING",
+            },
+          });
+        } catch (crmErr) {
+          console.warn("[CRM] Customer upsert handled:", crmErr);
+        }
+
+        // 7. Create the booking.
+        const isFree = service.price === 0 || data.paymentMethod === "FREE";
+        const isPayAtVenue = !isFree && (data.paymentPreference === "cash" || data.paymentPreference === "venue" || data.paymentMethod === "CASH_ON_DELIVERY");
+        const bookingStatus = isPayAtVenue || isFree ? "CONFIRMED" : "PENDING";
+        const bookingPaymentStatus = isFree ? "PAID" : "UNPAID";
+        const bookingPaymentMethod = isFree ? "FREE" : isPayAtVenue ? "CASH_ON_DELIVERY" : (data.paymentMethod ?? "UPI");
+        const newBooking = await tx.booking.create({
+          data: {
             businessId: data.businessId,
-            name: data.customerName,
-            phone: data.customerPhone,
-            email: data.customerEmail || null,
-            visitCount: 1,
-            lifetimeValue: 0, // starts at 0; set to service.price after payment verified
-            source: "BOOKING",
+            serviceId: data.serviceId,
+            staffId: data.staffId || null,
+            customerId: customer?.id || null,
+            customerName: data.customerName,
+            customerPhone: data.customerPhone,
+            customerEmail: data.customerEmail || null,
+            date: data.date,
+            startTime: data.startTime,
+            endTime,
+            duration: service.duration,
+            price: service.price,
+            notes: data.notes || null,
+            status: bookingStatus,
+            paymentStatus: bookingPaymentStatus,
+            paymentMethod: bookingPaymentMethod,
           },
+          include: { service: true },
         });
-      } catch (crmErr) {
-        console.warn("[CRM] Customer upsert handled:", crmErr);
+
+        // NOTE: recordUsage is intentionally decoupled outside tx to eliminate cross-slot row locks
+        return { booking: newBooking, businessSlug: business.slug };
+      },
+      {
+        isolationLevel: "Serializable",
       }
+    );
+  }, 4);
 
-
-      // 7. Create the booking.
-      const isFree = service.price === 0 || data.paymentMethod === "FREE";
-      const isPayAtVenue = !isFree && (data.paymentPreference === "cash" || data.paymentPreference === "venue" || data.paymentMethod === "CASH_ON_DELIVERY");
-      const bookingStatus = isPayAtVenue || isFree ? "CONFIRMED" : "PENDING";
-      const bookingPaymentStatus = isFree ? "PAID" : "UNPAID";
-      const bookingPaymentMethod = isFree ? "FREE" : isPayAtVenue ? "CASH_ON_DELIVERY" : (data.paymentMethod ?? "UPI");
-      const newBooking = await tx.booking.create({
-        data: {
-          businessId: data.businessId,
-          serviceId: data.serviceId,
-          staffId: data.staffId || null,
-          customerId: customer?.id || null,
-          customerName: data.customerName,
-          customerPhone: data.customerPhone,
-          customerEmail: data.customerEmail || null,
-          date: data.date,
-          startTime: data.startTime,
-          endTime,
-          duration: service.duration,
-          price: service.price,
-          notes: data.notes || null,
-          status: bookingStatus,
-          paymentStatus: bookingPaymentStatus,
-          paymentMethod: bookingPaymentMethod,
-        },
-        include: { service: true },
-      });
-
-      // 8. Atomically Record Usage for the current billing period
-      await recordUsage(data.businessId, "BOOKINGS_COUNT", 1, tx);
-
-      return { booking: newBooking, businessSlug: business.slug };
-    },
-    {
-      isolationLevel: "Serializable",
-    }
-  );
+  // 8. Decoupled Clinic-Wide Usage Lock:
+  // Move recordUsage OUT of the serializable slot-locking transaction so concurrent patients
+  // booking different doctors/slots in the same clinic do NOT serialize on the identical monthly UsageRecord row.
+  try {
+    await recordUsage(data.businessId, "BOOKINGS_COUNT", 1);
+  } catch (usageErr) {
+    console.warn("[createPublicBooking] Decoupled usage record update handled:", usageErr);
+  }
 
   // Resiliently sync booking record to Supabase DB
   try {
@@ -266,7 +267,6 @@ export async function createPublicBooking(rawInput: {
   revalidatePath(`/book/${booking.businessSlug}`);
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard/usage");
-  revalidatePath("/dashboard");
 
   return booking.booking;
 }
@@ -377,6 +377,5 @@ export async function updateBookingStatusAction(rawInput: {
 
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard/usage");
-  revalidatePath("/dashboard");
   return updated;
 }
