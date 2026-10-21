@@ -1,0 +1,4 @@
+Welcome to the AK Assistant installer.
+
+AK Assistant brings a powerful local and online AI assistant to your PC.
+Continue through this wizard to install AK and begin using voice-enabled intelligent help.

@@ -1,0 +1,4 @@
+AK Assistant has been installed successfully.
+
+You can launch the app from the Start menu or desktop shortcut.
+Visit AK Labs support if you need help configuring offline voice or local models.

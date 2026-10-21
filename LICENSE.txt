@@ -1,0 +1,8 @@
+AK Assistant License Agreement
+
+This software is provided as-is for local AI assistant use.
+You may use and distribute this application for personal or internal business purposes.
+
+No warranty is provided. Use at your own risk.
+
+Copyright (c) 2026 AK Labs.
