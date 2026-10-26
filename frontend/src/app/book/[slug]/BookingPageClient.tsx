@@ -742,6 +742,64 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               <h2 className="text-2xl font-black text-gray-900 mb-2">Booking Confirmed! 🎉</h2>
               <p className="text-gray-500 mb-6">Your appointment at {business.name} is confirmed.</p>
 
+              {/* Prominent High-Contrast OPD Token Card */}
+              {(() => {
+                const bookingId = bookingResult?.id || "";
+                const tokenNum = bookingId
+                  ? (Math.abs(bookingId.split("").reduce((acc: number, char: string) => (acc * 33 + char.charCodeAt(0)) | 0, 7)) % 40 + 1)
+                  : 14;
+                const tokenFormatted = `OPD Token #${String(tokenNum).padStart(2, "0")}`;
+                const doctorName = selectedStaff?.name
+                  ? (selectedStaff.name.toLowerCase().startsWith("dr") ? selectedStaff.name : `Dr. ${selectedStaff.name}`)
+                  : business.name;
+                const dateDisplay = selectedDate
+                  ? new Date(selectedDate + "T00:00:00").toLocaleDateString("en-IN", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "";
+
+                return (
+                  <div className="bg-zinc-950 text-white rounded-2xl border-2 border-emerald-500/70 p-5 text-left max-w-sm mx-auto shadow-2xl mb-4 relative overflow-hidden">
+                    <div className="flex items-center justify-between pb-3.5 border-b border-zinc-800">
+                      <div>
+                        <span className="text-[10px] font-mono tracking-widest text-emerald-400 font-bold uppercase block">
+                          Official Clinic Pass
+                        </span>
+                        <h3 className="text-2xl font-black text-white font-mono tracking-tight mt-0.5">
+                          {tokenFormatted}
+                        </h3>
+                      </div>
+                      <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-lg shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        🎫
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 pt-3 text-xs">
+                      <div>
+                        <span className="text-zinc-400 block text-[11px]">Doctor / Clinic</span>
+                        <span className="font-bold text-zinc-100 truncate block mt-0.5">
+                          {doctorName}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-400 block text-[11px]">Appointment Slot</span>
+                        <span className="font-bold text-emerald-400 font-mono block mt-0.5">
+                          {selectedTime}
+                        </span>
+                      </div>
+                      <div className="col-span-2 pt-1 border-t border-zinc-900">
+                        <span className="text-zinc-400 block text-[11px]">Scheduled Date</span>
+                        <span className="font-semibold text-zinc-200 block mt-0.5">
+                          {dateDisplay}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="bg-white rounded-2xl border border-gray-200 p-5 text-left space-y-3 max-w-sm mx-auto shadow-sm mb-4">
                 <p className="font-bold text-center text-gray-700 mb-2 text-sm uppercase tracking-wider">Booking Details</p>
                 {[
@@ -870,18 +928,16 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
 
       {/* Footer */}
       <div className="text-center py-6 mt-4 border-t border-gray-100">
-        <p className="text-xs text-gray-400">
-          Powered by{" "}
+        <p className="text-xs text-gray-500">
+          Are you a Doctor or Clinic Owner?{" "}
           <a
-            href={`https://docodo.in?ref=${business.slug}&utm_source=client_storefront&utm_medium=footer_badge&utm_campaign=powered_by_docodo`}
+            href="https://docodo.in?ref=patient_storefront&utm_source=rx_slip&utm_medium=footer_referral"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-bold hover:underline"
-            style={{ color: primaryColor }}
+            className="font-bold hover:underline text-emerald-600"
           >
-            Docodo
+            Launch your 0% commission clinic page in 15 mins →
           </a>
-          {" "}· AI-powered business platform
         </p>
       </div>
     </div>

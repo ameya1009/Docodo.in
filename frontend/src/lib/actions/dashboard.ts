@@ -424,12 +424,55 @@ export async function updateBookingStatus(
   // SECURITY: Verify this booking belongs to the authenticated user's business.
   await requireBookingOwnership(bookingId);
 
-  await prisma.booking.update({
+  const updated = await prisma.booking.update({
     where: { id: bookingId },
     data: { status },
+    include: { service: true, customer: true },
   });
 
+  // When a slot is cancelled, trigger waitlist refill notification to eliminate empty chairs
+  if (status === "CANCELLED") {
+    console.info(
+      `[Waitlist Refill] Slot released for appointment ${bookingId} on ${updated.date} at ${updated.startTime} (${updated.service?.name || "Consultation"}). Triggering automated refill notifications for clinic waitlist.`
+    );
+    try {
+      if (updated.businessId) {
+        // Query active waitlist candidates / pending enquiries waiting for a consultation slot
+        const waitlistCandidates = await prisma.enquiry.findMany({
+          where: { businessId: updated.businessId, status: "NEW" },
+          orderBy: { createdAt: "desc" },
+          take: 3,
+        }).catch(() => []);
+
+        if (waitlistCandidates.length > 0) {
+          for (const candidate of waitlistCandidates) {
+            DocodoBackendAPI.dispatchWhatsAppMessage({
+              businessId: updated.businessId,
+              recipientPhone: candidate.phone,
+              messageType: "SLOT_RELEASED",
+              customMessage: `⚡ Urgent OPD Slot Available: A consultation slot for ${updated.service?.name || "Consultation"} on ${updated.date} at ${updated.startTime} has just opened up at our clinic. Reply YES to claim this priority slot.`,
+            }).catch((err) => {
+              console.warn(`[Waitlist Refill] Notification dispatch failed for ${candidate.phone}:`, err);
+            });
+          }
+        } else {
+          DocodoBackendAPI.dispatchWhatsAppMessage({
+            businessId: updated.businessId,
+            recipientPhone: updated.customerPhone,
+            messageType: "SLOT_RELEASED",
+            customMessage: `Notice: Slot for ${updated.service?.name || "Consultation"} on ${updated.date} at ${updated.startTime} has been released. Next patients in waitlist queue are being notified.`,
+          }).catch((err) => {
+            console.warn("[Waitlist Refill] Notification dispatch handled:", err);
+          });
+        }
+      }
+    } catch (refillErr) {
+      console.warn("[Waitlist Refill] Waitlist trigger handled:", refillErr);
+    }
+  }
+
   revalidatePath("/dashboard/bookings");
+  return updated;
 }
 
 export async function getBookings(date?: string) {

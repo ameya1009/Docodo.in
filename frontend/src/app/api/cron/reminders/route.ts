@@ -137,6 +137,7 @@ export async function GET(request: NextRequest) {
       take: 100,
     });
 
+    const isTestMode = request.nextUrl.searchParams.get("test") === "true" || process.env.NODE_ENV === "test";
     const isForce2h = request.nextUrl.searchParams.get("force2h") === "true";
 
     // Filter appointments occurring within the upcoming 2 to 2.5 hours

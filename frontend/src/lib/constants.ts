@@ -27,22 +27,23 @@ export const NAVIGATION = [
 ];
 
 export const HERO_CONTENT = {
-  eyebrow: "The #1 Healthcare CRM, OPD Automation, Marketing & Practice Dashboard · 0% Aggregator Take-Rate",
+  eyebrow: "The Anti-Aggregator Practice OS · 0% Commission · DPDP Act 2023 Compliant",
   headline: {
-    line1: "The All-in-One CRM, Automation & Dashboard",
-    line2: "Built Exclusively for Doctors & Clinics.",
+    line1: "Stop Losing ₹90,000/Month to Empty Chairs.",
+    line2: "The All-in-One Practice OS Built for Doctors & Clinics.",
   },
-  subheadline: "Docodo replaces chaotic paper registers with an intelligent patient CRM, automated WhatsApp appointment workflows, digital clinic marketing, and a real-time doctor dashboard.",
-  primaryCTA: "Launch Doctor Workspace",
-  secondaryCTA: "Explore Live Dashboard",
-  pilotBadge: "Clinic Pilot Program (₹0 Setup Fee)",
+  subheadline:
+    "Docodo replaces chaotic paper registers with an intelligent patient CRM, automated WhatsApp appointment workflows, rapid 10-second OPD walk-in entry, and direct UPI bank settlement with 0% platform cuts.",
+  primaryCTA: "Launch Doctor Workspace (15 Mins)",
+  secondaryCTA: "Test 10-Sec OPD Simulator",
+  pilotBadge: "Founder Cohort: Free Setup + 0% Commission Guaranteed",
   trustTicker: [
     "#1 Healthcare CRM & Dashboard",
     "Automated WhatsApp Token Reminders",
     "0% Aggregator Take-Rate",
     "DPDP Act 2023 Compliant",
     "UPI Advance to End No-Shows",
-    "15-Minute Instant Clinic Launch",
+    "10-Second Front-Desk Walk-in Entry",
   ],
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useMemo } from "react";
+import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Plus, X, Loader2, CheckCircle2, Clock, Phone, ChevronLeft, ChevronRight, User, Filter, Zap } from "lucide-react";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
@@ -10,9 +10,62 @@ export default function BookingsClient({ business, bookings: initialBookings, to
   const [selectedDate, setSelectedDate] = useState(today);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showWalkInModal, setShowWalkInModal] = useState(false);
+  const [walkInCustomerName, setWalkInCustomerName] = useState("");
+  const [walkInCustomerPhone, setWalkInCustomerPhone] = useState("");
+  const [isReturningPatient, setIsReturningPatient] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [bookings, setBookings] = useState(initialBookings);
   const [isPending, startTransition] = useTransition();
+
+  // Fast phone-to-patient lookup across existing bookings to auto-fill returning patients
+  const customerPhoneMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const b of bookings) {
+      const name = b.customer?.name || b.customerName;
+      const rawPhone = b.customer?.phone || b.customerPhone || "";
+      const digits = rawPhone.replace(/\D/g, "");
+      if (digits && name) {
+        const last10 = digits.slice(-10);
+        if (!map.has(last10)) map.set(last10, name);
+        if (!map.has(digits)) map.set(digits, name);
+      }
+    }
+    return map;
+  }, [bookings]);
+
+  // Global hotkey: 'w' or 'W' opens 10-second Walk-in OPD Entry immediately (Escape closes it)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowWalkInModal(false);
+        setShowCreateModal(false);
+        return;
+      }
+      const target = e.target as HTMLElement;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      // Never hijack browser shortcuts like Ctrl+W (close tab) or Cmd+W
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+      if (e.key === "w" || e.key === "W") {
+        e.preventDefault();
+        setWalkInCustomerName("");
+        setWalkInCustomerPhone("");
+        setIsReturningPatient(false);
+        setShowWalkInModal(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const getCurrentTimeSlot = () => {
     const now = new Date();
@@ -73,11 +126,29 @@ export default function BookingsClient({ business, bookings: initialBookings, to
     });
   };
 
+  const handleWalkInPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setWalkInCustomerPhone(val);
+    const digits = val.replace(/\D/g, "");
+    const last10 = digits.length >= 10 ? digits.slice(-10) : digits;
+    const match = customerPhoneMap.get(last10) || customerPhoneMap.get(digits);
+    if (match) {
+      setWalkInCustomerName(match);
+      setIsReturningPatient(true);
+    } else {
+      if (isReturningPatient) {
+        setIsReturningPatient(false);
+      }
+    }
+  };
+
   const handleWalkInSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const customerName = (formData.get("customerName") as string)?.trim() || "";
-    const customerPhone = (formData.get("customerPhone") as string)?.trim() || "";
+    const customerName = (formData.get("customerName") as string)?.trim() || walkInCustomerName.trim() || "";
+    const customerPhone = (formData.get("customerPhone") as string)?.trim() || walkInCustomerPhone.trim() || "";
+    if (!customerName || !customerPhone) return;
+
     const serviceId = (formData.get("serviceId") as string) || business.services?.[0]?.id || undefined;
     const timeSlot = (formData.get("startTime") as string) || getCurrentTimeSlot();
 
@@ -97,6 +168,9 @@ export default function BookingsClient({ business, bookings: initialBookings, to
         if (res && res.id) {
           setBookings((prev) => [res, ...prev]);
           setShowWalkInModal(false);
+          setWalkInCustomerName("");
+          setWalkInCustomerPhone("");
+          setIsReturningPatient(false);
           setSelectedDate(today);
         }
       } catch (err) {
@@ -154,11 +228,18 @@ export default function BookingsClient({ business, bookings: initialBookings, to
             <Filter className="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
           <button
-            onClick={() => setShowWalkInModal(true)}
+            onClick={() => {
+              setWalkInCustomerName("");
+              setWalkInCustomerPhone("");
+              setIsReturningPatient(false);
+              setShowWalkInModal(true);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-[#C8F135] hover:bg-[#b5dc2d] text-black rounded-xl font-black text-sm shadow-[0_0_15px_rgba(200,241,53,0.35)] transition-all"
+            title="Press 'W' anytime to open"
           >
             <Zap className="w-4 h-4 fill-black" />
-            ⚡ 10s Walk-in OPD
+            <span>⚡ 10s Walk-in OPD</span>
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-black/20 text-black font-mono rounded font-bold">W</kbd>
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -412,7 +493,12 @@ export default function BookingsClient({ business, bookings: initialBookings, to
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowWalkInModal(false)}
+                  onClick={() => {
+                    setShowWalkInModal(false);
+                    setWalkInCustomerName("");
+                    setWalkInCustomerPhone("");
+                    setIsReturningPatient(false);
+                  }}
                   className="p-2 text-[var(--text-muted)] hover:text-white rounded-lg transition-colors"
                 >
                   <X size={18} />
@@ -420,13 +506,35 @@ export default function BookingsClient({ business, bookings: initialBookings, to
               </div>
 
               <form onSubmit={handleWalkInSubmit} className="mt-5 space-y-4">
+                {/* Returning Patient Auto-fill Indicator */}
+                {isReturningPatient && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 px-3 py-2 bg-[#C8F135]/15 border border-[#C8F135]/40 rounded-xl text-xs text-[#C8F135] font-semibold"
+                  >
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-[#C8F135]" />
+                    <span>Returning patient identified! Name auto-filled from clinic records.</span>
+                  </motion.div>
+                )}
+
                 {/* 2 Quick Inputs */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
-                    <User size={14} className="text-[var(--lime)]" /> 1. Patient Full Name *
+                  <label className="text-xs font-bold text-[var(--text-secondary)] flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <User size={14} className="text-[var(--lime)]" /> 1. Patient Full Name *
+                    </span>
+                    {isReturningPatient && (
+                      <span className="text-[10px] text-[var(--lime)] font-mono font-bold tracking-wider uppercase">Auto-Filled</span>
+                    )}
                   </label>
                   <input
                     name="customerName"
+                    value={walkInCustomerName}
+                    onChange={(e) => {
+                      setWalkInCustomerName(e.target.value);
+                      setIsReturningPatient(false);
+                    }}
                     autoFocus
                     required
                     placeholder="e.g. Ramesh Patel"
@@ -445,8 +553,10 @@ export default function BookingsClient({ business, bookings: initialBookings, to
                     <input
                       name="customerPhone"
                       type="tel"
+                      value={walkInCustomerPhone}
+                      onChange={handleWalkInPhoneChange}
                       required
-                      maxLength={10}
+                      maxLength={14}
                       placeholder="9876543210"
                       className="w-full pl-12 pr-4 py-3 bg-[var(--bg-void)] border border-[var(--border-subtle)] focus:border-[var(--lime)] rounded-xl text-base font-medium text-white placeholder-[var(--text-muted)] outline-none transition-colors"
                     />
@@ -482,7 +592,12 @@ export default function BookingsClient({ business, bookings: initialBookings, to
                 <div className="pt-3 flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setShowWalkInModal(false)}
+                    onClick={() => {
+                      setShowWalkInModal(false);
+                      setWalkInCustomerName("");
+                      setWalkInCustomerPhone("");
+                      setIsReturningPatient(false);
+                    }}
                     className="flex-1 py-3 px-4 bg-[var(--bg-elevated)] text-[var(--text-primary)] rounded-xl text-xs font-bold hover:bg-[var(--border-subtle)] transition-colors"
                   >
                     Cancel
