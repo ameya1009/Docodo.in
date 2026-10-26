@@ -265,7 +265,7 @@ For each prospect:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 • **Founder WhatsApp Destination**: +919284310604 (Ameya Kshirsagar)
 • **Webhook Receiver Endpoint**: /api/webhooks/whatsapp (LIVE & ACTIVE)
-• **Two-Way Meta Verification**: ${verifyTokenConfigured ? "✅ Configured (WHATSAPP_VERIFY_TOKEN active)" : "⚡ Default Fallback Active ('docodo_wa_verify_secret')"}
+• **Two-Way Meta Verification**: ${verifyTokenConfigured ? "✅ Configured (WHATSAPP_VERIFY_TOKEN active)" : "❌ Unconfigured (WHATSAPP_VERIFY_TOKEN required - requests rejected with HTTP 500)"}
 • **Meta Graph API Token**: ${tokenConfigured ? "✅ Configured" : "⚡ Ready (Add WHATSAPP_ACCESS_TOKEN to .env.local for live Meta Cloud)"}
 • **Phone Number ID**: ${phoneConfigured ? "✅ Configured" : "⚡ Ready (Add WHATSAPP_PHONE_NUMBER_ID to .env.local)"}
 • **Autonomous AI Auto-Responder**: ✅ ONLINE (Llama 3.3 70B & Gemini 2.5 Flash Round-Robin Active)

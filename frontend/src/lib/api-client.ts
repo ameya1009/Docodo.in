@@ -76,69 +76,80 @@ export class DocodoBackendAPI {
    */
   static async dispatchWhatsAppMessage(
     params: WhatsAppDispatchParams
-  ): Promise<{ success: boolean; messageId?: string }> {
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
       const waToken = process.env.WHATSAPP_ACCESS_TOKEN;
       const waPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
       const cleanPhone = params.recipientPhone.replace(/[^0-9]/g, "");
 
-      const log = await prisma.whatsAppLog.create({
-        data: {
-          businessId: params.businessId,
-          recipient: params.recipientPhone,
-          messageType: params.messageType,
-          content: params.customMessage,
-          status: waToken && waPhoneId ? "SENT" : "NOT_CONFIGURED",
-        },
-      });
+      let logId = `walog_${Date.now()}`;
+      try {
+        const log = await prisma.whatsAppLog.create({
+          data: {
+            businessId: params.businessId,
+            recipient: params.recipientPhone,
+            messageType: params.messageType,
+            content: params.customMessage,
+            status: !waToken || !waPhoneId ? "NOT_CONFIGURED" : "PENDING",
+          },
+        });
+        logId = log.id;
+      } catch (dbErr) {
+        console.warn("[WhatsApp Log Create DB Warning]:", dbErr);
+      }
 
-      if (waToken && waPhoneId && cleanPhone) {
-        const formattedTo = cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`;
-        try {
-          if (params.templateName) {
-            const templatePayload = {
-              messaging_product: "whatsapp",
-              to: formattedTo,
-              type: "template",
-              template: {
-                name: params.templateName,
-                language: { code: params.templateLanguage || "en" },
-                components: params.templateComponents || [
-                  {
-                    type: "body",
-                    parameters: [{ type: "text", text: params.customMessage }],
-                  },
-                ],
-              },
-            };
+      if (!waToken || !waPhoneId) {
+        return {
+          success: false,
+          messageId: logId,
+          error: "Meta WhatsApp credentials unconfigured (WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID missing)",
+        };
+      }
 
-            const response = await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${waToken}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(templatePayload),
-            });
+      if (!cleanPhone) {
+        await prisma.whatsAppLog.update({
+          where: { id: logId },
+          data: { status: "FAILED" },
+        }).catch((e: any) => console.warn("[WhatsApp Log Update Error]:", e));
+        return {
+          success: false,
+          messageId: logId,
+          error: "Invalid recipient phone number",
+        };
+      }
 
-            if (!response.ok) {
-              console.warn("[WhatsApp Template Dispatch Warning] Template dispatch failed, falling back to text payload.");
-              await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${waToken}`,
-                  "Content-Type": "application/json",
+      const formattedTo = cleanPhone.startsWith("91") ? cleanPhone : `91${cleanPhone}`;
+      try {
+        let response: Response;
+        if (params.templateName) {
+          const templatePayload = {
+            messaging_product: "whatsapp",
+            to: formattedTo,
+            type: "template",
+            template: {
+              name: params.templateName,
+              language: { code: params.templateLanguage || "en" },
+              components: params.templateComponents || [
+                {
+                  type: "body",
+                  parameters: [{ type: "text", text: params.customMessage }],
                 },
-                body: JSON.stringify({
-                  messaging_product: "whatsapp",
-                  to: formattedTo,
-                  type: "text",
-                  text: { body: params.customMessage },
-                }),
-              });
-            }
-          } else {
-            await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
+              ],
+            },
+          };
+
+          response = await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${waToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(templatePayload),
+          });
+
+          if (!response.ok) {
+            console.warn("[WhatsApp Template Dispatch Warning] Template dispatch failed, falling back to text payload.");
+            response = await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${waToken}`,
@@ -152,15 +163,63 @@ export class DocodoBackendAPI {
               }),
             });
           }
-        } catch (apiErr) {
-          console.warn("[WhatsApp API Dispatch Error]:", apiErr);
+        } else {
+          response = await fetch(`https://graph.facebook.com/v19.0/${waPhoneId}/messages`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${waToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              messaging_product: "whatsapp",
+              to: formattedTo,
+              type: "text",
+              text: { body: params.customMessage },
+            }),
+          });
         }
-      }
 
-      return { success: true, messageId: log.id };
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.warn("[WhatsApp API Dispatch Error]: Meta Graph API returned non-OK status:", response.status, errorText);
+          await prisma.whatsAppLog.update({
+            where: { id: logId },
+            data: { status: "FAILED" },
+          }).catch((e: any) => console.warn("[WhatsApp Log Update Error]:", e));
+          return {
+            success: false,
+            messageId: logId,
+            error: `Meta Graph API error (status ${response.status}): ${errorText}`,
+          };
+        }
+
+        const data = await response.json();
+        const externalId = data?.messages?.[0]?.id;
+
+        await prisma.whatsAppLog.update({
+          where: { id: logId },
+          data: {
+            status: "SENT",
+            externalId: externalId || undefined,
+          },
+        }).catch((e: any) => console.warn("[WhatsApp Log Update Error]:", e));
+
+        return { success: true, messageId: logId };
+      } catch (apiErr: any) {
+        console.warn("[WhatsApp API Dispatch Error]:", apiErr);
+        await prisma.whatsAppLog.update({
+          where: { id: logId },
+          data: { status: "FAILED" },
+        }).catch((e: any) => console.warn("[WhatsApp Log Update Error]:", e));
+        return {
+          success: false,
+          messageId: logId,
+          error: apiErr?.message || "WhatsApp dispatch network failure",
+        };
+      }
     } catch (err: any) {
       console.warn("[WhatsApp Dispatch Error]:", err);
-      return { success: false };
+      return { success: false, error: err?.message || "Internal WhatsApp dispatch error" };
     }
   }
 

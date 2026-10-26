@@ -19,7 +19,14 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
 
-  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || "docodo_wa_verify_secret";
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
+  if (!verifyToken) {
+    console.error("[WhatsApp Webhook] WHATSAPP_VERIFY_TOKEN environment variable is not configured.");
+    return NextResponse.json(
+      { error: "WHATSAPP_VERIFY_TOKEN is not configured on server" },
+      { status: 500 }
+    );
+  }
 
   if (mode === "subscribe" && token === verifyToken) {
     console.log("[WhatsApp Webhook] Handshake verified successfully");

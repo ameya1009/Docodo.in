@@ -337,6 +337,11 @@ export async function createBooking(data: {
   date: string;
   startTime: string;
   notes?: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  paidAmount?: number;
+  price?: number;
+  status?: string;
 }) {
   // SECURITY: businessId comes from session, never from client input.
   const { business } = await requireAuthBusiness();
@@ -355,6 +360,10 @@ export async function createBooking(data: {
   const endMinutes = (h ?? 0) * 60 + (m ?? 0) + duration;
   const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 
+  const isPaid = data.paymentStatus === "PAID";
+  const bookingPrice = data.price ?? service?.price ?? 0;
+  const ltvIncrement = isPaid ? (typeof data.paidAmount === "number" ? data.paidAmount : bookingPrice) : 0;
+
   let customer = null;
   try {
     customer = await prisma.customer.upsert({
@@ -368,7 +377,7 @@ export async function createBooking(data: {
         name: data.customerName,
         ...(data.customerEmail ? { email: data.customerEmail } : {}),
         visitCount: { increment: 1 },
-        lifetimeValue: { increment: service?.price ?? 0 },
+        ...(ltvIncrement > 0 ? { lifetimeValue: { increment: ltvIncrement } } : {}),
       },
       create: {
         businessId: business.id,
@@ -376,7 +385,7 @@ export async function createBooking(data: {
         phone: data.customerPhone,
         email: data.customerEmail || null,
         visitCount: 1,
-        lifetimeValue: service?.price ?? 0,
+        lifetimeValue: ltvIncrement,
         source: "BOOKING",
       },
     });
@@ -397,9 +406,12 @@ export async function createBooking(data: {
       startTime: data.startTime,
       endTime,
       duration,
-      price: service?.price ?? 0,
+      price: bookingPrice,
+      paidAmount: data.paidAmount ?? (isPaid ? bookingPrice : 0),
+      paymentStatus: data.paymentStatus ?? "UNPAID",
+      paymentMethod: data.paymentMethod ?? "UPI",
       notes: data.notes,
-      status: "CONFIRMED",
+      status: data.status ?? "CONFIRMED",
     },
   });
 
@@ -416,6 +428,8 @@ export async function createBooking(data: {
   revalidatePath("/dashboard/bookings");
   return booking;
 }
+
+export const createBookingAction = createBooking;
 
 export async function updateBookingStatus(
   bookingId: string,

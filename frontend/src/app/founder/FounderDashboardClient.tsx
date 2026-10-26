@@ -380,6 +380,10 @@ export default function FounderDashboardClient({ initialData }: FounderDashboard
       const text = await res.text();
       if (res.ok && text.includes("docodo_ping_ok_2026")) {
         setWaPingStatus("✅ Webhook Handshake 100% OK! Verification token matched, webhook route is active.");
+      } else if (res.status === 403) {
+        setWaPingStatus("🔒 Webhook route active & secure! HTTP 403 Forbidden (token mismatch: server enforces custom WHATSAPP_VERIFY_TOKEN).");
+      } else if (res.status === 500) {
+        setWaPingStatus("⚠️ Webhook route active! HTTP 500 (WHATSAPP_VERIFY_TOKEN not yet configured in server environment).");
       } else {
         setWaPingStatus(`⚡ Webhook responded with status ${res.status}: ${text.slice(0, 100)}`);
       }

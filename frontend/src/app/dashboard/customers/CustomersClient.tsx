@@ -7,6 +7,19 @@ import { cn, formatCurrency, getInitials, formatDate } from "@/lib/utils";
 import { calculateCustomerTier, parseTags } from "@/lib/engines/crm-engine";
 import { createCustomerAction } from "@/lib/actions/crm";
 
+export function computeCustomerLtv(customer: any): number {
+  if (customer?.bookings && customer.bookings.length > 0) {
+    return customer.bookings
+      .filter((b: any) => b.paymentStatus === "PAID")
+      .reduce(
+        (acc: number, b: any) =>
+          acc + (typeof b.paidAmount === "number" ? b.paidAmount : (b.price ?? b.service?.price ?? 0)),
+        0
+      );
+  }
+  return customer?.lifetimeValue || 0;
+}
+
 export default function CustomersClient({
   customers: initialCustomers,
   businessName,
@@ -34,8 +47,8 @@ export default function CustomersClient({
     return customers.filter((c) => {
       const q = searchQuery.toLowerCase();
       return (
-        c.name.toLowerCase().includes(q) ||
-        (c.phone && c.phone.toLowerCase().includes(q))
+        (c.name ? c.name.toLowerCase().includes(q) : false) ||
+        (c.phone ? c.phone.toLowerCase().includes(q) : false)
       );
     });
   }, [customers, searchQuery]);
@@ -271,7 +284,7 @@ export default function CustomersClient({
             {filteredCustomers.map((c) => {
               const visitCount = c.bookings?.length || c.visitCount || 0;
               const lastVisit = c.bookings && c.bookings.length > 0 ? c.bookings[0].date : null;
-              const lifetimeValue = c.bookings?.reduce((acc: number, b: any) => acc + (b.service?.price || 0), 0) || c.lifetimeValue || 0;
+              const lifetimeValue = computeCustomerLtv(c);
               const tier = calculateCustomerTier(visitCount, lifetimeValue);
               const tags = parseTags(c.tags);
 
@@ -376,7 +389,7 @@ export default function CustomersClient({
                       <span className="px-2 py-0.5 rounded text-xs font-black uppercase bg-[var(--lime)] text-[var(--bg-void)]">
                         {calculateCustomerTier(
                           selectedCustomer.bookings?.length || selectedCustomer.visitCount || 0,
-                          selectedCustomer.bookings?.reduce((acc: number, b: any) => acc + (b.service?.price || 0), 0) || selectedCustomer.lifetimeValue || 0
+                          computeCustomerLtv(selectedCustomer)
                         )}
                       </span>
                     </div>
@@ -395,9 +408,7 @@ export default function CustomersClient({
                   <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl flex flex-col">
                     <span className="text-xs font-semibold text-[var(--text-secondary)] mb-1">Total Spent (LTV)</span>
                     <span className="text-2xl font-extrabold text-[var(--lime)]">
-                      {formatCurrency(
-                        selectedCustomer.bookings?.reduce((acc: number, b: any) => acc + (b.service?.price || 0), 0) || selectedCustomer.lifetimeValue || 0
-                      )}
+                      {formatCurrency(computeCustomerLtv(selectedCustomer))}
                     </span>
                   </div>
                   <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl flex flex-col">
