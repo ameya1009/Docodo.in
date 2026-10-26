@@ -178,13 +178,24 @@ export default async function BookingPage({ params }: Props) {
     priceRange: "₹₹",
     openingHoursSpecification: Array.isArray(business.workingHours)
       ? business.workingHours
-          .filter((wh: any) => !wh.isClosed)
-          .map((wh: any) => ({
-            "@type": "OpeningHoursSpecification",
-            dayOfWeek: wh.dayOfWeek,
-            opens: wh.openTime || "09:00",
-            closes: wh.closeTime || "18:00",
-          }))
+          .filter((wh: any) => wh.isOpen !== false)
+          .map((wh: any) => {
+            const dayMap: Record<string, string> = {
+              MON: "https://schema.org/Monday",
+              TUE: "https://schema.org/Tuesday",
+              WED: "https://schema.org/Wednesday",
+              THU: "https://schema.org/Thursday",
+              FRI: "https://schema.org/Friday",
+              SAT: "https://schema.org/Saturday",
+              SUN: "https://schema.org/Sunday",
+            };
+            return {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: dayMap[wh.day?.toUpperCase()] || wh.day,
+              opens: wh.openTime || "09:00",
+              closes: wh.closeTime || "18:00",
+            };
+          })
       : undefined,
     makesOffer: Array.isArray(business.services)
       ? business.services.map((svc: any) => ({

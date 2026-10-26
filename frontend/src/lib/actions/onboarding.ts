@@ -210,32 +210,78 @@ export async function save15MinuteOnboardingAction(payload: {
       businessId = created.id;
     }
 
-    // Safely update services
+    // Safely update services: Never set historical booking serviceId to null.
+    // Upsert incoming services and soft-deactivate (isActive: false) obsolete services that have existing bookings.
     if (payload.services && payload.services.length > 0) {
-      try {
-        await tx.booking.updateMany({
-          where: { businessId, serviceId: { not: null } },
-          data: { serviceId: null },
-        });
-      } catch (bkErr) {
-        console.warn("[Onboarding] Service foreign key safeguard:", bkErr);
+      const existingServices = await tx.service.findMany({
+        where: { businessId },
+        select: { id: true, name: true },
+      });
+
+      const existingServiceIds = existingServices.map((s) => s.id);
+      const bookedBookings = await tx.booking.findMany({
+        where: {
+          businessId,
+          serviceId: { in: existingServiceIds },
+        },
+        select: { serviceId: true },
+      });
+      const bookedServiceIds = new Set(bookedBookings.map((b) => b.serviceId).filter(Boolean));
+
+      const incomingValidServices = payload.services.filter(
+        (s) => s.name && s.name.trim().length > 0
+      );
+
+      const touchedServiceIds = new Set<string>();
+
+      for (let idx = 0; idx < incomingValidServices.length; idx++) {
+        const svc = incomingValidServices[idx];
+        const trimmedName = svc.name.trim();
+        const price = Math.max(0, Number(svc.price) || 0);
+        const duration = Math.max(5, Number(svc.duration) || 30);
+
+        const match = existingServices.find(
+          (es) => es.name.toLowerCase() === trimmedName.toLowerCase()
+        );
+
+        if (match) {
+          touchedServiceIds.add(match.id);
+          await tx.service.update({
+            where: { id: match.id },
+            data: {
+              name: trimmedName,
+              price,
+              duration,
+              order: idx,
+              isActive: true,
+            },
+          });
+        } else {
+          const created = await tx.service.create({
+            data: {
+              businessId,
+              name: trimmedName,
+              price,
+              duration,
+              order: idx,
+              isActive: true,
+            },
+          });
+          touchedServiceIds.add(created.id);
+        }
       }
 
-      await tx.service.deleteMany({ where: { businessId } }).catch(() => null);
-
-      const validServices = payload.services
-        .filter((s) => s.name && s.name.trim().length > 0)
-        .map((svc, idx) => ({
-          businessId,
-          name: svc.name.trim(),
-          price: Math.max(0, Number(svc.price) || 0),
-          duration: Math.max(5, Number(svc.duration) || 30),
-          order: idx,
-          isActive: true,
-        }));
-
-      if (validServices.length > 0) {
-        await tx.service.createMany({ data: validServices });
+      for (const es of existingServices) {
+        if (!touchedServiceIds.has(es.id)) {
+          if (bookedServiceIds.has(es.id)) {
+            await tx.service.update({
+              where: { id: es.id },
+              data: { isActive: false },
+            });
+          } else {
+            await tx.service.delete({ where: { id: es.id } }).catch(() => null);
+          }
+        }
       }
     }
 

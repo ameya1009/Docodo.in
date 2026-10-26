@@ -151,18 +151,65 @@ export async function confirmDiscoveredBusinessAction(
       data: defaultHours.map((h) => ({ ...h, businessId: activeBusinessId })),
     });
 
-    // Replace services with the discovered booking offerings
-    await prisma.service.deleteMany({ where: { businessId: activeBusinessId } });
-    await prisma.service.createMany({
-      data: data.services.map((svc) => ({
-        businessId: activeBusinessId,
-        name: svc.name,
-        price: svc.price,
-        duration: svc.duration,
-        description: svc.description || null,
-        isActive: true,
-      })),
+    // Safely upsert discovered booking offerings and preserve historical booking integrity
+    const existingServices = await prisma.service.findMany({
+      where: { businessId: activeBusinessId },
+      select: { id: true, name: true },
     });
+    const existingServiceIds = existingServices.map((s) => s.id);
+    const bookedBookings = await prisma.booking.findMany({
+      where: {
+        businessId: activeBusinessId,
+        serviceId: { in: existingServiceIds },
+      },
+      select: { serviceId: true },
+    });
+    const bookedServiceIds = new Set(bookedBookings.map((b) => b.serviceId).filter(Boolean));
+    const touchedServiceIds = new Set<string>();
+
+    for (const svc of data.services) {
+      const match = existingServices.find(
+        (es) => es.name.toLowerCase() === svc.name.trim().toLowerCase()
+      );
+      if (match) {
+        touchedServiceIds.add(match.id);
+        await prisma.service.update({
+          where: { id: match.id },
+          data: {
+            name: svc.name.trim(),
+            price: svc.price,
+            duration: svc.duration,
+            description: svc.description || null,
+            isActive: true,
+          },
+        });
+      } else {
+        const created = await prisma.service.create({
+          data: {
+            businessId: activeBusinessId,
+            name: svc.name.trim(),
+            price: svc.price,
+            duration: svc.duration,
+            description: svc.description || null,
+            isActive: true,
+          },
+        });
+        touchedServiceIds.add(created.id);
+      }
+    }
+
+    for (const es of existingServices) {
+      if (!touchedServiceIds.has(es.id)) {
+        if (bookedServiceIds.has(es.id)) {
+          await prisma.service.update({
+            where: { id: es.id },
+            data: { isActive: false },
+          });
+        } else {
+          await prisma.service.delete({ where: { id: es.id } }).catch(() => null);
+        }
+      }
+    }
 
     recordInstrumentationEvent("website_published", {
       businessId: activeBusinessId,

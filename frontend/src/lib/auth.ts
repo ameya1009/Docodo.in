@@ -25,11 +25,24 @@ if (process.env.NODE_ENV === "production") {
   }
 }
 
+function getAuthSecret(): string {
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[auth] Critical: AUTH_SECRET or NEXTAUTH_SECRET must be set in production environments."
+      );
+    }
+    return "docodo-dev-auth-secret-ephemeral-key-32-chars-min";
+  }
+  return secret;
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   session: { strategy: "jwt" },
   trustHost: true,
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "docodo-production-auth-secret-key-32-chars-minimum",
+  secret: getAuthSecret(),
   providers: [
     Credentials({
       name: "credentials",

@@ -21,12 +21,16 @@ export const TOKEN_PREFIX = "docodo_agy_";
 export const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 
 function getSigningSecret(): string {
-  return (
-    process.env.AUTH_SECRET ||
-    process.env.FOUNDER_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    "docodo_autonomous_agent_protocol_master_signing_key_2026"
-  );
+  const sec = process.env.AUTH_SECRET || process.env.FOUNDER_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!sec) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[ai-agents] Critical: AUTH_SECRET, FOUNDER_SECRET, or NEXTAUTH_SECRET must be set in production."
+      );
+    }
+    return "docodo_autonomous_agent_protocol_master_signing_key_2026";
+  }
+  return sec;
 }
 
 /**

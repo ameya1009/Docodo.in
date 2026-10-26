@@ -166,9 +166,12 @@ export async function createPublicBooking(rawInput: {
         }
 
         // 7. Create the booking.
+        // Under direct merchant settlement (Pay at Venue or Direct UPI), all public bookings are
+        // confirmed appointments on the calendar. This prevents slot release after 15 mins and ensures
+        // automated 24-hr reminder crons dispatch correctly.
         const isFree = service.price === 0 || data.paymentMethod === "FREE";
         const isPayAtVenue = !isFree && (data.paymentPreference === "cash" || data.paymentPreference === "venue" || data.paymentMethod === "CASH_ON_DELIVERY");
-        const bookingStatus = isPayAtVenue || isFree ? "CONFIRMED" : "PENDING";
+        const bookingStatus = "CONFIRMED";
         const bookingPaymentStatus = isFree ? "PAID" : "UNPAID";
         const bookingPaymentMethod = isFree ? "FREE" : isPayAtVenue ? "CASH_ON_DELIVERY" : (data.paymentMethod ?? "UPI");
         const newBooking = await tx.booking.create({

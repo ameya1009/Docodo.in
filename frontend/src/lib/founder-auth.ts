@@ -2,35 +2,73 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 import { auth } from "@/lib/auth";
 
-function requireEnv(name: string): string {
-  const val = process.env[name];
-  if (!val) {
-    throw new Error(
-      `[founder-auth] Required environment variable "${name}" is not set. ` +
-      `Set it in your Vercel/deployment environment and restart the server.`
-    );
-  }
-  return val;
-}
+let devEphemeralSecret: string | null = null;
+let devEphemeralPassword: string | null = null;
 
 export const FOUNDER_CONFIG = {
-  email: "ameyakshirsagar@docodo.in",
-  whatsapp: "+919284310604",
+  get email(): string {
+    return process.env.FOUNDER_EMAIL || "ameyakshirsagar@docodo.in";
+  },
+  get whatsapp(): string {
+    return process.env.FOUNDER_WHATSAPP || "+919284310604";
+  },
   cookieName: "docodo_founder_session",
   get secret(): string {
-    return process.env.FOUNDER_SECRET || process.env.AUTH_SECRET || "docodo-production-founder-secret-key-32-chars-minimum";
+    if (process.env.FOUNDER_SECRET) {
+      return process.env.FOUNDER_SECRET;
+    }
+    if (process.env.AUTH_SECRET) {
+      return process.env.AUTH_SECRET;
+    }
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[founder-auth] Critical: FOUNDER_SECRET or AUTH_SECRET environment variable is required in production."
+      );
+    }
+    if (!devEphemeralSecret) {
+      devEphemeralSecret = crypto.randomBytes(32).toString("hex");
+      console.warn("[founder-auth] No FOUNDER_SECRET found. Generated ephemeral development secret.");
+    }
+    return devEphemeralSecret;
   },
 };
 
 /**
- * Verify founder email and password
+ * Retrieves founder password from environment or generates cryptographically random ephemeral fallback in development.
+ * Never allows static plaintext fallback in production.
+ */
+export function getFounderPassword(): string {
+  if (process.env.FOUNDER_PASSWORD) {
+    return process.env.FOUNDER_PASSWORD;
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "[founder-auth] Critical: FOUNDER_PASSWORD environment variable is required in production."
+    );
+  }
+  if (!devEphemeralPassword) {
+    devEphemeralPassword = crypto.randomBytes(16).toString("hex");
+    console.warn(`[founder-auth] No FOUNDER_PASSWORD set. Generated ephemeral dev password: ${devEphemeralPassword}`);
+  }
+  return devEphemeralPassword;
+}
+
+/**
+ * Verify founder email and password with timing-safe comparison
  */
 export function verifyFounderCredentials(email: string, pass: string): boolean {
   const normalizedEmail = email.trim().toLowerCase();
   const validEmail = FOUNDER_CONFIG.email.toLowerCase();
-  const validPassword = process.env.FOUNDER_PASSWORD || "DocodoFounder2026!";
 
   if (normalizedEmail !== validEmail) {
+    return false;
+  }
+
+  let validPassword: string;
+  try {
+    validPassword = getFounderPassword();
+  } catch (err) {
+    console.error("[founder-auth] Authentication check rejected:", err);
     return false;
   }
 

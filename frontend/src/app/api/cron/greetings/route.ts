@@ -9,9 +9,9 @@ export async function GET(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    // Optional bearer secret check if configured in production
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized cron execution" }, { status: 401 });
+    // Enforce strict header verification: reject unauthenticated calls even if CRON_SECRET is unset
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: "Unauthorized cron execution. Valid Bearer CRON_SECRET is required." }, { status: 401 });
     }
 
     const businessSlug = req.nextUrl.searchParams.get("slug");

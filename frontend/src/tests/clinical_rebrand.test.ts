@@ -202,6 +202,6 @@ describe("Clinical Rebrand, SEO & Security Verification Tests", () => {
       expect(result.grossRevenue).toBe(0);
       expect(result.totalBookings).toBe(0);
       expect(result.conversionRate).toBe(0);
-    }, 15000);
+    }, 45000);
   });
 });

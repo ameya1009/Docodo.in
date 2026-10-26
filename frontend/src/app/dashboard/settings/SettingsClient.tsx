@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, Plus, Trash2, Loader2, Check, Clock, DollarSign, Power, AlertCircle, Bell, MessageSquare, Star } from "lucide-react";
+import { Settings, Plus, Trash2, Loader2, Check, Clock, DollarSign, Power, AlertCircle, Bell, MessageSquare, Star, CreditCard, QrCode } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import { createServiceAction, updateServiceAction, deleteServiceAction } from "@/lib/actions/website";
 
@@ -17,13 +17,30 @@ const DAY_LABELS: Record<string, string> = {
 };
 
 export default function SettingsClient({ business }: SettingsClientProps) {
-  const [activeTab, setActiveTab] = useState<"services" | "hours" | "staff" | "automations">("services");
+  const [activeTab, setActiveTab] = useState<"services" | "hours" | "staff" | "automations" | "payments">("services");
   const [services, setServices] = useState(business.services ?? []);
   const [workingHours, _setWorkingHours] = useState(business.workingHours ?? []);
   const [staff, _setStaff] = useState(business.staff ?? []);
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Payment & Direct Settlement State
+  const initialPaymentSettings = (() => {
+    try {
+      const parsed = typeof business.websiteConfig === "string" ? JSON.parse(business.websiteConfig) : (business.websiteConfig || {});
+      return parsed.paymentSettings || {};
+    } catch {
+      return {};
+    }
+  })();
+
+  const [paymentSettings, setPaymentSettings] = useState({
+    upiId: initialPaymentSettings.upiId || "",
+    beneficiaryName: initialPaymentSettings.beneficiaryName || business.name || "",
+    acceptVenue: initialPaymentSettings.acceptVenue ?? true,
+    acceptUpi: initialPaymentSettings.acceptUpi ?? true,
+  });
 
   // Automation Toggles State (Section 14)
   const [automations, setAutomations] = useState({
@@ -120,7 +137,7 @@ export default function SettingsClient({ business }: SettingsClientProps) {
 
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-[var(--bg-elevated)] rounded-xl w-fit flex-wrap">
-        {(["services", "hours", "staff", "automations"] as const).map((tab) => (
+        {(["services", "hours", "staff", "automations", "payments"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -131,7 +148,7 @@ export default function SettingsClient({ business }: SettingsClientProps) {
                 : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             )}
           >
-            {tab === "hours" ? "Working Hours" : tab === "automations" ? "Automations" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === "hours" ? "Working Hours" : tab === "automations" ? "Automations" : tab === "payments" ? "Payments & Payouts" : tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
@@ -399,6 +416,161 @@ export default function SettingsClient({ business }: SettingsClientProps) {
                     automations.reviewRequest ? "left-6 bg-black" : "left-0.5 bg-gray-400"
                   )}
                 />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payments & Payouts Tab */}
+      {activeTab === "payments" && (
+        <div className="space-y-6">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-6">
+            <div>
+              <h3 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2">
+                <CreditCard size={20} className="text-[var(--lime)]" /> Direct Merchant Settlement
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                Configure your UPI VPA and settlement preferences. Customers pay directly into your account — 100% compliant with RBI Payment Aggregator guidelines with zero platform deduction.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-5 pt-2">
+              <div>
+                <label className={labelCls}>Merchant UPI ID / VPA *</label>
+                <div className="relative">
+                  <input
+                    value={paymentSettings.upiId}
+                    onChange={(e) => setPaymentSettings({ ...paymentSettings, upiId: e.target.value })}
+                    placeholder="e.g. drsharma@okhdfcbank or 9876543210@paytm"
+                    className={inputCls}
+                  />
+                </div>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                  Required for direct UPI QR and intent links on your booking page.
+                </p>
+              </div>
+
+              <div>
+                <label className={labelCls}>Beneficiary / Payee Name *</label>
+                <input
+                  value={paymentSettings.beneficiaryName}
+                  onChange={(e) => setPaymentSettings({ ...paymentSettings, beneficiaryName: e.target.value })}
+                  placeholder="e.g. Dr. Sharma Dental Care"
+                  className={inputCls}
+                />
+                <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                  The verified name associated with your bank account or merchant VPA.
+                </p>
+              </div>
+            </div>
+
+            {/* Payment Method Preferences */}
+            <div className="space-y-3 pt-3 border-t border-[var(--border-subtle)]">
+              <h4 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Accepted Payment Modes</h4>
+
+              {/* Pay at Venue */}
+              <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl flex items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
+                    <Check size={16} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--text-primary)]">Pay at Venue (Cash / In-Clinic QR)</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Recommended default. Patients pay in person at your reception counter or scan your in-clinic QR code.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPaymentSettings((prev) => ({ ...prev, acceptVenue: !prev.acceptVenue }))}
+                  className={cn(
+                    "w-12 h-6 rounded-full transition-colors relative shrink-0",
+                    paymentSettings.acceptVenue ? "bg-[var(--lime)]" : "bg-gray-800 border border-gray-700"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-5 h-5 rounded-full bg-black transition-transform absolute top-0.5",
+                      paymentSettings.acceptVenue ? "left-6 bg-black" : "left-0.5 bg-gray-400"
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* Direct UPI Advance */}
+              <div className="p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl flex items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 shrink-0">
+                    <QrCode size={16} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--text-primary)]">Direct UPI Advance / Dynamic QR</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Enables dynamic UPI intent links (GPay, PhonePe, Paytm, BHIM) that transfer directly to your VPA.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPaymentSettings((prev) => ({ ...prev, acceptUpi: !prev.acceptUpi }))}
+                  className={cn(
+                    "w-12 h-6 rounded-full transition-colors relative shrink-0",
+                    paymentSettings.acceptUpi ? "bg-[var(--lime)]" : "bg-gray-800 border border-gray-700"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-5 h-5 rounded-full bg-black transition-transform absolute top-0.5",
+                      paymentSettings.acceptUpi ? "left-6 bg-black" : "left-0.5 bg-gray-400"
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="pt-4 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  setErrorMessage("");
+                  setSuccessMessage("");
+
+                  if (!paymentSettings.acceptVenue && !paymentSettings.acceptUpi) {
+                    setErrorMessage("Please accept at least one payment mode (Pay at Venue or Direct UPI).");
+                    return;
+                  }
+
+                  if (paymentSettings.acceptUpi && paymentSettings.upiId.trim()) {
+                    const vpaRegex = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+                    if (!vpaRegex.test(paymentSettings.upiId.trim())) {
+                      setErrorMessage("Invalid UPI ID format. Expected format: username@bankhandle (e.g. drsharma@okhdfcbank or 9876543210@paytm).");
+                      return;
+                    }
+                  }
+
+                  startTransition(async () => {
+                    try {
+                      const { updatePaymentSettingsAction } = await import("@/lib/actions/website");
+                      await updatePaymentSettingsAction({
+                        businessId: business.id,
+                        upiId: paymentSettings.upiId,
+                        beneficiaryName: paymentSettings.beneficiaryName,
+                        acceptVenue: paymentSettings.acceptVenue,
+                        acceptUpi: paymentSettings.acceptUpi,
+                      });
+                      setSuccessMessage("Payments & Settlement settings updated successfully!");
+                    } catch (err: any) {
+                      setErrorMessage(err.message || "Failed to update payment settings");
+                    }
+                  });
+                }}
+                disabled={isPending}
+                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--lime)] text-[var(--bg-void)] font-bold text-sm rounded-xl hover:bg-[var(--lime-hover)] transition-all disabled:opacity-60 shadow-[var(--lime-glow-sm)]"
+              >
+                {isPending ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Save Settlement Settings
               </button>
             </div>
           </div>

@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Phone, Clock, Star, CheckCircle2, ArrowRight, ArrowLeft, Loader2,
-  Calendar, User, Mail, MessageSquare, ChevronLeft, ChevronRight
+  Calendar, User, Mail, MessageSquare, ChevronLeft, ChevronRight, QrCode, Copy
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { generateAvailableTimeSlots } from "@/lib/engines/booking-engine";
@@ -23,6 +22,19 @@ const DAY_MAP: Record<string, number> = { SUN:0, MON:1, TUE:2, WED:3, THU:4, FRI
 type Step = "service" | "datetime" | "details" | "confirm" | "success";
 
 export default function BookingPageClient({ business, bookedSlots }: BookingPageClientProps) {
+  // Direct Merchant Settlement details from business config
+  const paymentSettings = (() => {
+    try {
+      const parsed = typeof business.websiteConfig === "string" ? JSON.parse(business.websiteConfig) : (business.websiteConfig || {});
+      return parsed.paymentSettings || {};
+    } catch {
+      return {};
+    }
+  })();
+  const acceptVenue = paymentSettings.acceptVenue !== false;
+  const acceptUpi = paymentSettings.acceptUpi !== false;
+  const initialPreference: "venue" | "upi" = !acceptVenue && acceptUpi ? "upi" : "venue";
+
   const [activeTab, setActiveTab] = useState<"book" | "enquire">("book");
   const [step, setStep] = useState<Step>("service");
   const [selectedService, setSelectedService] = useState<any>(null);
@@ -34,8 +46,11 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [isPending, startTransition] = useTransition();
-  const [paymentPreference, setPaymentPreference] = useState<"cash" | "online">("online");
+  const [paymentPreference, setPaymentPreference] = useState<"venue" | "upi">(initialPreference);
   const [paymentError, setPaymentError] = useState<string>("");
+
+  const merchantVpa = paymentSettings.upiId || (business.phone ? `${business.phone.replace(/[^0-9]/g, "")}@upi` : "");
+  const beneficiaryName = paymentSettings.beneficiaryName || business.name || "Business";
 
   // Enquiry Form State
   const [enquiryForm, setEnquiryForm] = useState({ name: "", phone: "", serviceName: "", message: "" });
@@ -98,8 +113,8 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
       try {
         const { createPublicBooking } = await import("@/lib/actions/booking");
         const isFree = (selectedService?.price || 0) === 0;
-        const isOnline = !isFree && paymentPreference === "online";
-        const selectedMethod = isFree ? "FREE" : isOnline ? "UPI" : "CASH_ON_DELIVERY";
+        const isUpi = !isFree && paymentPreference === "upi";
+        const selectedMethod = isFree ? "FREE" : isUpi ? "UPI" : "CASH_ON_DELIVERY";
 
         const booking = await createPublicBooking({
           businessId: business.id,
@@ -115,104 +130,8 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           paymentPreference: isFree ? "free" : paymentPreference,
         });
 
-        if (!isOnline) {
-          // Pay at venue / clinic or free appointment
-          setBookingResult(booking);
-          setStep("success");
-          return;
-        }
-
-        // Razorpay Online Payment Flow
-        const { loadRazorpayScript } = await import("@/lib/razorpay");
-        const isLoaded = await loadRazorpayScript();
-        if (!isLoaded || typeof window === "undefined" || !(window as any).Razorpay) {
-          setPaymentError("Unable to load Razorpay payment gateway. Please check your internet connection.");
-          return;
-        }
-
-        const orderRes = await fetch("/api/create-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            bookingId: booking.id,
-            amount: Math.round(selectedService.price * 100),
-            currency: "INR",
-            notes: {
-              bookingId: booking.id,
-              businessId: business.id,
-              customerName: form.name,
-              customerPhone: form.phone,
-              customerEmail: form.email || "",
-            },
-          }),
-        });
-
-        const orderData = await orderRes.json();
-        if (!orderRes.ok || !orderData.order_id) {
-          setPaymentError(orderData.error || "Failed to create payment order. Please try again.");
-          return;
-        }
-
-        const options = {
-          key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
-          amount: orderData.amount,
-          currency: orderData.currency || "INR",
-          name: business.name,
-          description: `${selectedService?.name || "Appointment"} Booking`,
-          order_id: orderData.order_id,
-          prefill: {
-            name: form.name,
-            contact: form.phone,
-            email: form.email || undefined,
-          },
-          theme: {
-            color: primaryColor || "#2563EB",
-          },
-          modal: {
-            escape: true,
-            backdropclose: false,
-            ondismiss: function () {
-              setPaymentError("Payment window was closed before completion. You can retry online payment or choose Pay at Venue.");
-            },
-          },
-          handler: async function (response: any) {
-            try {
-              const verifyRes = await fetch("/api/verify-payment", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  order_id: response.razorpay_order_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  bookingId: booking.id,
-                }),
-              });
-
-              const verifyData = await verifyRes.json();
-              if (verifyRes.ok && verifyData.success) {
-                setBookingResult({
-                  ...booking,
-                  status: "CONFIRMED",
-                  paymentStatus: "PAID",
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  paymentMethod: "UPI",
-                });
-                setStep("success");
-              } else {
-                setPaymentError(verifyData.error || "Payment verification failed. Please contact the business.");
-              }
-            } catch (vErr: any) {
-              setPaymentError(vErr.message || "Network error verifying payment.");
-            }
-          },
-        };
-
-        const rzp = new (window as any).Razorpay(options);
-        rzp.on("payment.failed", function (resp: any) {
-          setPaymentError(`Payment failed: ${resp.error?.description || "Transaction declined"}`);
-        });
-        rzp.open();
+        setBookingResult(booking);
+        setStep("success");
       } catch (err: any) {
         console.error("Booking failed:", err);
         setPaymentError(err.message || "We could not process your booking at this time. Please try another slot or refresh.");
@@ -227,7 +146,6 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
       className="min-h-screen"
       style={{ backgroundColor: "#F8FAFC", fontFamily: business.fontBody ?? "Inter, sans-serif" }}
     >
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       {/* Business Header */}
       <div className="shadow-sm" style={{ backgroundColor: primaryColor }}>
         <div className="max-w-2xl mx-auto px-4 py-6 text-white">
@@ -731,53 +649,57 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               {/* Payment Method Selector — shown for paid services */}
               {selectedService?.price > 0 && (
                 <div className="mb-4">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">How would you like to pay?</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => { setPaymentPreference("online"); setPaymentError(""); }}
-                      className={cn(
-                        "py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all text-left",
-                        paymentPreference === "online"
-                          ? "border-current text-white shadow-sm"
-                          : "border-gray-200 text-gray-600 bg-white hover:border-gray-400"
-                      )}
-                      style={paymentPreference === "online" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
-                    >
-                      💳 Pay Online
-                      <span className="block text-xs font-normal opacity-85">UPI, Cards, NetBanking</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setPaymentPreference("cash"); setPaymentError(""); }}
-                      className={cn(
-                        "py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all text-left",
-                        paymentPreference === "cash"
-                          ? "border-current text-white shadow-sm"
-                          : "border-gray-200 text-gray-600 bg-white hover:border-gray-400"
-                      )}
-                      style={paymentPreference === "cash" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
-                    >
-                      🏠 Pay at Venue
-                      <span className="block text-xs font-normal opacity-85">Cash / UPI on Arrival</span>
-                    </button>
+                  <p className="text-sm font-semibold text-gray-700 mb-2">How would you like to settle payment?</p>
+                  <div className={cn("grid gap-2", (acceptVenue || (!acceptVenue && !acceptUpi)) && acceptUpi ? "grid-cols-2" : "grid-cols-1")}>
+                    {(acceptVenue || (!acceptVenue && !acceptUpi)) && (
+                      <button
+                        type="button"
+                        onClick={() => { setPaymentPreference("venue"); setPaymentError(""); }}
+                        className={cn(
+                          "py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all text-left",
+                          paymentPreference === "venue"
+                            ? "border-current text-white shadow-sm"
+                            : "border-gray-200 text-gray-600 bg-white hover:border-gray-400"
+                        )}
+                        style={paymentPreference === "venue" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                      >
+                        🏠 Pay at Venue
+                        <span className="block text-xs font-normal opacity-85">Cash / UPI on Arrival</span>
+                      </button>
+                    )}
+                    {acceptUpi && (
+                      <button
+                        type="button"
+                        onClick={() => { setPaymentPreference("upi"); setPaymentError(""); }}
+                        className={cn(
+                          "py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all text-left",
+                          paymentPreference === "upi"
+                            ? "border-current text-white shadow-sm"
+                            : "border-gray-200 text-gray-600 bg-white hover:border-gray-400"
+                        )}
+                        style={paymentPreference === "upi" ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                      >
+                        ⚡ Direct UPI / QR
+                        <span className="block text-xs font-normal opacity-85">GPay, PhonePe, Paytm</span>
+                      </button>
+                    )}
                   </div>
 
-                  {paymentPreference === "online" && (
-                    <div className="mt-3 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 space-y-1">
-                      <div className="flex items-center gap-1.5 font-bold text-emerald-800">
-                        <CheckCircle2 size={14} /> Instant Confirmation via Razorpay
-                      </div>
-                      <p>
-                        Pay securely with any UPI app (GPay, PhonePe, Paytm), Credit/Debit Cards, or NetBanking.
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentPreference === "cash" && (
+                  {paymentPreference === "venue" && (acceptVenue || (!acceptVenue && !acceptUpi)) && (
                     <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 space-y-1">
                       <p className="font-semibold">🏠 Pay at Clinic / Salon</p>
                       <p>Pay {formatCurrency(selectedService.price)} via Cash or scan {business.name}&apos;s UPI QR code in person during your visit.</p>
+                    </div>
+                  )}
+
+                  {paymentPreference === "upi" && acceptUpi && (
+                    <div className="mt-3 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                        <CheckCircle2 size={14} className="text-emerald-700" /> Direct Merchant Settlement
+                      </div>
+                      <p>
+                        Transfer {formatCurrency(selectedService.price)} directly to {beneficiaryName} ({merchantVpa || `${business.phone}@upi`}) with zero platform intermediaries.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -797,9 +719,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                 style={{ backgroundColor: primaryColor }}
               >
                 {isPending ? (
-                  <><Loader2 size={18} className="animate-spin" /> Processing...</>
-                ) : (selectedService?.price || 0) > 0 && paymentPreference === "online" ? (
-                  <>Pay {formatCurrency(selectedService.price)} &amp; Confirm <ArrowRight size={18} /></>
+                  <><Loader2 size={18} className="animate-spin" /> Confirming...</>
                 ) : (
                   <>Confirm Booking <CheckCircle2 size={18} /></>
                 )}
@@ -822,7 +742,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               <h2 className="text-2xl font-black text-gray-900 mb-2">Booking Confirmed! 🎉</h2>
               <p className="text-gray-500 mb-6">Your appointment at {business.name} is confirmed.</p>
 
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 text-left space-y-3 max-w-sm mx-auto shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-200 p-5 text-left space-y-3 max-w-sm mx-auto shadow-sm mb-4">
                 <p className="font-bold text-center text-gray-700 mb-2 text-sm uppercase tracking-wider">Booking Details</p>
                 {[
                   { label: "Service", value: selectedService?.name },
@@ -832,13 +752,10 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                     label: "Payment Mode",
                     value: (selectedService?.price || 0) === 0
                       ? "Free Appointment"
-                      : bookingResult?.paymentStatus === "PAID"
-                      ? "Paid Online (Razorpay)"
-                      : `Pay at Venue (${formatCurrency(selectedService.price)})`,
+                      : bookingResult?.paymentMethod === "UPI"
+                      ? `Direct UPI (${formatCurrency(selectedService?.price)})`
+                      : `Pay at Venue (${formatCurrency(selectedService?.price)})`,
                   },
-                  bookingResult?.razorpayPaymentId
-                    ? { label: "Payment ID", value: bookingResult.razorpayPaymentId }
-                    : null,
                   { label: "Location", value: business.address ?? business.city ?? "Business address" },
                   { label: "Phone", value: business.phone },
                 ].filter(Boolean).map((item: any) => (
@@ -848,6 +765,55 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                   </div>
                 ))}
               </div>
+
+              {/* Direct Merchant UPI Intent & Dynamic QR */}
+              {bookingResult?.paymentMethod === "UPI" && (selectedService?.price || 0) > 0 && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-center space-y-3.5 max-w-sm mx-auto shadow-sm mb-4">
+                  <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                    <QrCode size={16} className="text-emerald-700" /> Direct Merchant Settlement
+                  </div>
+                  <p className="text-xs text-emerald-800">
+                    Scan or tap below to transfer <strong>{formatCurrency(selectedService.price)}</strong> directly to <strong>{beneficiaryName}</strong>.
+                  </p>
+
+                  {(() => {
+                    const upiUri = `upi://pay?pa=${encodeURIComponent(merchantVpa || `${business.phone}@upi`)}&pn=${encodeURIComponent(beneficiaryName)}&am=${selectedService.price}&cu=INR&tn=${encodeURIComponent(`Booking ${selectedService.name} - ${form.name}`)}`;
+                    return (
+                      <div className="space-y-3">
+                        <div className="bg-white p-3 rounded-2xl border border-emerald-200 inline-block shadow-sm">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiUri)}`}
+                            alt="Direct Merchant UPI QR"
+                            width={160}
+                            height={160}
+                            className="mx-auto"
+                          />
+                        </div>
+                        <div className="flex items-center justify-center gap-2 bg-white px-3 py-2 rounded-xl border border-emerald-200 text-xs font-mono text-gray-800">
+                          <span>UPI ID: {merchantVpa || `${business.phone}@upi`}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(merchantVpa || `${business.phone}@upi`);
+                              alert("Merchant UPI ID copied!");
+                            }}
+                            className="text-emerald-700 hover:text-emerald-900"
+                            title="Copy UPI ID"
+                          >
+                            <Copy size={13} />
+                          </button>
+                        </div>
+                        <a
+                          href={upiUri}
+                          className="w-full py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors shadow-sm"
+                        >
+                          ⚡ Open UPI App (GPay / PhonePe / Paytm)
+                        </a>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-2.5 max-w-sm mx-auto mt-5">

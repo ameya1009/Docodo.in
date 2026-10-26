@@ -16,52 +16,48 @@ export async function GET(req: NextRequest) {
     const slug = searchParams.get("slug");
     const date = searchParams.get("date");
 
-    // Authenticate via session, verified AI agent token, or server x-api-key
-    let businessId: string | undefined;
+    const requestedBizId = searchParams.get("businessId");
 
-    if (session?.user?.id) {
-      const biz = await prisma.business.findFirst({
-        where: { ownerId: session.user.id },
-        select: { id: true },
-      });
-      businessId = biz?.id;
-    } else if (agentToken) {
-      const verification = verifyAgentAccessToken(agentToken);
-      if (!verification.valid) {
-        return NextResponse.json(
-          { error: `Unauthorized AI Agent: ${verification.error}` },
-          { status: 401 }
-        );
-      }
-      const requestedBizId = searchParams.get("businessId");
-      const biz = slug
-        ? await prisma.business.findUnique({ where: { slug }, select: { id: true } })
-        : requestedBizId
-        ? await prisma.business.findUnique({ where: { id: requestedBizId }, select: { id: true } })
-        : null;
-      businessId = biz?.id;
-    } else if (apiKey) {
-      const validToken = process.env.DOCODO_API_KEY || process.env.INTERNAL_API_KEY || process.env.API_SECRET_KEY;
-      if (validToken && apiKey === validToken) {
-        const requestedBizId = searchParams.get("businessId");
-        const biz = slug
-          ? await prisma.business.findUnique({ where: { slug }, select: { id: true } })
-          : requestedBizId
-          ? await prisma.business.findUnique({ where: { id: requestedBizId }, select: { id: true } })
-          : null;
-        businessId = biz?.id;
-      }
-    }
-
-    if (!businessId) {
+    // 1. DPDP Act 2023 Enforcement: Block AI agents from accessing patient personal data
+    if (agentToken || isAiAgent(req.headers)) {
       return NextResponse.json(
         {
           error:
-            "Unauthorized: An authenticated merchant session, verified AI agent token (docodo_agy_*), or valid API key is required to view bookings.",
+            "Forbidden: AI Agents cannot access customer personal data, booking history, or patient records under the Digital Personal Data Protection Act 2023 (DPDP Act 2023). To check slot capacity and real-time availability, use GET /api/v1/availability.",
+          endpoint: "/api/v1/availability",
+          compliance: "DPDP_ACT_2023_DATA_MINIMIZATION",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Restrict GET /api/v1/bookings exclusively to authenticated merchant sessions
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          error:
+            "Unauthorized: An authenticated merchant session is required to view customer booking records.",
         },
         { status: 401 }
       );
     }
+
+    const biz = await prisma.business.findFirst({
+      where: {
+        ownerId: session.user.id,
+        ...(requestedBizId ? { id: requestedBizId } : slug ? { slug } : {}),
+      },
+      select: { id: true },
+    });
+
+    if (!biz) {
+      return NextResponse.json(
+        { error: "No business found for this authenticated merchant." },
+        { status: 404 }
+      );
+    }
+
+    const businessId = biz.id;
 
     const bookings = await prisma.booking.findMany({
       where: {
