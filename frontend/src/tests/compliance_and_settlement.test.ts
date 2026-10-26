@@ -50,7 +50,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
         scopes: ["book:appointments"],
       });
 
-      const req = new NextRequest("http://localhost:3000/api/v1/bookings?businessId=biz_1", {
+      const req = new NextRequest("https://docodo.in/api/v1/bookings?businessId=biz_1", {
         headers: {
           authorization: `Bearer ${token}`,
         },
@@ -64,7 +64,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
     });
 
     it("returns 403 Forbidden when an AI Agent User-Agent attempts GET /api/v1/bookings without session", async () => {
-      const req = new NextRequest("http://localhost:3000/api/v1/bookings?businessId=biz_1", {
+      const req = new NextRequest("https://docodo.in/api/v1/bookings?businessId=biz_1", {
         headers: {
           "user-agent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2; +https://openai.com/gptbot)",
         },
@@ -78,7 +78,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
     });
 
     it("returns 401 Unauthorized for unauthenticated GET /api/v1/bookings requests", async () => {
-      const req = new NextRequest("http://localhost:3000/api/v1/bookings?businessId=biz_1");
+      const req = new NextRequest("https://docodo.in/api/v1/bookings?businessId=biz_1");
       const res = await getBookings(req);
       expect(res.status).toBe(401);
       const data = await res.json();
@@ -86,7 +86,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
     });
 
     it("GET /api/v1/availability returns 400 when business identifier is omitted", async () => {
-      const req = new NextRequest("http://localhost:3000/api/v1/availability");
+      const req = new NextRequest("https://docodo.in/api/v1/availability");
       const res = await getAvailability(req);
       expect(res.status).toBe(400);
       const data = await res.json();
@@ -94,7 +94,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
     });
 
     it("GET /api/v1/availability returns 400 when date is malformed", async () => {
-      const req = new NextRequest("http://localhost:3000/api/v1/availability?slug=my-clinic&date=not-a-date");
+      const req = new NextRequest("https://docodo.in/api/v1/availability?slug=my-clinic&date=not-a-date");
       const res = await getAvailability(req);
       expect(res.status).toBe(400);
       const data = await res.json();
@@ -104,7 +104,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
 
   describe("P0-2: RBI PA Compliance & Direct Settlement Restrictions", () => {
     it("rejects appointment booking payments through platform Razorpay create-order route", async () => {
-      const req = new NextRequest("http://localhost:3000/api/create-order", {
+      const req = new NextRequest("https://docodo.in/api/create-order", {
         method: "POST",
         body: JSON.stringify({
           bookingId: "bk_customer_appointment_123",
@@ -121,7 +121,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
     });
 
     it("rejects orders without a valid SaaS subscription planId", async () => {
-      const req = new NextRequest("http://localhost:3000/api/create-order", {
+      const req = new NextRequest("https://docodo.in/api/create-order", {
         method: "POST",
         body: JSON.stringify({
           amount: 50000,
@@ -176,7 +176,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
   describe("P1-1: Reminder & Greetings Cron Authentication Invariants", () => {
     it("rejects unauthenticated requests to /api/cron/reminders with 401", async () => {
       process.env.CRON_SECRET = "secure_production_cron_secret_2026";
-      const req = new NextRequest("http://localhost:3000/api/cron/reminders");
+      const req = new NextRequest("https://docodo.in/api/cron/reminders");
       const res = await getRemindersCron(req);
       expect(res.status).toBe(401);
       const data = await res.json();
@@ -185,7 +185,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
 
     it("rejects unauthenticated requests to /api/cron/greetings with 401", async () => {
       process.env.CRON_SECRET = "secure_production_cron_secret_2026";
-      const req = new NextRequest("http://localhost:3000/api/cron/greetings");
+      const req = new NextRequest("https://docodo.in/api/cron/greetings");
       const res = await getGreetingsCron(req);
       expect(res.status).toBe(401);
       const data = await res.json();
@@ -194,7 +194,7 @@ describe("Commercial Compliance & Settlement Verification Suite", () => {
 
     it("rejects cron calls if CRON_SECRET is unset in production environment", async () => {
       delete process.env.CRON_SECRET;
-      const req = new NextRequest("http://localhost:3000/api/cron/reminders", {
+      const req = new NextRequest("https://docodo.in/api/cron/reminders", {
         headers: { authorization: "Bearer some_unauthorized_token" },
       });
       const res = await getRemindersCron(req);

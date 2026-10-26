@@ -193,7 +193,7 @@ describe("Mandatory AI Agent Protocol (DAAMP-2026) Suite", () => {
     });
 
     it("POST /api/ai-agents/register rejects missing agentName", async () => {
-      const req = new NextRequest("http://localhost:3000/api/ai-agents/register", {
+      const req = new NextRequest("https://docodo.in/api/ai-agents/register", {
         method: "POST",
         body: JSON.stringify({
           modelProvider: "Anthropic",
@@ -207,7 +207,7 @@ describe("Mandatory AI Agent Protocol (DAAMP-2026) Suite", () => {
     });
 
     it("POST /api/ai-agents/register rejects missing modelProvider", async () => {
-      const req = new NextRequest("http://localhost:3000/api/ai-agents/register", {
+      const req = new NextRequest("https://docodo.in/api/ai-agents/register", {
         method: "POST",
         body: JSON.stringify({
           agentName: "SchedulerBot",
@@ -221,7 +221,7 @@ describe("Mandatory AI Agent Protocol (DAAMP-2026) Suite", () => {
     });
 
     it("POST /api/ai-agents/register rejects invalid operatorEmail", async () => {
-      const req = new NextRequest("http://localhost:3000/api/ai-agents/register", {
+      const req = new NextRequest("https://docodo.in/api/ai-agents/register", {
         method: "POST",
         body: JSON.stringify({
           agentName: "SchedulerBot",
@@ -236,7 +236,7 @@ describe("Mandatory AI Agent Protocol (DAAMP-2026) Suite", () => {
     });
 
     it("POST /api/ai-agents/register issues signed token and DPDP compliance", async () => {
-      const req = new NextRequest("http://localhost:3000/api/ai-agents/register", {
+      const req = new NextRequest("https://docodo.in/api/ai-agents/register", {
         method: "POST",
         body: JSON.stringify({
           agentName: "Siri-Health-Assistant",
@@ -261,7 +261,7 @@ describe("Mandatory AI Agent Protocol (DAAMP-2026) Suite", () => {
     });
 
     it("GET /api/ai-agents/auth returns 401 when token is omitted", async () => {
-      const req = new NextRequest("http://localhost:3000/api/ai-agents/auth");
+      const req = new NextRequest("https://docodo.in/api/ai-agents/auth");
       const res = await getAuth(req);
       expect(res.status).toBe(401);
       const data = await res.json();
@@ -270,7 +270,7 @@ describe("Mandatory AI Agent Protocol (DAAMP-2026) Suite", () => {
 
     it("GET /api/ai-agents/auth authenticates valid Authorization header", async () => {
       const token = createAgentToken(samplePayload);
-      const req = new NextRequest("http://localhost:3000/api/ai-agents/auth", {
+      const req = new NextRequest("https://docodo.in/api/ai-agents/auth", {
         headers: {
           authorization: `Bearer ${token}`,
         },
@@ -284,7 +284,7 @@ describe("Mandatory AI Agent Protocol (DAAMP-2026) Suite", () => {
 
     it("POST /api/ai-agents/auth validates token in JSON body", async () => {
       const token = createAgentToken(samplePayload);
-      const req = new NextRequest("http://localhost:3000/api/ai-agents/auth", {
+      const req = new NextRequest("https://docodo.in/api/ai-agents/auth", {
         method: "POST",
         body: JSON.stringify({ token }),
       });

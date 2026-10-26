@@ -9,20 +9,11 @@ const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
-if (process.env.NODE_ENV === "production") {
-  if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.includes("localhost")) {
-    process.env.NEXTAUTH_URL = "https://docodo.in";
-  }
-  if (!process.env.AUTH_URL || process.env.AUTH_URL.includes("localhost")) {
-    process.env.AUTH_URL = "https://docodo.in";
-  }
-} else {
-  if (process.env.NEXTAUTH_URL?.includes("docodo.in")) {
-    delete process.env.NEXTAUTH_URL;
-  }
-  if (process.env.AUTH_URL?.includes("docodo.in")) {
-    delete process.env.AUTH_URL;
-  }
+if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.includes("localhost")) {
+  process.env.NEXTAUTH_URL = "https://docodo.in";
+}
+if (!process.env.AUTH_URL || process.env.AUTH_URL.includes("localhost")) {
+  process.env.AUTH_URL = "https://docodo.in";
 }
 
 function getAuthSecret(): string {

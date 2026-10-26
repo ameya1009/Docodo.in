@@ -40,7 +40,8 @@ export const defaultMetadata: Metadata = {
     // Brand & Long-tail Keywords
     "Docodo",
     "Docodo.in",
-    "salon booking software India",
+    "clinic booking software India",
+    "opd appointment scheduling",
     "appointment booking SaaS",
     "dental clinic software",
     "Razorpay booking gateway",

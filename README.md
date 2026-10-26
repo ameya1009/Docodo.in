@@ -97,7 +97,7 @@ cd frontend
 npx prisma db push
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [https://docodo.in](https://docodo.in) in your browser.
 
 ---
 
