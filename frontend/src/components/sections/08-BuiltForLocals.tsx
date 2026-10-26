@@ -4,14 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
-  Scissors, 
   Sparkles, 
   Stethoscope, 
-  Dumbbell, 
-  Trophy, 
-  GraduationCap, 
   HeartHandshake, 
-  Wrench,
   ArrowRight,
   Check
 } from "lucide-react";
@@ -19,14 +14,9 @@ import { VERTICALS } from "@/lib/constants";
 
 export const BuiltForLocals = () => {
   const iconMap: Record<string, any> = {
-    Scissors,
     Sparkles,
     Stethoscope,
-    Dumbbell,
-    Trophy,
-    GraduationCap,
     HeartHandshake,
-    Wrench,
   };
 
   return (
@@ -48,7 +38,7 @@ export const BuiltForLocals = () => {
         {/* Vertical Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {VERTICALS.map((v, idx) => {
-            const Icon = iconMap[v.icon] || Scissors;
+            const Icon = iconMap[v.icon] || Stethoscope;
             return (
               <motion.div
                 key={v.slug}

@@ -8,11 +8,16 @@ export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
 
+  // RBAC Guard: Receptionists cannot modify clinic settings or billing
+  if ((session.user as any)?.role === "RECEPTIONIST") {
+    redirect("/dashboard/bookings");
+  }
+
   let business: any = {
     id: "biz-default",
-    name: "My Business",
-    slug: "my-business",
-    industry: "Salons & Spas",
+    name: "My Clinic",
+    slug: "my-clinic",
+    industry: "Outpatient Clinics & Healthcare",
     services: [],
     staff: [],
     workingHours: [],

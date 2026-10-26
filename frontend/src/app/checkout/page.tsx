@@ -342,20 +342,20 @@ function CheckoutContent() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="rahul@salon.com"
+                    placeholder="dr.rahul@clinic.in"
                     className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-xl text-sm text-white placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--lime)]/60"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">
-                    Business Name (Optional)
+                    Clinic / Practice Name (Optional)
                   </label>
                   <input
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="e.g. Sharma Luxury Salon &amp; Spa"
+                    placeholder="e.g. Sharma Multi-Specialty Dental Clinic"
                     className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-xl text-sm text-white placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--lime)]/60"
                   />
                 </div>

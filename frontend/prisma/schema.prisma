@@ -15,7 +15,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?   // Hashed password for credentials login
-  role          String    @default("OWNER") // OWNER | MANAGER | STAFF
+  role          String    @default("OWNER") // OWNER | MANAGER | STAFF | RECEPTIONIST
   plan          String    @default("PILOT") // PILOT | STARTER | GROWTH | CONCIERGE
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -134,6 +134,7 @@ model Business {
   ndrDisputes  NDRDispute[]
   knowledgeBases KnowledgeBase[]
   conversations  Conversation[]
+  optOutLogs     OptOutLog[]
 
   // Real Subscriptions, Entitlements & Provisioning
   subscriptions       Subscription[]
@@ -327,8 +328,9 @@ model Booking {
   paymentStatus String   @default("UNPAID") // UNPAID | PARTIAL | PAID | COD_VERIFYING
   paymentMethod String?  @default("UPI")
   
-  reminderSent  Boolean  @default(false)
-  reviewSent    Boolean  @default(false)
+  reminderSent   Boolean  @default(false)
+  reminder2hSent Boolean  @default(false)
+  reviewSent     Boolean  @default(false)
   
   razorpayOrderId   String?  @unique
   razorpayPaymentId String?
@@ -350,7 +352,7 @@ model Booking {
 // ─── CRM (CUSTOMER RELATIONSHIP MANAGEMENT) ──────────────────────────────────
 
 model Customer {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   businessId    String
   name          String
   email         String?
@@ -358,11 +360,13 @@ model Customer {
   avatar        String?
   notes         String?
   tags          String?
-  lifetimeValue Float    @default(0)
-  visitCount    Int      @default(0)
-  source        String?  @default("WHATSAPP")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  lifetimeValue Float     @default(0)
+  visitCount    Int       @default(0)
+  source        String?   @default("WHATSAPP")
+  optedOut      Boolean   @default(false)
+  optOutAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   
   business      Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   bookings      Booking[]
@@ -768,3 +772,81 @@ model SupervisorRun {
   @@index([status])
   @@index([startedAt])
 }
+
+// ─── DPDP ACT 2023 COMPLIANCE & AUDIT TRAIL ──────────────────────────────────
+
+model OptOutLog {
+  id            String   @id @default(cuid())
+  businessId    String
+  customerPhone String
+  channel       String   @default("WHATSAPP") // WHATSAPP | SMS | EMAIL
+  reason        String?
+  createdAt     DateTime @default(now())
+
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, customerPhone])
+  @@index([createdAt])
+}
+
+// ─── PARTNER & AFFILIATE REVENUE SHARING ─────────────────────────────────────
+
+model Partner {
+  id              String             @id @default(cuid())
+  name            String
+  email           String             @unique
+  phone           String
+  referralCode    String             @unique
+  upiId           String?
+  status          String             @default("ACTIVE") // ACTIVE | PENDING | SUSPENDED
+  commissionRate  Float              @default(20.0)
+  totalEarned     Float              @default(0.0)
+  totalPaid       Float              @default(0.0)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  referrals       Referral[]
+  commissions     CommissionLedger[]
+
+  @@index([referralCode])
+  @@index([status])
+}
+
+model Referral {
+  id              String             @id @default(cuid())
+  partnerId       String
+  businessId      String?
+  clinicName      String
+  doctorName      String
+  phone           String
+  email           String?
+  status          String             @default("PENDING") // PENDING | CONVERTED | REJECTED
+  convertedAt     DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  partner         Partner            @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  commissions     CommissionLedger[]
+
+  @@index([partnerId])
+  @@index([status])
+}
+
+model CommissionLedger {
+  id              String    @id @default(cuid())
+  partnerId       String
+  referralId      String?
+  amount          Float
+  currency        String    @default("INR")
+  status          String    @default("PENDING") // PENDING | APPROVED | PAID
+  payoutDate      DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  partner         Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  referral        Referral? @relation(fields: [referralId], references: [id])
+
+  @@index([partnerId, status])
+}
+

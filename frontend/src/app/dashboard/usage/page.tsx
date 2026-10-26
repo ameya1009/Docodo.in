@@ -12,6 +12,11 @@ export default async function UsagePage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/login");
 
+  // RBAC Guard: Receptionists cannot access subscriptions, usage or billing
+  if ((session.user as any)?.role === "RECEPTIONIST") {
+    redirect("/dashboard/bookings");
+  }
+
   const business = await prisma.business.findFirst({
     where: { ownerId: session.user.id },
     include: {

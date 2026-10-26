@@ -134,6 +134,100 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // 3.5. DPDP Act 2023 Compliance: Handle Opt-Out keywords (STOP, UNSUBSCRIBE, OPT OUT)
+    const normalizedBody = messageBody.trim().toUpperCase();
+    const isOptOutRequest =
+      normalizedBody === "STOP" ||
+      normalizedBody === "UNSUBSCRIBE" ||
+      normalizedBody === "OPT OUT" ||
+      normalizedBody === "OPT-OUT" ||
+      normalizedBody === "OPTOUT";
+
+    if (isOptOutRequest) {
+      console.log(`[WhatsApp Webhook] Opt-out requested by ${fromPhone} for business ${business.id}`);
+
+      // Mark customer as opted out
+      await prisma.customer.updateMany({
+        where: {
+          businessId: business.id,
+          phone: { contains: fromPhone.slice(-10) },
+        },
+        data: {
+          optedOut: true,
+          optOutAt: new Date(),
+        },
+      });
+
+      // Record in OptOutLog audit trail
+      await prisma.optOutLog.create({
+        data: {
+          businessId: business.id,
+          customerPhone: fromPhone,
+          channel: "WHATSAPP",
+          reason: messageBody.trim(),
+        },
+      });
+
+      // Also pause bot in conversation so no further automated messages are dispatched
+      await prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { isBotPaused: true },
+      });
+
+      const optOutConfirmation = `You have been successfully unsubscribed from automated appointment notifications from ${business.name} in compliance with the DPDP Act 2023. You will receive no further automated messages. Reply 'START' if you ever wish to opt back in.`;
+
+      // Record confirmation message in chat thread
+      await prisma.chatMessage.create({
+        data: {
+          conversationId: conversation.id,
+          sender: "BOT",
+          text: optOutConfirmation,
+          status: "SENT",
+        },
+      });
+
+      // Dispatch single final confirmation via WhatsApp
+      await DocodoBackendAPI.dispatchWhatsAppMessage({
+        businessId: business.id,
+        recipientPhone: fromPhone,
+        messageType: "BROADCAST",
+        customMessage: optOutConfirmation,
+      }).catch((err) => {
+        console.warn("[WhatsApp Webhook] Opt-out confirmation dispatch notice:", err);
+      });
+
+      return NextResponse.json({ status: "OPTED_OUT_SUCCESS" }, { status: 200 });
+    }
+
+    // Check if customer is currently opted-out; if so, halt future automated messages
+    const customer = await prisma.customer.findFirst({
+      where: {
+        businessId: business.id,
+        phone: { contains: fromPhone.slice(-10) },
+      },
+    });
+
+    if (customer?.optedOut && normalizedBody !== "START") {
+      console.log(`[WhatsApp Webhook] Customer ${fromPhone} is opted-out. Halting automated messages.`);
+      return NextResponse.json({ status: "HALTED_CUSTOMER_OPTED_OUT" }, { status: 200 });
+    } else if (customer?.optedOut && normalizedBody === "START") {
+      // Re-subscribe if requested
+      await prisma.customer.updateMany({
+        where: {
+          businessId: business.id,
+          phone: { contains: fromPhone.slice(-10) },
+        },
+        data: {
+          optedOut: false,
+          optOutAt: null,
+        },
+      });
+      await prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { isBotPaused: false },
+      });
+    }
+
     // 4. Human Handoff Check: Has staff paused the bot?
     const lowerMessage = messageBody.toLowerCase();
     const isHumanRequest =

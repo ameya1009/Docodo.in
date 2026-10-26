@@ -48,7 +48,7 @@ export const HERO_CONTENT = {
 
 export const PROBLEM_SECTION = {
   headline: "The Empty Consultation Chair: How Clinics Lose Revenue Daily",
-  subheadline: "Third-party aggregators bid against your own clinic, while unconfirmed phone calls lead to 25%+ missed patient appointments.",
+  subheadline: "Third-party aggregators bid against your own clinic, while unconfirmed phone calls lead to high rates of missed patient appointments.",
   flow: [
     { title: "Patient Searches Your Clinic", desc: "Searches on Google / WhatsApp", icon: "Instagram" },
     { title: "Aggregator Shows Rivals", desc: "Practo displays rival doctors", icon: "MessageSquare" },
@@ -64,7 +64,7 @@ export const PROBLEM_SECTION = {
     },
     {
       id: "no-shows",
-      title: "25%+ Patient No-Show Rates",
+      title: "Frequent Patient No-Show Rates",
       desc: "Patients book over phone and forget. Without UPI token deposits or automated WhatsApp reminders, consultation slots sit empty.",
       icon: "BellOff",
     },
@@ -258,7 +258,7 @@ export const VERTICALS = [
   },
   {
     id: "dermatology",
-    slug: "spas",
+    slug: "dermatology",
     name: "Dermatology & Skin Clinics",
     icon: "Sparkles",
     tagline: "Consultations + Laser Sessions + WhatsApp Reminders",
@@ -268,7 +268,7 @@ export const VERTICALS = [
   },
   {
     id: "general-physicians",
-    slug: "local-service-businesses",
+    slug: "general-physicians",
     name: "General Physicians & OPD",
     icon: "Stethoscope",
     tagline: "Queue-Free OPD + Slot Booking + Follow-Ups",
@@ -278,7 +278,7 @@ export const VERTICALS = [
   },
   {
     id: "physiotherapy",
-    slug: "trainers",
+    slug: "physiotherapy",
     name: "Physiotherapy & Rehab Centers",
     icon: "HeartHandshake",
     tagline: "1-on-1 Rehab Slots + Treatment Packages",
@@ -288,7 +288,7 @@ export const VERTICALS = [
   },
   {
     id: "pediatrics",
-    slug: "beauty-businesses",
+    slug: "pediatrics",
     name: "Pediatrics & Child Care Clinics",
     icon: "HeartHandshake",
     tagline: "Child OPD + Vaccination Slot Management",
@@ -298,7 +298,7 @@ export const VERTICALS = [
   },
   {
     id: "ayurveda",
-    slug: "salons",
+    slug: "ayurveda",
     name: "Ayurveda & Holistic Clinics",
     icon: "Sparkles",
     tagline: "Nadi Parikshan + Panchakarma Schedules",
@@ -308,7 +308,7 @@ export const VERTICALS = [
   },
   {
     id: "orthopedics",
-    slug: "gyms",
+    slug: "orthopedics",
     name: "Orthopedics & Joint Care",
     icon: "Stethoscope",
     tagline: "Specialist Consultations + X-Ray Reviews",
@@ -318,7 +318,7 @@ export const VERTICALS = [
   },
   {
     id: "polyclinics",
-    slug: "tutors",
+    slug: "polyclinics",
     name: "Specialty Polyclinics & Centers",
     icon: "Stethoscope",
     tagline: "Multi-Doctor Schedules + Shared Reception",
@@ -345,43 +345,51 @@ export const SOCIAL_PROOF = {
 export const FAQ_LIST = [
   {
     q: "What is Docodo?",
-    a: "Docodo is an all-in-one booking, customer management, and simple automation platform built specifically for Indian local service businesses like salons, clinics, gyms, tutors, and spas.",
+    a: "Docodo is an all-in-one patient appointment booking, customer management, and automated WhatsApp communication platform built specifically for Indian outpatient clinics, dental centers, and healthcare practitioners.",
   },
   {
     q: "Who is Docodo for?",
-    a: "Docodo is designed for appointment-based local business owners, service professionals, doctors, trainers, and freelancers who currently manage bookings through WhatsApp messages, phone calls, or physical notebooks.",
+    a: "Docodo is designed for doctors, outpatient clinics, polyclinics, and healthcare specialists who currently manage appointments through WhatsApp messages, phone calls, or physical paper registers.",
+  },
+  {
+    q: "Do our front-desk receptionists need technical skills?",
+    a: "No, 10-second walk-in booking and WhatsApp alerts require zero training.",
+  },
+  {
+    q: "Do WhatsApp messages come from our clinic's own number?",
+    a: "Yes, official WhatsApp Cloud API integration links directly to your clinic's business number.",
   },
   {
     q: "How long does setup take?",
-    a: "Under 15 minutes! You simply sign up, enter your business name, add your services with prices, configure your open hours, and your live booking link (docodo.in/book/your-slug) is immediately ready to share.",
+    a: "Under 15 minutes! You simply sign up, enter your clinic name, add consultation types with fees, configure OPD hours, and your live booking link (docodo.in/book/your-slug) is immediately ready to share.",
   },
   {
     q: "Do I need a separate website or domain?",
-    a: "No! Docodo hosts your professional, mobile-responsive booking storefront on docodo.in/book/your-business. You can also embed it into an existing website if you already have one.",
+    a: "No! Docodo hosts your professional, mobile-responsive booking storefront on docodo.in/book/your-clinic. You can also embed it into an existing website or Google Business Profile.",
   },
   {
-    q: "Can customers book through WhatsApp?",
-    a: "Yes! Every Docodo booking page includes an instant WhatsApp CTA. Plus, when clients book, they receive instant confirmation details on WhatsApp and SMS.",
+    q: "Can patients book through WhatsApp?",
+    a: "Yes! Every Docodo clinic booking page includes an instant WhatsApp CTA. Plus, when patients book, they receive instant confirmation tokens, clinic directions, and reminders on WhatsApp.",
   },
   {
-    q: "Can I manage and reschedule bookings from my phone?",
-    a: "Yes. Your merchant dashboard is 100% mobile-responsive. You can confirm appointments, mark clients as completed or no-show, reschedule slots, and block off break times on the fly.",
+    q: "Can I manage and reschedule appointments from my phone?",
+    a: "Yes. Your doctor dashboard is 100% mobile-responsive. You can confirm appointments, mark patients as completed or no-show, reschedule slots, and block off break times on the fly.",
   },
   {
-    q: "Can I see customer history and past visits?",
-    a: "Yes. The built-in CRM automatically tracks every customer by phone number, displaying their total visits, past appointment dates, services received, and lifetime spend.",
+    q: "Can I see patient history and past visits?",
+    a: "Yes. The built-in CRM automatically tracks every patient by phone number, displaying their total visits, past appointment dates, consultation history, and lifetime visit records.",
   },
   {
-    q: "Can I accept online payments like UPI and cards?",
-    a: "Yes. Docodo natively integrates with Razorpay to accept Google Pay, PhonePe, Paytm, credit/debit cards, and NetBanking. You can also allow Cash on Delivery (Pay at Clinic/Salon).",
+    q: "Can I accept online consultation fees like UPI and cards?",
+    a: "Yes. Docodo natively integrates with Razorpay to accept Google Pay, PhonePe, Paytm, credit/debit cards, and NetBanking. You can also allow Pay at Clinic (Cash / UPI at OPD counter).",
   },
   {
-    q: "Does Docodo work well on mobile for my customers?",
-    a: "Yes, 100%. The customer booking interface is mobile-first, lightweight, and requires no app downloads or password creation for your clients.",
+    q: "Does Docodo work well on mobile for my patients?",
+    a: "Yes, 100%. The patient booking interface is mobile-first, lightweight, and requires no app downloads or password creation for your patients.",
   },
   {
-    q: "Do customers need to download an app or create an account to book?",
-    a: "No! Customers simply open your link, choose a service, pick a date/time, enter their name and phone number, and book. Zero friction.",
+    q: "Do patients need to download an app or create an account to book?",
+    a: "No! Patients simply open your link, choose a consultation type, pick an available slot, enter their name and phone number, and confirm. Zero friction.",
   },
   {
     q: "Can I cancel my subscription anytime?",
@@ -389,15 +397,15 @@ export const FAQ_LIST = [
   },
   {
     q: "Is there a free plan to test the platform?",
-    a: "Yes! Our Pilot / Community plan is 100% free with ₹0 setup fees so you can experience how easy it is to receive online bookings.",
+    a: "Yes! Our Clinic Pilot plan is 100% free with ₹0 setup fees so you can experience how easy it is to receive online bookings.",
   },
   {
     q: "How does the WhatsApp AI Assistant work?",
-    a: "Our multi-provider AI assistant uses round-robin fallbacks (Groq, Gemini, Meta AI) to answer common FAQs in Hindi, Marathi, or English. You can pause the bot with 1 click anytime to speak directly to your client.",
+    a: "Our multi-provider AI assistant uses round-robin fallbacks (Groq, Gemini, Meta AI) to answer common clinic FAQs in Hindi, Marathi, or English. You or your receptionist can pause the bot with 1 click anytime to speak directly to your patient.",
   },
   {
-    q: "Is my customer data secure?",
-    a: "Yes. All data is isolated by multi-tenant business IDs, encrypted with TLS/SSL, and stored on Indian servers compliant with the Digital Personal Data Protection (DPDP) Act 2023.",
+    q: "Is patient data secure?",
+    a: "Yes. All data is isolated by multi-tenant clinic IDs, encrypted with TLS/SSL, and stored on Indian servers compliant with the Digital Personal Data Protection (DPDP) Act 2023.",
   },
 ];
 
@@ -433,17 +441,18 @@ export const FOOTER_LINKS = {
     { label: "Growth Tools", href: "/tools" },
   ],
   solutions: [
-    { label: "For Salons", href: "/for/salons" },
-    { label: "For Spas & Wellness", href: "/for/spas" },
-    { label: "For Clinics & Doctors", href: "/for/clinics" },
-    { label: "For Gyms & Fitness", href: "/for/gyms" },
-    { label: "For Personal Trainers", href: "/for/trainers" },
-    { label: "For Tutors & Academies", href: "/for/tutors" },
-    { label: "For Beauty Businesses", href: "/for/beauty-businesses" },
-    { label: "For Local Services", href: "/for/local-service-businesses" },
+    { label: "For Dental Clinics", href: "/for/clinics" },
+    { label: "For Dermatology & Skin", href: "/for/dermatology" },
+    { label: "For General Physicians & OPD", href: "/for/general-physicians" },
+    { label: "For Physiotherapy Centers", href: "/for/physiotherapy" },
+    { label: "For Pediatrics & Child Care", href: "/for/pediatrics" },
+    { label: "For Ayurveda & Wellness", href: "/for/ayurveda" },
+    { label: "For Orthopedics & Joint Care", href: "/for/orthopedics" },
+    { label: "For Specialty Polyclinics", href: "/for/polyclinics" },
   ],
   company: [
     { label: "About Docodo", href: "/about" },
+    { label: "Partner Program", href: "/partners" },
     { label: "Contact Us", href: "/contact" },
     { label: "Case Studies", href: "/case-studies" },
     { label: "Care Plans", href: "/care-plans" },
@@ -529,7 +538,7 @@ export const CARE_PLANS = [
     id: "starter",
     tier: "Starter",
     name: "WhatsApp Bot",
-    description: "For salons, clinics & cafes just getting started with automation.",
+    description: "For outpatient clinics and doctor practices just getting started with automated appointment management.",
     monthlyPrice: 2499,
     annualPrice: 1999,
     accent: "#6C9FFF",
@@ -590,42 +599,22 @@ export const CASE_STUDIES = [
   {
     id: "biogram-health",
     company: "BIOgram Health",
-    industry: "Healthcare",
-    metric: "40% fewer missed leads",
-    quote: "Before Docodo, we were losing leads at night constantly. Now our WhatsApp replies 24/7 and every lead is logged.",
-    before: "~15 missed leads/week",
-    after: "~2 missed leads/week",
+    industry: "Healthcare OPD",
+    metric: "40% fewer missed patient leads",
+    quote: "Before Docodo, we were losing patient leads at night constantly. Now our WhatsApp replies 24/7 and every lead is logged in our OPD queue.",
+    before: "~15 missed patient leads/week",
+    after: "~2 missed patient leads/week",
     plan: "Growth Care Plan",
   },
   {
     id: "patangankar-clinic",
     company: "Dr. Patangankar Clinic",
     industry: "Dental Clinic",
-    metric: "30% fewer no-shows",
-    quote: "The automated appointment reminder reduced no-shows dramatically. Patients love the WhatsApp confirmation.",
+    metric: "30% fewer appointment no-shows",
+    quote: "The automated appointment reminders reduced no-shows significantly. Patients appreciate the clear WhatsApp token and directions.",
     before: "6–8 no-shows/week",
     after: "3–4 no-shows/week",
     plan: "Starter Care Plan",
-  },
-  {
-    id: "viman-nagar-cafe",
-    company: "Viman Nagar Cafe",
-    industry: "F&B",
-    metric: "60 bookings in one day",
-    quote: "One WhatsApp broadcast for our Diwali offer. 60 table bookings in 24 hours. Zero ad spend.",
-    before: "Manual calls for every reservation",
-    after: "WhatsApp bot handles all bookings",
-    plan: "Growth Care Plan",
-  },
-  {
-    id: "baner-salon",
-    company: "Baner Salon",
-    industry: "Beauty & Wellness",
-    metric: "2× review count",
-    quote: "The auto review requester was the best feature. Our Google rating jumped from 3.8 to 4.6 in 30 days.",
-    before: "3.8 ★ (22 reviews)",
-    after: "4.6 ★ (51 reviews)",
-    plan: "Starter + Review Add-on",
   },
 ];
 

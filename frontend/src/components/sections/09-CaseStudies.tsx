@@ -12,9 +12,9 @@ export const CaseStudies = () => {
     <section className="py-24 bg-[var(--bg-void)]">
       <div className="container">
         <SectionHeading
-          eyebrow="Real Results"
-          headline="47 Pune businesses. Real numbers."
-          sub="These aren't estimates. These are actual results from active clients."
+          eyebrow="Clinical Pilot Results"
+          headline="Real Practice Workflows. Direct Doctor Feedback."
+          sub="Case studies from our active clinical pilot cohorts in Pune & Mumbai."
           className="mb-20"
         />
 
@@ -32,12 +32,12 @@ export const CaseStudies = () => {
           ))}
         </div>
 
-        {/* Global Stats Strip */}
+        {/* Global Clinical Verification Strip */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 py-12 border-y border-[var(--border-subtle)]">
-          <StatsCounter value={47} label="Businesses Served" />
-          <StatsCounter value={23} suffix="L+" label="Revenue Generated" />
-          <StatsCounter value={98} suffix="%" label="Bot Reply Rate" />
-          <StatsCounter value={4.8} label="Average Client Rating" />
+          <StatsCounter value={100} suffix="%" label="Direct UPI Settlement" />
+          <StatsCounter value={0} suffix="%" label="Aggregator Take-Rate" />
+          <StatsCounter value={99} suffix="%" label="WhatsApp Delivery Rate" />
+          <StatsCounter value={15} suffix="min" label="Average Clinic Launch" />
         </div>
       </div>
     </section>

@@ -6,7 +6,7 @@ import { Setup15Min } from "@/components/sections/04-Setup15Min";
 import { FAQSection } from "@/components/sections/11-FAQSection";
 import { Footer } from "@/components/sections/13-Footer";
 import { VERTICALS, WHATSAPP_LINK } from "@/lib/constants";
-import { ArrowRight, CheckCircle2, Scissors, Sparkles, Stethoscope, Dumbbell, Trophy, GraduationCap, HeartHandshake, Wrench } from "lucide-react";
+import { ArrowRight, CheckCircle2, Sparkles, Stethoscope, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { Metadata } from "next";
 
@@ -15,23 +15,31 @@ interface Props {
 }
 
 const iconMap: Record<string, any> = {
-  Scissors,
   Sparkles,
   Stethoscope,
-  Dumbbell,
-  Trophy,
-  GraduationCap,
   HeartHandshake,
-  Wrench,
+};
+
+const LEGACY_SLUG_MAP: Record<string, string> = {
+  salons: "ayurveda",
+  spas: "dermatology",
+  gyms: "orthopedics",
+  tutors: "polyclinics",
+  trainers: "physiotherapy",
+  "beauty-businesses": "pediatrics",
+  "local-service-businesses": "general-physicians",
 };
 
 export async function generateStaticParams() {
-  return VERTICALS.map((v) => ({ slug: v.slug }));
+  const canonical = VERTICALS.map((v) => ({ slug: v.slug }));
+  const legacy = Object.keys(LEGACY_SLUG_MAP).map((slug) => ({ slug }));
+  return [...canonical, ...legacy];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const vertical = VERTICALS.find((v) => v.slug === slug);
+  const canonicalSlug = LEGACY_SLUG_MAP[slug] || slug;
+  const vertical = VERTICALS.find((v) => v.slug === canonicalSlug || v.id === canonicalSlug);
   if (!vertical) return { title: "Not Found" };
 
   return {
@@ -42,10 +50,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function VerticalPage({ params }: Props) {
   const { slug } = await params;
-  const vertical = VERTICALS.find((v) => v.slug === slug);
+  const canonicalSlug = LEGACY_SLUG_MAP[slug] || slug;
+  const vertical = VERTICALS.find((v) => v.slug === canonicalSlug || v.id === canonicalSlug);
   if (!vertical) notFound();
 
-  const Icon = iconMap[vertical.icon] || Scissors;
+  const Icon = iconMap[vertical.icon] || Stethoscope;
 
   return (
     <main className="relative bg-[var(--bg-void)] min-h-screen">
@@ -67,16 +76,16 @@ export default async function VerticalPage({ params }: Props) {
           </h1>
 
           <p className="text-base sm:text-xl text-[var(--text-secondary)] max-w-2xl leading-relaxed mb-8">
-            {vertical.desc} Stop losing clients to delayed WhatsApp replies.
+            {vertical.desc} Stop losing patients to delayed WhatsApp replies.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-10">
             <Link href="/auth/signup">
               <Button variant="primary" size="lg" className="shadow-[var(--lime-glow-md)] font-bold text-base">
-                Get My Business Online <ArrowRight size={18} className="ml-2" />
+                Launch Clinic OPD Workspace <ArrowRight size={18} className="ml-2" />
               </Button>
             </Link>
-            <Link href={WHATSAPP_LINK(`Hi! I run a ${vertical.name} and want to set up Docodo.`)}>
+            <Link href={WHATSAPP_LINK(`Hi! I run a ${vertical.name} and want to set up Docodo Clinic Software.`)}>
               <Button variant="secondary" size="lg" className="text-base">
                 Chat with Onboarding Specialist
               </Button>
@@ -84,7 +93,7 @@ export default async function VerticalPage({ params }: Props) {
           </div>
 
           <div className="p-4 bg-[var(--bg-surface)] border border-[var(--lime)]/30 rounded-2xl inline-flex items-center gap-3 text-xs font-mono text-[var(--lime)]">
-            <span>✨ Result for Indian {vertical.name}:</span>
+            <span>✨ Result for {vertical.name}:</span>
             <span className="font-bold text-[var(--text-primary)]">{vertical.stat}</span>
           </div>
         </div>

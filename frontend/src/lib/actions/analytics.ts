@@ -11,9 +11,22 @@ export interface AnalyticsMetrics {
   avgLTV: number;
   conversionRate: number;
   weeklyTrends: Array<{ day: string; revenue: number; label: string; count: number }>;
+  noShowCount: number;
+  noShowRate: number;
+  lostRevenue: number;
 }
 
 export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "ALL" = "30D"): Promise<AnalyticsMetrics> {
+  const emptyTrends = [
+    { day: "Mon", revenue: 0, label: "₹0", count: 0 },
+    { day: "Tue", revenue: 0, label: "₹0", count: 0 },
+    { day: "Wed", revenue: 0, label: "₹0", count: 0 },
+    { day: "Thu", revenue: 0, label: "₹0", count: 0 },
+    { day: "Fri", revenue: 0, label: "₹0", count: 0 },
+    { day: "Sat", revenue: 0, label: "₹0", count: 0 },
+    { day: "Sun", revenue: 0, label: "₹0", count: 0 },
+  ];
+
   const session = await auth();
   if (!session?.user?.id) {
     return {
@@ -23,15 +36,10 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
       uniqueCustomers: 0,
       avgLTV: 0,
       conversionRate: 0,
-      weeklyTrends: [
-        { day: "Mon", revenue: 0, label: "₹0", count: 0 },
-        { day: "Tue", revenue: 0, label: "₹0", count: 0 },
-        { day: "Wed", revenue: 0, label: "₹0", count: 0 },
-        { day: "Thu", revenue: 0, label: "₹0", count: 0 },
-        { day: "Fri", revenue: 0, label: "₹0", count: 0 },
-        { day: "Sat", revenue: 0, label: "₹0", count: 0 },
-        { day: "Sun", revenue: 0, label: "₹0", count: 0 },
-      ],
+      weeklyTrends: emptyTrends,
+      noShowCount: 0,
+      noShowRate: 0,
+      lostRevenue: 0,
     };
   }
 
@@ -49,15 +57,10 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
         uniqueCustomers: 0,
         avgLTV: 0,
         conversionRate: 0,
-        weeklyTrends: [
-          { day: "Mon", revenue: 0, label: "₹0", count: 0 },
-          { day: "Tue", revenue: 0, label: "₹0", count: 0 },
-          { day: "Wed", revenue: 0, label: "₹0", count: 0 },
-          { day: "Thu", revenue: 0, label: "₹0", count: 0 },
-          { day: "Fri", revenue: 0, label: "₹0", count: 0 },
-          { day: "Sat", revenue: 0, label: "₹0", count: 0 },
-          { day: "Sun", revenue: 0, label: "₹0", count: 0 },
-        ],
+        weeklyTrends: emptyTrends,
+        noShowCount: 0,
+        noShowRate: 0,
+        lostRevenue: 0,
       };
     }
 
@@ -101,6 +104,9 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
     let completedBookings = 0;
     let totalBookings = bookings.length;
 
+    let noShowCount = 0;
+    let lostRevenue = 0;
+
     const daysMap: Record<string, { revenue: number; count: number }> = {
       Mon: { revenue: 0, count: 0 },
       Tue: { revenue: 0, count: 0 },
@@ -114,6 +120,11 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     for (const b of bookings) {
+      if (b.status === "NO_SHOW") {
+        noShowCount++;
+        lostRevenue += (b.price || 0);
+      }
+
       const isPaid = b.paymentStatus === "PAID" || b.paidAmount > 0;
       const isNotCancelled = b.status !== "CANCELLED" && b.status !== "NO_SHOW";
 
@@ -134,9 +145,9 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
       }
     }
 
-
     const avgLTV = customerCount > 0 ? Math.round(grossRevenue / customerCount) : 0;
     const conversionRate = totalBookings > 0 ? Math.round((completedBookings / totalBookings) * 100) : 0;
+    const noShowRate = totalBookings > 0 ? Math.round((noShowCount / totalBookings) * 100) : 0;
 
     const weeklyTrends = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => ({
       day,
@@ -153,6 +164,9 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
       avgLTV,
       conversionRate,
       weeklyTrends,
+      noShowCount,
+      noShowRate,
+      lostRevenue,
     };
   } catch (error) {
     console.error("[Analytics Engine] Failed to aggregate metrics:", error);
@@ -163,15 +177,10 @@ export async function getBusinessAnalytics(timeRange: "7D" | "30D" | "90D" | "AL
       uniqueCustomers: 0,
       avgLTV: 0,
       conversionRate: 0,
-      weeklyTrends: [
-        { day: "Mon", revenue: 0, label: "₹0", count: 0 },
-        { day: "Tue", revenue: 0, label: "₹0", count: 0 },
-        { day: "Wed", revenue: 0, label: "₹0", count: 0 },
-        { day: "Thu", revenue: 0, label: "₹0", count: 0 },
-        { day: "Fri", revenue: 0, label: "₹0", count: 0 },
-        { day: "Sat", revenue: 0, label: "₹0", count: 0 },
-        { day: "Sun", revenue: 0, label: "₹0", count: 0 },
-      ],
+      weeklyTrends: emptyTrends,
+      noShowCount: 0,
+      noShowRate: 0,
+      lostRevenue: 0,
     };
   }
 }

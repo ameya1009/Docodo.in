@@ -49,6 +49,14 @@ export function OfflineDetector() {
       setIsOffline(!navigator.onLine);
       checkConnectionSpeed();
 
+      // Register PWA service worker for offline appointment caching
+      if ("serviceWorker" in navigator && process.env.NODE_ENV !== "test") {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((reg) => console.log("[Docodo PWA] Service worker registered with scope:", reg.scope))
+          .catch((err) => console.warn("[Docodo PWA] Service worker registration notice:", err));
+      }
+
       window.addEventListener("online", handleOnline);
       window.addEventListener("offline", handleOffline);
 

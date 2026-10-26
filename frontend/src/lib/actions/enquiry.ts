@@ -119,3 +119,54 @@ export async function updateEnquiryStatus(
   revalidatePath("/dashboard");
   return updated;
 }
+
+export async function requestClinicDemoWalkthrough(formData: {
+  doctorName: string;
+  clinicName: string;
+  specialty: string;
+  phone: string;
+  preferredTime: string;
+  consultationRooms?: string;
+}) {
+  const { doctorName, clinicName, specialty, phone, preferredTime, consultationRooms } = formData;
+
+  if (!doctorName?.trim() || !phone?.trim()) {
+    throw new Error("Doctor name and mobile number are required for the live demo walkthrough.");
+  }
+
+  // Rate limit demo submissions per phone
+  const rateLimit = checkRateLimit(`demo_walkthrough:${phone.trim()}`, {
+    maxTokens: 3,
+    intervalMs: 60_000,
+  });
+  if (!rateLimit.allowed) {
+    throw new Error("A demo callback has already been requested for this number. Our doctor onboarding team will call you shortly.");
+  }
+
+  try {
+    // Locate system/pilot clinic business for logging, or first active business
+    const defaultBiz = await prisma.business.findFirst({
+      select: { id: true },
+    });
+
+    if (defaultBiz) {
+      await prisma.enquiry.create({
+        data: {
+          businessId: defaultBiz.id,
+          name: `${doctorName.trim()} (${clinicName.trim() || specialty})`,
+          phone: phone.trim(),
+          serviceName: `Live Demo: ${specialty}`,
+          message: `Specialty: ${specialty} | Rooms: ${consultationRooms || "1"} | Preferred Window: ${preferredTime}`,
+          status: "NEW",
+        },
+      });
+    }
+  } catch (err) {
+    console.warn("[Demo Walkthrough] Enquiry record logging notice:", err);
+  }
+
+  return {
+    success: true,
+    message: `Thank you, ${doctorName}! Our clinical specialist will call you at ${phone} during your preferred window (${preferredTime}) for your live 1-on-1 walkthrough.`,
+  };
+}

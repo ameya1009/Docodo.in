@@ -32,7 +32,7 @@ export default function TermsOfServicePage() {
               <CheckCircle size={18} className="text-[var(--lime)]" /> 1. Acceptance of Terms
             </h2>
             <p>
-              By registering an account, creating a business profile, or utilizing the booking links provided by Docodo Technologies Private Limited (&quot;Docodo&quot;), you agree to be bound by these Terms of Service. If you are registering on behalf of a salon, clinic, spa, gym, or commercial entity, you represent that you possess legal authority to bind that entity.
+              By registering an account, creating a business profile, or utilizing the booking links provided by Docodo Technologies Private Limited (&quot;Docodo&quot;), you agree to be bound by these Terms of Service. If you are registering on behalf of an outpatient clinic, medical practice, doctor's office, or healthcare entity, you represent that you possess legal authority to bind that entity.
             </p>
           </section>
 

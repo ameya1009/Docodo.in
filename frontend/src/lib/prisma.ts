@@ -65,7 +65,13 @@ const rawPrisma = globalThis.__prisma ?? createPrismaClient();
 // Ensure globalThis.__prisma is assigned in all environments to prevent connection pool proliferation under high concurrency / serverless lambdas.
 globalThis.__prisma = rawPrisma;
 
-export const prisma: PrismaClient = new Proxy(rawPrisma, {
+export const prisma: PrismaClient & {
+  optOutLog: any;
+  partner: any;
+  referral: any;
+  commissionLedger: any;
+  [key: string]: any;
+} = new Proxy(rawPrisma as any, {
   get(target: any, prop: string | symbol) {
     if (prop === "$transaction") {
       return async (arg: any, options?: any) => {

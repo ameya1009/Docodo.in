@@ -36,10 +36,10 @@ export default function ContactPage() {
               <MessageSquare size={13} /> 24/7 Dedicated Support
             </div>
             <h1 className="text-3xl sm:text-4xl font-black font-display text-white">
-              Let&apos;s scale your service business
+              Let&apos;s scale your clinic &amp; medical practice
             </h1>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Have questions about Docodo&apos;s 15-minute booking setup, payment settlements, or AI growth automation? Our team in Pune is here to help.
+              Have questions about Docodo&apos;s 15-minute doctor onboarding, zero-commission patient booking, or WhatsApp appointment reminders? Our clinical specialists in Pune are here to help.
             </p>
 
             <div className="space-y-4 pt-4">
@@ -132,7 +132,7 @@ export default function ContactPage() {
                     <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Email Address</label>
                     <input
                       type="email"
-                      placeholder="priya@salon.in"
+                      placeholder="dr.priya@clinic.in"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-xl text-sm text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--lime)]"
@@ -141,10 +141,10 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Business Details / Message</label>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Clinic Details / Message</label>
                   <textarea
                     rows={4}
-                    placeholder="Tell us about your salon, spa, or clinic and what you need..."
+                    placeholder="Tell us about your clinic specialty, OPD schedule, and appointment workflows..."
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-xl text-sm text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--lime)]"

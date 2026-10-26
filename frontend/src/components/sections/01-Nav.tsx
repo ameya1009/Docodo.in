@@ -44,7 +44,7 @@ export const Nav = () => {
             DOCODO
           </span>
           <span className="hidden sm:inline-block text-[10px] uppercase font-mono font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/30 shadow-[0_0_12px_rgba(255,255,255,0.25)]">
-            Clinical OS
+            Appointment & Patient-Communication Software
           </span>
         </Link>
 

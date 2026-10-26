@@ -118,7 +118,7 @@ export const Audit = () => {
                       <input 
                         {...register("businessName")}
                         className="w-full bg-[var(--bg-void)] border border-[var(--border-strong)] rounded-md py-3 px-4 outline-none focus:border-[var(--lime)]/50 transition-all text-sm"
-                        placeholder="e.g. Viman Nagar Cafe"
+                        placeholder="e.g. Apex Multi-Specialty Clinic"
                       />
                       {errors.businessName && <p className="text-red-500 text-[10px]">{errors.businessName.message}</p>}
                     </div>
@@ -127,7 +127,7 @@ export const Audit = () => {
                       <input 
                         {...register("name")}
                         className="w-full bg-[var(--bg-void)] border border-[var(--border-strong)] rounded-md py-3 px-4 outline-none focus:border-[var(--lime)]/50 transition-all text-sm"
-                        placeholder="Ameya K."
+                        placeholder="Dr. Sharma"
                       />
                       {errors.name && <p className="text-red-500 text-[10px]">{errors.name.message}</p>}
                     </div>
@@ -145,18 +145,18 @@ export const Audit = () => {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Business Type</label>
+                      <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Practice Specialty</label>
                       <select 
                         {...register("businessType")}
                         className="w-full bg-[var(--bg-void)] border border-[var(--border-strong)] rounded-md py-3 px-4 outline-none focus:border-[var(--lime)]/50 transition-all text-sm appearance-none"
                       >
                         <option value="">Select...</option>
-                        <option value="Clinic">Clinic</option>
-                        <option value="Salon">Salon</option>
-                        <option value="Cafe">Cafe</option>
-                        <option value="Coaching">Coaching</option>
-                        <option value="E-commerce">E-commerce</option>
-                        <option value="Other">Other</option>
+                        <option value="Dental Clinic">Dental Clinic</option>
+                        <option value="Dermatology & Skin">Dermatology &amp; Skin</option>
+                        <option value="General OPD & Physician">General OPD &amp; Physician</option>
+                        <option value="Physiotherapy & Rehab">Physiotherapy &amp; Rehab</option>
+                        <option value="Specialty Polyclinic">Specialty Polyclinic</option>
+                        <option value="Other Medical Specialty">Other Medical Specialty</option>
                       </select>
                     </div>
                     <div className="space-y-2">

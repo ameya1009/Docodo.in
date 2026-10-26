@@ -15,6 +15,7 @@ import { CustomerProof } from "@/components/sections/10-CustomerProof";
 import { FAQSection } from "@/components/sections/11-FAQSection";
 import { TrustSecurity } from "@/components/sections/12-TrustSecurity";
 import { Footer } from "@/components/sections/13-Footer";
+import { FloatingWhatsApp } from "@/components/ui/FloatingWhatsApp";
 import { useScrollReveal } from "@/hooks";
 
 export default function Home() {
@@ -61,6 +62,9 @@ export default function Home() {
 
       {/* 13. Comprehensive Footer */}
       <Footer />
+
+      {/* Floating Sticky WhatsApp Quick Chat */}
+      <FloatingWhatsApp />
     </main>
   );
 }

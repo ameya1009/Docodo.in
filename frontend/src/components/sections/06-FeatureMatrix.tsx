@@ -41,10 +41,10 @@ export const FeatureMatrix = () => {
             🛠️ Product Architecture
           </span>
           <h2 className="text-3xl sm:text-5xl font-display font-black text-[var(--text-primary)] tracking-tight mb-4">
-            Everything You Need to Run Your Service Business
+            Everything You Need to Run Your Medical Practice
           </h2>
           <p className="text-base sm:text-lg text-[var(--text-secondary)]">
-            Built ground-up for Indian clinics, salons, gyms, tutors, and local service professionals.
+            Built ground-up for Indian doctors, dental practices, specialty polyclinics, and healthcare practitioners.
           </p>
         </div>
 
