@@ -83,8 +83,10 @@ export class WebhookQueueManager {
    */
   private static async publishToQStash(eventId: string, eventType: string, payload: any) {
     try {
+      const rawUrl = process.env.NEXTAUTH_URL || "https://docodo.in";
+      const webhookBase = (!rawUrl || rawUrl.includes("localhost") || rawUrl.includes("127.0.0.1")) ? "https://docodo.in" : rawUrl;
       const qstashEndpoint = `${process.env.QSTASH_URL}/v2/publish/${encodeURIComponent(
-        `${process.env.NEXTAUTH_URL || "https://docodo.in"}/api/queue/process-webhook`
+        `${webhookBase}/api/queue/process-webhook`
       )}`;
 
       await fetch(qstashEndpoint, {

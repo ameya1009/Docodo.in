@@ -103,6 +103,22 @@ describe("Clinical Rebrand, SEO & Security Verification Tests", () => {
       expect(html).toContain("SGST (9.0%)");
       expect(html).toContain("Sharma Multi-Specialty Clinic");
       expect(html).toContain("Docodo Technologies Private Limited");
+      expect(html).toContain("https://docodo.in/dashboard");
+      expect(html).not.toContain("localhost");
+
+      // Verify activationUrl localhost sanitization
+      const localInvoice = generateInvoiceData({
+        clientName: "Dr. Aditi Sharma",
+        clientEmail: "aditi@sharmaclinic.in",
+        businessName: "Sharma Clinic",
+        planId: "PRO",
+        planName: "Growth",
+        amountPaid: 2499,
+        paymentId: "pay_1",
+        orderId: "order_1",
+        activationUrl: "http://localhost:3000/auth/reset-password?token=abc",
+      });
+      expect(localInvoice.activationUrl).toBe("https://docodo.in/auth/reset-password?token=abc");
     });
 
     it("generates secure forgot password reset HTML email with 60-min expiry", async () => {

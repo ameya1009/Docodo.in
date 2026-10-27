@@ -118,5 +118,27 @@ describe("Priority 2: Authentication Engine - Validation & Business Logic Tests"
       expect(getPostRegistrationTarget("pilot", null)).toBe("/onboarding");
       expect(getPostRegistrationTarget(null, "/dashboard/website")).toBe("/dashboard/website");
     });
+
+    it("enforces canonical https://docodo.in domain in authConfig authorized redirect when origin is localhost", async () => {
+      const { authConfig } = await import("../lib/auth.config");
+      const authorized = authConfig.callbacks?.authorized;
+      expect(typeof authorized).toBe("function");
+
+      if (typeof authorized === "function") {
+        const dummyReq = {
+          nextUrl: new URL("http://localhost:3000/dashboard/bookings"),
+          url: "http://localhost:3000/dashboard/bookings",
+        };
+        const res = (authorized as any)({
+          auth: null,
+          request: dummyReq,
+        });
+        expect(res).toBeDefined();
+        // Redirect target must be canonical https://docodo.in/auth/login and not localhost
+        const location = res.headers?.get("location");
+        expect(location).toContain("https://docodo.in/auth/login");
+        expect(location).not.toContain("localhost");
+      }
+    });
   });
 });

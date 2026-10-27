@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
           } catch {}
         }
         if (!reviewUrl && biz.slug) {
-          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+          const rawUrl = process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+          const baseUrl = (!rawUrl || rawUrl.includes("localhost") || rawUrl.includes("127.0.0.1")) ? "https://docodo.in" : rawUrl;
           reviewUrl = `${baseUrl}/book/${biz.slug}#reviews`;
         }
 

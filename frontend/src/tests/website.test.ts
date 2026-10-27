@@ -49,6 +49,11 @@ describe("Priority 5: Website Generator Engine - Validation & Configuration Test
       const snippet = generateEmbedSnippet("aura-spa", "https://docodo.in");
       expect(snippet).toContain('src="https://docodo.in/book/aura-spa?embed=true"');
       expect(snippet).toContain("iframe");
+
+      // Domain invariant: localhost is normalized to canonical https://docodo.in
+      const localSnippet = generateEmbedSnippet("aura-spa", "http://localhost:3000");
+      expect(localSnippet).toContain('src="https://docodo.in/book/aura-spa?embed=true"');
+      expect(localSnippet).not.toContain("localhost");
     });
   });
 });

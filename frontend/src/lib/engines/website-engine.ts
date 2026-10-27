@@ -44,5 +44,6 @@ export function serializeWebsiteConfig(config: Partial<WebsiteSectionsConfig>): 
 
 export function generateEmbedSnippet(slug: string, domain: string = "https://docodo.in"): string {
   const cleanSlug = slug || "your-business";
-  return `<iframe src="${domain}/book/${cleanSlug}?embed=true" width="100%" height="850" frameborder="0" style="border:none; overflow:hidden; border-radius:12px;" scrolling="no"></iframe>`;
+  const cleanDomain = (!domain || domain.includes("localhost") || domain.includes("127.0.0.1")) ? "https://docodo.in" : domain;
+  return `<iframe src="${cleanDomain}/book/${cleanSlug}?embed=true" width="100%" height="850" frameborder="0" style="border:none; overflow:hidden; border-radius:12px;" scrolling="no"></iframe>`;
 }

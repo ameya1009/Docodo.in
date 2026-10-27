@@ -36,7 +36,10 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
   const [copied, setCopied] = React.useState(false);
   const businessSlug = business?.slug || "my-business";
   const businessName = business?.name || "My Business";
-  const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/book/${businessSlug}`;
+  const appBase = (!process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL.includes("localhost") || process.env.NEXT_PUBLIC_APP_URL.includes("127.0.0.1"))
+    ? "https://docodo.in"
+    : process.env.NEXT_PUBLIC_APP_URL;
+  const bookingUrl = `${appBase}/book/${businessSlug}`;
 
   const handleEnquiryStatusChange = (enquiryId: string, newStatus: "NEW" | "CONTACTED" | "BOOKED" | "LOST") => {
     setEnquiries((prev) =>
@@ -528,7 +531,7 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
               <div className="px-6 py-12 text-center">
                 <Calendar size={32} className="mx-auto mb-3 text-[var(--text-disabled)]" />
                 <p className="text-sm text-[var(--text-muted)] mb-4">No upcoming bookings recorded today</p>
-                <Link href={`/book/${business.slug}`} target="_blank" className="inline-flex items-center gap-1.5 text-xs text-[var(--lime)] font-bold hover:underline">
+                <Link href={bookingUrl} target="_blank" className="inline-flex items-center gap-1.5 text-xs text-[var(--lime)] font-bold hover:underline">
                   Share your booking page <ExternalLink size={12} />
                 </Link>
               </div>
@@ -657,20 +660,25 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
             </h3>
             <p className="text-xs text-[var(--text-muted)] mb-3">Share on WhatsApp & Social Media to receive instant bookings</p>
             <div className="flex items-center gap-2 p-2.5 bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-default)]">
-              <span className="text-xs text-[var(--text-secondary)] truncate flex-1 font-mono">
+              <span className="text-xs text-[var(--text-secondary)] truncate flex-1 font-mono select-all">
                 {bookingUrl.replace("https://", "")}
               </span>
               <button
+                type="button"
                 onClick={handleCopy}
-                className="shrink-0 p-1.5 text-[var(--text-muted)] hover:text-[var(--lime)] transition-colors flex items-center gap-1"
+                className="shrink-0 min-h-[32px] px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] hover:bg-[var(--lime-ghost)] text-[var(--text-secondary)] hover:text-[var(--lime)] transition-colors flex items-center gap-1.5 text-xs font-semibold border border-[var(--border-subtle)]"
                 title="Copy Link"
               >
-                {copied ? <CheckCircle2 size={15} className="text-[var(--lime)]" /> : <Copy size={15} />}
-                {copied && <span className="text-[10px] text-[var(--lime)] font-bold">Copied!</span>}
+                {copied ? <CheckCircle2 size={13} className="text-[var(--lime)]" /> : <Copy size={13} />}
+                <span>{copied ? "Copied!" : "Copy"}</span>
               </button>
             </div>
-            <Link href={`/book/${business.slug}`} target="_blank" className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-[var(--lime)] border border-[var(--lime)]/30 rounded-xl hover:bg-[var(--lime)]/10 transition-colors">
-              <ExternalLink size={13} /> Open Live Page
+            <Link
+              href={bookingUrl}
+              target="_blank"
+              className="mt-3 w-full flex items-center justify-center gap-1.5 py-3 text-xs font-bold text-[var(--lime)] border border-[var(--lime)]/30 rounded-xl hover:bg-[var(--lime)]/10 transition-colors min-h-[44px] shadow-sm font-semibold"
+            >
+              <ExternalLink size={14} /> Open Live Page
             </Link>
           </div>
 

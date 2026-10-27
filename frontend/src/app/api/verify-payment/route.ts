@@ -236,7 +236,8 @@ export async function POST(req: NextRequest) {
               },
             });
 
-            const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+            const rawUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+            const appUrl = (!rawUrl || rawUrl.includes("localhost") || rawUrl.includes("127.0.0.1")) ? "https://docodo.in" : rawUrl;
             activationUrl = `${appUrl}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(emailToMatch)}&welcome=true`;
           } catch (tokErr) {
             console.warn("[Payment Verify] Activation token generation handled:", tokErr);

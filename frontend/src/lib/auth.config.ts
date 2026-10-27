@@ -15,10 +15,18 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const { pathname } = nextUrl;
 
+      // Resolve canonical origin: enforce https://docodo.in if origin is localhost, 127.0.0.1, or missing
+      const rawOrigin = (nextUrl.origin && !nextUrl.origin.includes("localhost") && !nextUrl.origin.includes("127.0.0.1"))
+        ? nextUrl.origin
+        : (process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in");
+      const canonicalOrigin = (!rawOrigin || rawOrigin.includes("localhost") || rawOrigin.includes("127.0.0.1"))
+        ? "https://docodo.in"
+        : rawOrigin;
+
       // Protect dashboard routes with explicit host redirect to avoid localhost fallback
       if (pathname.startsWith("/dashboard")) {
         if (!isLoggedIn) {
-          const redirectUrl = new URL("/auth/login", nextUrl.origin);
+          const redirectUrl = new URL("/auth/login", canonicalOrigin);
           redirectUrl.searchParams.set("callbackUrl", pathname);
           return NextResponse.redirect(redirectUrl);
         }
@@ -27,7 +35,7 @@ export const authConfig: NextAuthConfig = {
 
       // Redirect logged-in users away from login/signup auth pages
       if ((pathname === "/auth/login" || pathname === "/auth/signup") && isLoggedIn) {
-        return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
+        return NextResponse.redirect(new URL("/dashboard", canonicalOrigin));
       }
 
       return true;

@@ -32,7 +32,8 @@ export default function WebsiteClient({ business }: WebsiteClientProps) {
   const [saveMessage, setSaveMessage] = useState<string>("");
   const [isPending, startTransition] = useTransition();
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://docodo.in";
+  const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://docodo.in";
+  const appUrl = (!rawAppUrl || rawAppUrl.includes("localhost") || rawAppUrl.includes("127.0.0.1")) ? "https://docodo.in" : rawAppUrl;
   const bookingUrl = `${appUrl}/book/${business.slug}`;
   const embedCode = generateEmbedSnippet(business.slug, appUrl);
 

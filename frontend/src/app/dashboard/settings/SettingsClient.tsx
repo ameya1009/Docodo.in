@@ -216,27 +216,49 @@ export default function SettingsClient({ business }: SettingsClientProps) {
 
       {/* Status Feedback */}
       {successMessage && (
-        <div className="p-3 bg-[var(--success)]/15 border border-[var(--success)]/30 rounded-xl text-[var(--success)] text-xs flex items-center gap-2">
-          <Check size={16} /> {successMessage}
+        <div className="p-3.5 bg-[var(--success)]/15 border border-[var(--success)]/30 rounded-xl text-[var(--success)] text-xs flex items-center justify-between gap-2 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Check size={16} className="shrink-0" />
+            <span className="font-semibold">{successMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessMessage("")}
+            className="text-[var(--success)] hover:opacity-75 w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg hover:bg-[var(--success)]/10 transition-colors"
+            aria-label="Dismiss message"
+          >
+            ✕
+          </button>
         </div>
       )}
       {errorMessage && (
-        <div className="p-3 bg-[var(--danger)]/15 border border-[var(--danger)]/30 rounded-xl text-[var(--danger)] text-xs flex items-center gap-2">
-          <AlertCircle size={16} /> {errorMessage}
+        <div className="p-3.5 bg-[var(--danger)]/15 border border-[var(--danger)]/30 rounded-xl text-[var(--danger)] text-xs flex items-center justify-between gap-2 shadow-sm">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={16} className="shrink-0" />
+            <span className="font-semibold">{errorMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setErrorMessage("")}
+            className="text-[var(--danger)] hover:opacity-75 w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg hover:bg-[var(--danger)]/10 transition-colors"
+            aria-label="Dismiss error"
+          >
+            ✕
+          </button>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-[var(--bg-elevated)] rounded-xl w-fit flex-wrap">
+      <div className="flex gap-1.5 p-1.5 bg-[var(--bg-elevated)] rounded-2xl w-full sm:w-fit flex-wrap border border-[var(--border-subtle)]">
         {(["services", "hours", "staff", "automations", "payments"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-semibold transition-all capitalize",
+              "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all capitalize min-h-[40px] flex items-center justify-center",
               activeTab === tab
-                ? "bg-[var(--bg-surface)] text-[var(--lime)] shadow-sm"
-                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                ? "bg-[var(--bg-surface)] text-[var(--lime)] shadow-sm border border-[var(--lime)]/30"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]/50"
             )}
           >
             {tab === "hours" ? "Working Hours" : tab === "automations" ? "Automations" : tab === "payments" ? "Payments & Payouts" : tab.charAt(0).toUpperCase() + tab.slice(1)}

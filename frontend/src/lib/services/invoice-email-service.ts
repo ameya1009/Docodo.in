@@ -63,7 +63,9 @@ export function generateInvoiceData(params: {
     amountPaid: params.amountPaid,
     currency: "INR",
     paymentMethod: "Razorpay (UPI / NetBanking / Cards)",
-    activationUrl: params.activationUrl,
+    activationUrl: params.activationUrl
+      ? params.activationUrl.replace(/^https?:\/\/(localhost(:\d+)?|127\.0\.0\.1(:\d+)?)/, "https://docodo.in")
+      : undefined,
   };
 }
 
@@ -76,7 +78,8 @@ export function generateTaxInvoiceHtml(invoice: InvoiceDetails): string {
   const cgst = Math.round((totalTax / 2) * 100) / 100;
   const sgst = Math.round((totalTax / 2) * 100) / 100;
 
-  const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+  const rawUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+  const appUrl = (!rawUrl || rawUrl.includes("localhost") || rawUrl.includes("127.0.0.1")) ? "https://docodo.in" : rawUrl;
   const dashboardUrl = `${appUrl}/dashboard`;
 
   return `

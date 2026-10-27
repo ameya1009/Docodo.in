@@ -234,7 +234,7 @@ describe("Docodo Commercial Tier Delivery Features Verification Suite", () => {
         reviewSent: true,
       });
 
-      const req = new NextRequest("http://localhost:3000/api/reviews/automation", {
+      const req = new NextRequest("https://docodo.in/api/reviews/automation", {
         method: "POST",
         body: JSON.stringify({ bookingId: "book_api_1" }),
       });
@@ -263,7 +263,7 @@ describe("Docodo Commercial Tier Delivery Features Verification Suite", () => {
     it("returns 404 in /api/reviews/automation when booking does not exist", async () => {
       mockPrisma.booking.findUnique.mockResolvedValue(null);
 
-      const req = new NextRequest("http://localhost:3000/api/reviews/automation", {
+      const req = new NextRequest("https://docodo.in/api/reviews/automation", {
         method: "POST",
         body: JSON.stringify({ bookingId: "book_missing" }),
       });
@@ -278,7 +278,7 @@ describe("Docodo Commercial Tier Delivery Features Verification Suite", () => {
         businessId: "biz_OTHER_999",
       });
 
-      const req = new NextRequest("http://localhost:3000/api/reviews/automation", {
+      const req = new NextRequest("https://docodo.in/api/reviews/automation", {
         method: "POST",
         body: JSON.stringify({ bookingId: "book_foreign" }),
       });

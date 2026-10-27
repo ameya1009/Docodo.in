@@ -48,6 +48,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
   const [isPending, startTransition] = useTransition();
   const [paymentPreference, setPaymentPreference] = useState<"venue" | "upi">(initialPreference);
   const [paymentError, setPaymentError] = useState<string>("");
+  const [copiedUpi, setCopiedUpi] = useState<boolean>(false);
 
   const merchantVpa = paymentSettings.upiId || (business.phone ? `${business.phone.replace(/[^0-9]/g, "")}@upi` : "");
   const beneficiaryName = paymentSettings.beneficiaryName || business.name || "Business";
@@ -363,7 +364,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full py-4 rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-95 transition-opacity disabled:opacity-50"
+                  className="w-full py-4 min-h-[48px] rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-95 transition-opacity disabled:opacity-50 shadow-sm"
                   style={{ backgroundColor: primaryColor }}
                 >
                   {isPending ? <Loader2 size={18} className="animate-spin" /> : "Send Enquiry to Business"}
@@ -396,8 +397,17 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
 
               <div className="space-y-3">
                 {activeServices.length === 0 ? (
-                  <div className="text-center py-10 text-gray-400 bg-white rounded-2xl border border-gray-100 p-6">
-                    <p className="text-sm font-medium">No matching services found.</p>
+                  <div className="text-center py-10 text-gray-400 bg-white rounded-2xl border border-gray-100 p-6 space-y-3">
+                    <p className="text-sm font-medium text-gray-600">No matching services found.</p>
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold transition-colors"
+                      >
+                        Clear search filter
+                      </button>
+                    )}
                   </div>
                 ) : (
                   activeServices.map((service: any) => (
@@ -438,7 +448,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setSelectedStaff(null)}
-                      className={cn("px-4 py-2 rounded-xl text-sm font-semibold border transition-all", !selectedStaff ? "text-white" : "border-gray-200 text-gray-600")}
+                      className={cn("px-4 py-2 rounded-xl text-sm font-semibold border transition-all min-h-[40px]", !selectedStaff ? "text-white" : "border-gray-200 text-gray-600")}
                       style={!selectedStaff ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
                     >
                       Any Staff
@@ -447,7 +457,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                       <button
                         key={s.id}
                         onClick={() => setSelectedStaff(s)}
-                        className={cn("px-4 py-2 rounded-xl text-sm font-semibold border transition-all", selectedStaff?.id === s.id ? "text-white" : "border-gray-200 text-gray-600")}
+                        className={cn("px-4 py-2 rounded-xl text-sm font-semibold border transition-all min-h-[40px]", selectedStaff?.id === s.id ? "text-white" : "border-gray-200 text-gray-600")}
                         style={selectedStaff?.id === s.id ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
                       >
                         {s.name}
@@ -462,8 +472,12 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           {/* Step 2: Date & Time */}
           {step === "datetime" && (
             <motion.div key="datetime" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <button onClick={() => setStep("service")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors">
-                <ArrowLeft size={16} /> Back
+              <button
+                type="button"
+                onClick={() => setStep("service")}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 mb-4 transition-colors py-1.5 px-3 rounded-xl hover:bg-gray-100"
+              >
+                <ArrowLeft size={15} /> Back to Services
               </button>
               <h2 className="text-xl font-black text-gray-900 mb-1">Select Date &amp; Time</h2>
               <p className="text-sm text-gray-500 mb-5">
@@ -471,19 +485,30 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               </p>
 
               {/* Calendar strip */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-4">
+              <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-4 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <button onClick={() => setCalendarOffset(Math.max(0, calendarOffset - 1))} disabled={calendarOffset === 0} className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-40">
+                  <button
+                    type="button"
+                    onClick={() => setCalendarOffset(Math.max(0, calendarOffset - 1))}
+                    disabled={calendarOffset === 0}
+                    aria-label="Previous 14 days"
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
                     <ChevronLeft size={18} />
                   </button>
-                  <span className="text-sm font-bold text-gray-700">
+                  <span className="text-sm font-bold text-gray-800">
                     {MONTHS[calendarDays[0].getMonth()]} {calendarDays[0].getFullYear()}
                   </span>
-                  <button onClick={() => setCalendarOffset(calendarOffset + 1)} className="p-1.5 rounded-lg hover:bg-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setCalendarOffset(calendarOffset + 1)}
+                    aria-label="Next 14 days"
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
+                  >
                     <ChevronRight size={18} />
                   </button>
                 </div>
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-7 gap-1.5">
                   {calendarDays.map((d) => {
                     const dateStr = d.toISOString().split("T")[0];
                     const isOpen = isDayOpen(d);
@@ -496,15 +521,19 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                         disabled={!isOpen || isPast}
                         onClick={() => { setSelectedDate(dateStr); setSelectedTime(""); }}
                         className={cn(
-                          "flex flex-col items-center py-2 px-1 rounded-xl text-xs font-semibold transition-all",
-                          isSelected ? "text-white" : isOpen && !isPast ? "text-gray-700 hover:bg-gray-100" : "text-gray-300 cursor-not-allowed"
+                          "flex flex-col items-center py-2.5 px-1 rounded-xl text-xs font-semibold transition-all min-h-[50px] justify-center",
+                          isSelected
+                            ? "text-white shadow-sm"
+                            : isOpen && !isPast
+                            ? "text-gray-700 hover:bg-gray-100 active:scale-95"
+                            : "text-gray-300 cursor-not-allowed opacity-40"
                         )}
                         style={isSelected ? { backgroundColor: primaryColor } : {}}
                       >
-                        <span className="text-[10px] mb-1">{DAYS[d.getDay()]}</span>
-                        <span>{d.getDate()}</span>
+                        <span className="text-[10px] mb-1 font-mono">{DAYS[d.getDay()]}</span>
+                        <span className="font-bold text-sm leading-none">{d.getDate()}</span>
                         {isOpen && !isPast && (
-                          <span className="w-1 h-1 rounded-full mt-1" style={{ backgroundColor: isSelected ? "white" : slots.length > 0 ? primaryColor : "#D1D5DB" }} />
+                          <span className="w-1.5 h-1.5 rounded-full mt-1.5" style={{ backgroundColor: isSelected ? "white" : slots.length > 0 ? primaryColor : "#D1D5DB" }} />
                         )}
                       </button>
                     );
@@ -514,20 +543,20 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
 
               {/* Time slots */}
               {selectedDate && (
-                <div className="bg-white rounded-2xl border border-gray-200 p-4">
-                  <h3 className="text-sm font-bold text-gray-700 mb-3">
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+                  <h3 className="text-sm font-bold text-gray-800 mb-3">
                     Available Times — {new Date(selectedDate + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
                   </h3>
                   {getAvailableSlots(selectedDate).length === 0 ? (
-                    <p className="text-sm text-gray-400 py-4 text-center">No available slots for this day</p>
+                    <p className="text-sm text-gray-400 py-6 text-center font-medium">No available slots for this day</p>
                   ) : (
-                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                       {getAvailableSlots(selectedDate).map((slot) => (
                         <button
                           key={slot}
                           onClick={() => setSelectedTime(slot)}
-                          className={cn("py-2 rounded-xl text-sm font-semibold border transition-all",
-                            selectedTime === slot ? "text-white" : "border-gray-200 text-gray-700 hover:border-gray-400"
+                          className={cn("py-2.5 px-2 rounded-xl text-sm font-semibold border transition-all min-h-[42px] flex items-center justify-center active:scale-95",
+                            selectedTime === slot ? "text-white shadow-sm" : "border-gray-200 text-gray-700 hover:border-gray-400 bg-white"
                           )}
                           style={selectedTime === slot ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
                         >
@@ -542,7 +571,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               {selectedDate && selectedTime && (
                 <button
                   onClick={() => setStep("details")}
-                  className="w-full mt-4 py-4 rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                  className="w-full mt-4 py-4 min-h-[48px] rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
                   style={{ backgroundColor: primaryColor }}
                 >
                   Continue <ArrowRight size={18} />
@@ -554,8 +583,12 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           {/* Step 3: Customer Details */}
           {step === "details" && (
             <motion.div key="details" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <button onClick={() => setStep("datetime")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors">
-                <ArrowLeft size={16} /> Back
+              <button
+                type="button"
+                onClick={() => setStep("datetime")}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 mb-4 transition-colors py-2 px-3.5 rounded-xl hover:bg-gray-100 min-h-[40px]"
+              >
+                <ArrowLeft size={15} /> Back to Date &amp; Time
               </button>
               <h2 className="text-xl font-black text-gray-900 mb-1">Your Details</h2>
               <p className="text-sm text-gray-500 mb-5">We&apos;ll send your confirmation to these details</p>
@@ -598,7 +631,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
 
                 <button
                   onClick={() => { if (validateDetails()) setStep("confirm"); }}
-                  className="w-full py-4 rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                  className="w-full py-4 min-h-[48px] rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
                   style={{ backgroundColor: primaryColor }}
                 >
                   Review Booking <ArrowRight size={18} />
@@ -610,8 +643,12 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
           {/* Step 4: Confirm */}
           {step === "confirm" && (
             <motion.div key="confirm" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <button onClick={() => setStep("details")} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors">
-                <ArrowLeft size={16} /> Back
+              <button
+                type="button"
+                onClick={() => setStep("details")}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 mb-4 transition-colors py-2 px-3.5 rounded-xl hover:bg-gray-100 min-h-[40px]"
+              >
+                <ArrowLeft size={15} /> Back to Details
               </button>
               <h2 className="text-xl font-black text-gray-900 mb-1">Confirm Booking</h2>
               <p className="text-sm text-gray-500 mb-5">Review your booking details before confirming</p>
@@ -715,7 +752,7 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
               <button
                 onClick={handleConfirmBooking}
                 disabled={isPending}
-                className="w-full py-4 rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
+                className="w-full py-4 min-h-[48px] rounded-xl text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 shadow-sm"
                 style={{ backgroundColor: primaryColor }}
               >
                 {isPending ? (
@@ -853,12 +890,20 @@ export default function BookingPageClient({ business, bookedSlots }: BookingPage
                             type="button"
                             onClick={() => {
                               navigator.clipboard.writeText(merchantVpa || `${business.phone}@upi`);
-                              alert("Merchant UPI ID copied!");
+                              setCopiedUpi(true);
+                              setTimeout(() => setCopiedUpi(false), 2500);
                             }}
-                            className="text-emerald-700 hover:text-emerald-900"
+                            className="text-emerald-700 hover:text-emerald-900 p-1 rounded-lg hover:bg-emerald-50 transition-colors inline-flex items-center gap-1 font-sans"
                             title="Copy UPI ID"
+                            aria-label="Copy UPI ID"
                           >
-                            <Copy size={13} />
+                            {copiedUpi ? (
+                              <span className="text-[11px] font-bold text-emerald-800 flex items-center gap-1">
+                                <CheckCircle2 size={13} className="text-emerald-600" /> Copied!
+                              </span>
+                            ) : (
+                              <Copy size={13} />
+                            )}
                           </button>
                         </div>
                         <a

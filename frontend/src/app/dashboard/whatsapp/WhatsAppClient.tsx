@@ -894,7 +894,7 @@ OPENROUTER_API_KEY="sk-or-v1-..."`}
             <div className="p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] space-y-2">
               <h3 className="font-bold text-sm text-[var(--text-primary)]">Option 2: Botpress / Direct Meta Webhook</h3>
               <p className="text-xs text-[var(--text-secondary)]">
-                Directly point Meta's webhook to <code className="text-[var(--lime)] font-mono">https://www.docodo.in/api/webhooks/whatsapp</code> with your configured server verification token (<code className="text-[var(--lime)] font-mono">WHATSAPP_VERIFY_TOKEN</code>).
+                Directly point Meta's webhook to <code className="text-[var(--lime)] font-mono">https://docodo.in/api/webhooks/whatsapp</code> with your configured server verification token (<code className="text-[var(--lime)] font-mono">WHATSAPP_VERIFY_TOKEN</code>).
               </p>
             </div>
           </div>
