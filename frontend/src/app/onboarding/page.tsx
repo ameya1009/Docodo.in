@@ -101,7 +101,12 @@ export default function OnboardingPage() {
   useEffect(() => {
     setStartedAt(new Date().toISOString());
     if (typeof window !== "undefined" && window.location.origin) {
-      setOrigin(window.location.origin);
+      const curOrigin = window.location.origin;
+      if (!curOrigin.includes("localhost") && !curOrigin.includes("127.0.0.1")) {
+        setOrigin(curOrigin);
+      } else {
+        setOrigin("https://docodo.in");
+      }
     }
 
     // Check if session is already active
@@ -935,7 +940,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = "/dashboard";
+                  window.location.href = "https://docodo.in/dashboard";
                 }}
                 className="w-full py-4 bg-lime text-black font-black text-sm rounded-2xl hover:bg-[#bbf04b] transition-colors shadow-xl flex items-center justify-center gap-2"
               >

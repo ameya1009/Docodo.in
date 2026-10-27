@@ -33,7 +33,15 @@ function SignupForm() {
         }
         if (result?.success) {
           const plan = searchParams?.get("plan");
-          const callbackUrl = searchParams?.get("callbackUrl");
+          let callbackUrl = searchParams?.get("callbackUrl");
+          if (callbackUrl && (callbackUrl.includes("localhost") || callbackUrl.includes("127.0.0.1"))) {
+            try {
+              const parsed = new URL(callbackUrl, "https://docodo.in");
+              callbackUrl = parsed.pathname + parsed.search;
+            } catch {
+              callbackUrl = "/dashboard";
+            }
+          }
           let destination = result.redirectTo || "/onboarding";
           if (result.redirectTo?.startsWith("/auth")) {
             const params = new URLSearchParams();
@@ -49,6 +57,14 @@ function SignupForm() {
             destination = `/checkout?plan=${encodeURIComponent(plan)}`;
           } else if (callbackUrl && !callbackUrl.startsWith("/auth")) {
             destination = callbackUrl;
+          }
+          if (destination.includes("localhost") || destination.includes("127.0.0.1")) {
+            try {
+              const parsed = new URL(destination, "https://docodo.in");
+              destination = parsed.pathname + parsed.search;
+            } catch {
+              destination = "/onboarding";
+            }
           }
           router.push(destination);
           router.refresh();

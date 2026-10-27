@@ -48,6 +48,14 @@ function LoginForm() {
           if (!callbackUrl && plan && plan !== "pilot") {
             destination = `/checkout?plan=${encodeURIComponent(plan)}`;
           }
+          if (destination.includes("localhost") || destination.includes("127.0.0.1")) {
+            try {
+              const parsed = new URL(destination, "https://docodo.in");
+              destination = parsed.pathname + parsed.search;
+            } catch {
+              destination = "/dashboard";
+            }
+          }
           router.push(destination);
           router.refresh();
         }

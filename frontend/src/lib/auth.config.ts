@@ -30,6 +30,10 @@ export const authConfig: NextAuthConfig = {
           redirectUrl.searchParams.set("callbackUrl", pathname);
           return NextResponse.redirect(redirectUrl);
         }
+        // Enforce canonical production domain when accessing dashboard from localhost
+        if (nextUrl.hostname === "localhost" || nextUrl.hostname === "127.0.0.1") {
+          return NextResponse.redirect(new URL(pathname + nextUrl.search, "https://docodo.in"));
+        }
         return true;
       }
 
@@ -39,6 +43,24 @@ export const authConfig: NextAuthConfig = {
       }
 
       return true;
+    },
+    async redirect({ url, baseUrl }) {
+      const canonicalBase = "https://docodo.in";
+      if (url.startsWith("/")) {
+        return `${canonicalBase}${url}`;
+      }
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
+          return `${canonicalBase}${parsed.pathname}${parsed.search}`;
+        }
+        if (parsed.hostname === "docodo.in" || parsed.hostname.endsWith(".docodo.in")) {
+          return url;
+        }
+      } catch {
+        // Fallback to canonical dashboard
+      }
+      return `${canonicalBase}/dashboard`;
     },
   },
 };
