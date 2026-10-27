@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { AlertCircle, Calendar, MessageSquare, CheckCircle2, Clock, ArrowRight, Phone, Check, RefreshCw } from "lucide-react";
 import { updateBookingStatus } from "@/lib/actions/dashboard";
+import { updateEnquiryStatus } from "@/lib/actions/enquiry";
 
 interface ActionCenterProps {
   business: {
@@ -34,13 +35,18 @@ interface ActionCenterProps {
 export function ActionCenter({ business, bookings, enquiries }: ActionCenterProps) {
   const [isPending, startTransition] = useTransition();
   const [localBookings, setLocalBookings] = useState(bookings);
+  const [localEnquiries, setLocalEnquiries] = useState(enquiries);
+
+  React.useEffect(() => {
+    setLocalEnquiries(enquiries);
+  }, [enquiries]);
 
   // Filter for items needing attention:
   // 1. Bookings in PENDING status
   const pendingBookings = localBookings.filter((b) => b.status === "PENDING");
 
   // 2. Enquiries in NEW status
-  const newEnquiries = enquiries.filter((e) => e.status === "NEW" || e.status === "UNREAD");
+  const newEnquiries = localEnquiries.filter((e) => e.status === "NEW" || e.status === "UNREAD");
 
   const totalActions = pendingBookings.length + newEnquiries.length;
 
@@ -53,6 +59,19 @@ export function ActionCenter({ business, bookings, enquiries }: ActionCenterProp
         await updateBookingStatus(bookingId, "CONFIRMED");
       } catch (err) {
         console.error("Failed to confirm booking:", err);
+      }
+    });
+  };
+
+  const handleEnquiryStatusChange = (enquiryId: string, newStatus: "NEW" | "CONTACTED" | "BOOKED" | "LOST") => {
+    setLocalEnquiries((prev) =>
+      prev.map((e) => (e.id === enquiryId ? { ...e, status: newStatus } : e))
+    );
+    startTransition(async () => {
+      try {
+        await updateEnquiryStatus(enquiryId, newStatus);
+      } catch (err) {
+        console.error("Failed to update enquiry status:", err);
       }
     });
   };
@@ -157,16 +176,30 @@ export function ActionCenter({ business, bookings, enquiries }: ActionCenterProp
                         <p className="text-[11px] text-[var(--text-muted)] mt-0.5">Interested in {e.serviceName || "services"}</p>
                       )}
                     </div>
-                    <a
-                      href={`https://wa.me/${e.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                        `Hi ${e.name}, this is ${business.name}. How can we assist you today?`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center gap-1 shrink-0 transition-colors"
-                    >
-                      <MessageSquare size={13} /> Reply
-                    </a>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <select
+                        value={e.status}
+                        onChange={(ev) => handleEnquiryStatusChange(e.id, ev.target.value as any)}
+                        disabled={isPending}
+                        className="text-[10px] font-bold uppercase rounded-lg px-2 py-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--lime)] cursor-pointer"
+                        title="Advance enquiry status"
+                      >
+                        <option value="NEW">NEW</option>
+                        <option value="CONTACTED">CONTACTED</option>
+                        <option value="BOOKED">BOOKED</option>
+                        <option value="LOST">LOST</option>
+                      </select>
+                      <a
+                        href={`https://wa.me/${e.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                          `Hi ${e.name}, this is ${business.name}. How can we assist you today?`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center gap-1 shrink-0 transition-colors"
+                      >
+                        <MessageSquare size={13} /> Reply
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>

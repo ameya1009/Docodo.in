@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Plus, Trash2, Loader2, Check, Clock, DollarSign, Power, AlertCircle, Bell, MessageSquare, Star, CreditCard, QrCode } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import { createServiceAction, updateServiceAction, deleteServiceAction } from "@/lib/actions/website";
+import { createStaffAction, deleteStaffAction, updateWorkingHoursAction } from "@/lib/actions/dashboard";
 
 interface SettingsClientProps {
   business: any;
@@ -19,8 +20,10 @@ const DAY_LABELS: Record<string, string> = {
 export default function SettingsClient({ business }: SettingsClientProps) {
   const [activeTab, setActiveTab] = useState<"services" | "hours" | "staff" | "automations" | "payments">("services");
   const [services, setServices] = useState(business.services ?? []);
-  const [workingHours, _setWorkingHours] = useState(business.workingHours ?? []);
-  const [staff, _setStaff] = useState(business.staff ?? []);
+  const [workingHours, setWorkingHours] = useState<any[]>(business.workingHours ?? []);
+  const [staff, setStaff] = useState<any[]>(business.staff ?? []);
+  const [showAddStaff, setShowAddStaff] = useState(false);
+  const [newStaff, setNewStaff] = useState({ name: "", role: "", phone: "", email: "" });
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -96,7 +99,7 @@ export default function SettingsClient({ business }: SettingsClientProps) {
   };
 
   const handleDeleteService = (serviceId: string, serviceName: string) => {
-    if (!confirm(`Are you sure you want to delete "${serviceName}"?`)) return;
+    if (typeof window !== "undefined" && !window.confirm(`Are you sure you want to delete "${serviceName}"?`)) return;
     setErrorMessage("");
     setSuccessMessage("");
 
@@ -107,6 +110,94 @@ export default function SettingsClient({ business }: SettingsClientProps) {
         setSuccessMessage("Service removed");
       } catch (err: any) {
         setErrorMessage(err.message || "Failed to delete service");
+      }
+    });
+  };
+
+  const handleAddStaff = () => {
+    if (!newStaff.name.trim()) return;
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    startTransition(async () => {
+      try {
+        const created = await createStaffAction({
+          businessId: business.id,
+          name: newStaff.name,
+          role: newStaff.role,
+          phone: newStaff.phone,
+          email: newStaff.email,
+        });
+        setStaff([...staff, created]);
+        setNewStaff({ name: "", role: "", phone: "", email: "" });
+        setShowAddStaff(false);
+        setSuccessMessage("Staff member added successfully!");
+      } catch (err: any) {
+        setErrorMessage(err.message || "Failed to add staff member");
+      }
+    });
+  };
+
+  const handleDeleteStaff = (staffId: string, staffName: string) => {
+    if (typeof window !== "undefined" && !window.confirm(`Are you sure you want to remove "${staffName}"?`)) return;
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    startTransition(async () => {
+      try {
+        await deleteStaffAction(staffId, business.id);
+        setStaff(staff.filter((s: any) => s.id !== staffId));
+        setSuccessMessage("Staff member removed successfully");
+      } catch (err: any) {
+        setErrorMessage(err.message || "Failed to delete staff member");
+      }
+    });
+  };
+
+  const DAY_INDEX_MAP: Record<string, number> = {
+    SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6
+  };
+
+  const handleToggleDayOpen = (day: string) => {
+    setWorkingHours((prev: any[]) => {
+      const existing = prev.find((h: any) => h.day === day);
+      if (existing) {
+        return prev.map((h: any) => h.day === day ? { ...h, isOpen: !h.isOpen } : h);
+      }
+      return [...prev, { day, isOpen: false, openTime: "10:00", closeTime: "20:00" }];
+    });
+  };
+
+  const handleTimeChange = (day: string, field: "openTime" | "closeTime", value: string) => {
+    setWorkingHours((prev: any[]) => {
+      const existing = prev.find((h: any) => h.day === day);
+      if (existing) {
+        return prev.map((h: any) => h.day === day ? { ...h, [field]: value } : h);
+      }
+      return [...prev, { day, isOpen: true, openTime: field === "openTime" ? value : "10:00", closeTime: field === "closeTime" ? value : "20:00" }];
+    });
+  };
+
+  const handleSaveWorkingHours = () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+    startTransition(async () => {
+      try {
+        const payload = DAYS.map((day) => {
+          const wh = workingHours.find((h: any) => h.day === day) ?? { day, isOpen: day !== "SUN", openTime: "10:00", closeTime: "20:00" };
+          return {
+            dayOfWeek: DAY_INDEX_MAP[day] ?? 1,
+            day,
+            openTime: wh.openTime,
+            closeTime: wh.closeTime,
+            isOpen: wh.isOpen,
+          };
+        });
+
+        await updateWorkingHoursAction(payload, business.id);
+        setSuccessMessage("Working hours saved successfully!");
+      } catch (err: any) {
+        setErrorMessage(err.message || "Failed to update working hours");
       }
     });
   };
@@ -254,26 +345,88 @@ export default function SettingsClient({ business }: SettingsClientProps) {
 
       {/* Working Hours Tab */}
       {activeTab === "hours" && (
-        <div className="space-y-3">
-          <h2 className="font-bold text-[var(--text-primary)]">Working Hours</h2>
-          {DAYS.map((day) => {
-            const wh = workingHours.find((h: any) => h.day === day) ?? { day, isOpen: day !== "SUN", openTime: "10:00", closeTime: "20:00" };
-            return (
-              <div key={day} className="flex items-center gap-4 p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl">
-                <span className="text-sm font-bold text-[var(--text-primary)] w-24">{DAY_LABELS[day]}</span>
-                <div className="flex items-center gap-2 ml-auto flex-wrap">
-                  {wh.isOpen ? (
-                    <>
-                      <span className="text-xs text-[var(--text-muted)] font-mono">{wh.openTime} – {wh.closeTime}</span>
-                      <span className="text-xs px-2.5 py-1 bg-[var(--success)]/15 text-[var(--success)] rounded-full font-bold">Open</span>
-                    </>
-                  ) : (
-                    <span className="text-xs px-2.5 py-1 bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-full font-bold">Closed</span>
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="font-bold text-[var(--text-primary)]">Working Hours</h2>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Set daily opening and closing hours for appointment bookings.</p>
+            </div>
+            <button
+              onClick={handleSaveWorkingHours}
+              disabled={isPending}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--lime)] text-[var(--bg-void)] font-bold text-sm rounded-xl hover:bg-[var(--lime-hover)] transition-colors disabled:opacity-60 shadow-sm shrink-0"
+            >
+              {isPending ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />} Save Working Hours
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {DAYS.map((day) => {
+              const wh = workingHours.find((h: any) => h.day === day) ?? { day, isOpen: day !== "SUN", openTime: "10:00", closeTime: "20:00" };
+              return (
+                <div key={day} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleDayOpen(day)}
+                      disabled={isPending}
+                      className={cn(
+                        "w-11 h-6 rounded-full transition-colors relative shrink-0",
+                        wh.isOpen ? "bg-[var(--lime)]" : "bg-gray-800 border border-gray-700"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-4 h-4 rounded-full transition-transform absolute top-1",
+                          wh.isOpen ? "left-6 bg-black" : "left-1 bg-gray-400"
+                        )}
+                      />
+                    </button>
+                    <span className="text-sm font-bold text-[var(--text-primary)] w-28">{DAY_LABELS[day]}</span>
+                    <span className={cn("text-xs px-2.5 py-0.5 rounded-full font-bold", wh.isOpen ? "bg-[var(--success)]/15 text-[var(--success)]" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]")}>
+                      {wh.isOpen ? "Open" : "Closed"}
+                    </span>
+                  </div>
+
+                  {wh.isOpen && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-[var(--text-muted)]">From:</span>
+                        <input
+                          type="time"
+                          value={wh.openTime}
+                          onChange={(e) => handleTimeChange(day, "openTime", e.target.value)}
+                          disabled={isPending}
+                          className="px-2.5 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-lg text-xs text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--lime)]/50"
+                        />
+                      </div>
+                      <span className="text-xs text-[var(--text-muted)]">–</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-[var(--text-muted)]">To:</span>
+                        <input
+                          type="time"
+                          value={wh.closeTime}
+                          onChange={(e) => handleTimeChange(day, "closeTime", e.target.value)}
+                          disabled={isPending}
+                          className="px-2.5 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-lg text-xs text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--lime)]/50"
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              onClick={handleSaveWorkingHours}
+              disabled={isPending}
+              className="flex items-center gap-1.5 px-5 py-2.5 bg-[var(--lime)] text-[var(--bg-void)] font-bold text-sm rounded-xl hover:bg-[var(--lime-hover)] transition-colors disabled:opacity-60 shadow-[var(--lime-glow-sm)]"
+            >
+              {isPending ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />} Save Working Hours
+            </button>
+          </div>
         </div>
       )}
 
@@ -281,23 +434,114 @@ export default function SettingsClient({ business }: SettingsClientProps) {
       {activeTab === "staff" && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="font-bold text-[var(--text-primary)]">Team Members ({staff.length})</h2>
+            <div>
+              <h2 className="font-bold text-[var(--text-primary)]">Team Members ({staff.length})</h2>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Manage practitioners, consultants, and service specialists.</p>
+            </div>
+            <button
+              onClick={() => setShowAddStaff(!showAddStaff)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[var(--lime)] text-[var(--bg-void)] font-bold text-sm rounded-xl hover:bg-[var(--lime-hover)] transition-colors active:scale-95 shadow-sm"
+            >
+              <Plus size={15} /> Add Staff Member
+            </button>
           </div>
+
+          {/* Add Staff Member Modal / Dialog */}
+          <AnimatePresence>
+            {showAddStaff && (
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="bg-[var(--bg-surface)] border border-[var(--lime)]/30 rounded-2xl p-5 space-y-4 shadow-xl">
+                <h3 className="font-bold text-sm text-[var(--lime)]">New Staff Member</h3>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Full Name *</label>
+                    <input
+                      value={newStaff.name}
+                      onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
+                      placeholder="e.g. Dr. Rajesh Sharma"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Role / Title</label>
+                    <input
+                      value={newStaff.role}
+                      onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
+                      placeholder="e.g. Senior Specialist / Consultant"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Phone Number (optional)</label>
+                    <input
+                      value={newStaff.phone}
+                      onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
+                      placeholder="e.g. 9876543210"
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Email Address (optional)</label>
+                    <input
+                      type="email"
+                      value={newStaff.email}
+                      onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                      placeholder="e.g. doctor@clinic.com"
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleAddStaff}
+                    disabled={isPending || !newStaff.name.trim()}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[var(--lime)] text-[var(--bg-void)] font-bold text-sm rounded-xl disabled:opacity-60 shadow-[var(--lime-glow-sm)]"
+                  >
+                    {isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Save Staff Member
+                  </button>
+                  <button
+                    onClick={() => setShowAddStaff(false)}
+                    className="px-4 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {staff.length === 0 ? (
             <div className="text-center py-12 text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl">
-              <p className="text-sm">Default booking assignment is configured to the business owner.</p>
+              <p className="text-sm font-medium">No team members added yet.</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Default booking assignment is configured to the business owner.</p>
             </div>
-          ) : staff.map((s: any) => (
-            <div key={s.id} className="flex items-center gap-4 p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl">
-              <div className="w-9 h-9 rounded-full bg-[var(--lime-ghost)] text-[var(--lime)] flex items-center justify-center text-sm font-bold">
-                {s.name?.[0]}
-              </div>
-              <div>
-                <p className="font-bold text-sm text-[var(--text-primary)]">{s.name}</p>
-                {s.role && <p className="text-xs text-[var(--text-muted)]">{s.role}</p>}
-              </div>
+          ) : (
+            <div className="space-y-3">
+              {staff.map((s: any) => (
+                <div key={s.id} className="flex items-center justify-between gap-4 p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[var(--lime-ghost)] text-[var(--lime)] flex items-center justify-center text-sm font-bold">
+                      {s.name?.[0]}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-[var(--text-primary)]">{s.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {s.role && <p className="text-xs text-[var(--text-muted)]">{s.role}</p>}
+                        {s.phone && <span className="text-[11px] text-[var(--text-secondary)] font-mono">· {s.phone}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteStaff(s.id, s.name)}
+                    disabled={isPending}
+                    title="Delete Staff Member"
+                    className="p-2 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
 

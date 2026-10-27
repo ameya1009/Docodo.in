@@ -11,6 +11,7 @@ import {
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ActionCenter } from "./ActionCenter";
 import { getHinduCalendarStatus } from "@/lib/engines/hindu-calendar-greetings";
+import { updateEnquiryStatus } from "@/lib/actions/enquiry";
 
 interface DashboardHomeProps {
   data: any;
@@ -26,10 +27,25 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function DashboardHome({ data }: DashboardHomeProps) {
   const { business = {}, stats = {}, upcomingBookings = [], recentEnquiries = [] } = data || {};
+  const [enquiries, setEnquiries] = React.useState<any[]>(recentEnquiries);
+
+  React.useEffect(() => {
+    setEnquiries(recentEnquiries);
+  }, [recentEnquiries]);
+
   const [copied, setCopied] = React.useState(false);
   const businessSlug = business?.slug || "my-business";
   const businessName = business?.name || "My Business";
   const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in"}/book/${businessSlug}`;
+
+  const handleEnquiryStatusChange = (enquiryId: string, newStatus: "NEW" | "CONTACTED" | "BOOKED" | "LOST") => {
+    setEnquiries((prev) =>
+      prev.map((e) => (e.id === enquiryId ? { ...e, status: newStatus } : e))
+    );
+    updateEnquiryStatus(enquiryId, newStatus).catch((err) => {
+      console.error("Failed to update enquiry status:", err);
+    });
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(bookingUrl);
@@ -380,7 +396,7 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
       <ActionCenter
         business={business}
         bookings={data.upcomingBookings || []}
-        enquiries={recentEnquiries}
+        enquiries={enquiries}
       />
 
       {/* Autonomous Growth & Revenue Progress Engine */}
@@ -546,29 +562,37 @@ export default function DashboardHome({ data }: DashboardHomeProps) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-elevated)]/30">
               <h2 className="font-bold text-[var(--text-primary)] flex items-center gap-2 text-sm">
                 <MessageSquare size={15} className="text-[var(--lime)]" />
-                Recent Customer Enquiries ({recentEnquiries.length})
+                Recent Customer Enquiries ({enquiries.length})
               </h2>
             </div>
 
             <div className="divide-y divide-[var(--border-subtle)]">
-              {recentEnquiries.length === 0 ? (
+              {enquiries.length === 0 ? (
                 <div className="px-6 py-6 text-center text-xs text-[var(--text-muted)]">
                   No direct customer enquiries received yet.
                 </div>
               ) : (
-                recentEnquiries.map((enq: any) => (
+                enquiries.map((enq: any) => (
                   <div key={enq.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 px-6 hover:bg-[var(--bg-elevated)] transition-colors gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-sm text-[var(--text-primary)]">{enq.name}</span>
                         {enq.serviceName && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--lime)]/10 text-[var(--lime)] font-bold">
                             {enq.serviceName}
                           </span>
                         )}
-                        <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">
-                          {enq.status}
-                        </span>
+                        <select
+                          value={enq.status}
+                          onChange={(e) => handleEnquiryStatusChange(enq.id, e.target.value as any)}
+                          className="text-[10px] font-bold uppercase rounded-lg px-2 py-0.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] cursor-pointer focus:outline-none focus:border-[var(--lime)] hover:border-[var(--lime)]/50 transition-colors"
+                          title="Click to advance enquiry status"
+                        >
+                          <option value="NEW">NEW</option>
+                          <option value="CONTACTED">CONTACTED</option>
+                          <option value="BOOKED">BOOKED</option>
+                          <option value="LOST">LOST</option>
+                        </select>
                       </div>
                       {enq.message && (
                         <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-1 italic">

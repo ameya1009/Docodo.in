@@ -59,6 +59,19 @@ async function requireBookingOwnership(bookingId: string): Promise<string> {
   return booking.id;
 }
 
+/**
+ * Verifies tenant ownership for business-level settings actions.
+ * If businessId is provided, verifies it matches the authenticated session's business.
+ * If not provided, resolves the business from the authenticated session.
+ */
+export async function requireBusinessOwnership(businessId?: string) {
+  const { business } = await requireAuthBusiness();
+  if (businessId && business.id !== businessId) {
+    throw new Error("Forbidden: you do not have permission to manage this business.");
+  }
+  return business;
+}
+
 export async function getDashboardData() {
   try {
     const session = await auth();
@@ -440,9 +453,55 @@ export async function updateBookingStatus(
 
   const updated = await prisma.booking.update({
     where: { id: bookingId },
-    data: { status },
-    include: { service: true, customer: true },
+    data: { 
+      status,
+      ...(status === "COMPLETED" ? { reviewSent: true } : {}),
+    },
+    include: { service: true, customer: true, business: true },
   });
+
+  // Automated Google Review Collection Sequence
+  if (status === "COMPLETED") {
+    try {
+      const customerPhone = updated.customerPhone || updated.customer?.phone;
+      const business = updated.business;
+
+      if (customerPhone && business) {
+        let reviewUrl = (business as any).googleReviewUrl || null;
+        if (!reviewUrl && (business as any).googlePlaceId) {
+          reviewUrl = `https://search.google.com/local/writereview?placeid=${(business as any).googlePlaceId}`;
+        }
+        if (!reviewUrl && business.websiteConfig) {
+          try {
+            const config = typeof business.websiteConfig === "string" ? JSON.parse(business.websiteConfig) : business.websiteConfig;
+            if (config.googleReviewUrl) reviewUrl = config.googleReviewUrl;
+            else if (config.googlePlaceId) reviewUrl = `https://search.google.com/local/writereview?placeid=${config.googlePlaceId}`;
+          } catch {}
+        }
+        if (!reviewUrl && business.slug) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://docodo.in";
+          reviewUrl = `${baseUrl}/book/${business.slug}#reviews`;
+        }
+
+        if (reviewUrl) {
+          const customerName = updated.customerName || updated.customer?.name || "Valued Client";
+          const businessName = business.name || "our team";
+          const thankYouMessage = `Hi ${customerName}, thank you for choosing ${businessName}! We hope you had a great experience with our team. Could you please take 30 seconds to share your feedback and leave us a review? It helps us immensely:\n${reviewUrl}`;
+
+          await DocodoBackendAPI.dispatchWhatsAppMessage({
+            businessId: updated.businessId,
+            recipientPhone: customerPhone,
+            messageType: "REVIEW_REQUEST",
+            customMessage: thankYouMessage,
+          }).catch((err) => {
+            console.warn("[Review Automation] WhatsApp review dispatch error:", err);
+          });
+        }
+      }
+    } catch (reviewErr) {
+      console.warn("[Review Automation] Review trigger handled:", reviewErr);
+    }
+  }
 
   // When a slot is cancelled, trigger waitlist refill notification to eliminate empty chairs
   if (status === "CANCELLED") {
@@ -586,3 +645,119 @@ export async function generateAIPost(type: string) {
 
   return finalContent;
 }
+
+export async function createStaffAction(data: {
+  businessId?: string;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+}) {
+  const business = await requireBusinessOwnership(data?.businessId);
+
+  if (!data?.name || !data.name.trim()) {
+    throw new Error("Staff name is required.");
+  }
+
+  const staff = await prisma.staff.create({
+    data: {
+      businessId: business.id,
+      name: data.name.trim(),
+      role: data.role?.trim() || "Specialist",
+      phone: data.phone?.trim() || null,
+      email: data.email?.trim() || null,
+      isActive: true,
+    },
+  });
+
+  revalidatePath("/dashboard/settings");
+  return staff;
+}
+
+export async function deleteStaffAction(staffId: string, businessId?: string) {
+  const business = await requireBusinessOwnership(businessId);
+
+  const staff = await prisma.staff.findUnique({
+    where: { id: staffId },
+    select: { id: true, businessId: true },
+  });
+
+  if (!staff) {
+    throw new Error("Staff member not found.");
+  }
+
+  if (staff.businessId !== business.id) {
+    throw new Error("Forbidden: you do not have permission to delete this staff member.");
+  }
+
+  await prisma.staff.delete({
+    where: { id: staffId },
+  });
+
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+}
+
+const INDEX_TO_DAY_MAP: Record<number, string> = {
+  0: "SUN", 1: "MON", 2: "TUE", 3: "WED", 4: "THU", 5: "FRI", 6: "SAT", 7: "SUN"
+};
+
+export async function updateWorkingHoursAction(
+  workingHours: Array<{
+    dayOfWeek?: number;
+    day?: string;
+    openTime: string;
+    closeTime: string;
+    isOpen: boolean;
+    breakStart?: string | null;
+    breakEnd?: string | null;
+  }>,
+  businessId?: string
+) {
+  const business = await requireBusinessOwnership(businessId);
+
+  if (!Array.isArray(workingHours) || workingHours.length === 0) {
+    throw new Error("Invalid working hours data: expected an array.");
+  }
+
+  const results = [];
+  for (const item of workingHours) {
+    let day = item.day ? item.day.toUpperCase() : undefined;
+    if (!day && typeof item.dayOfWeek === "number") {
+      day = INDEX_TO_DAY_MAP[item.dayOfWeek] || "MON";
+    }
+
+    if (!day) continue;
+
+    const record = await prisma.workingHours.upsert({
+      where: {
+        businessId_day: {
+          businessId: business.id,
+          day,
+        },
+      },
+      create: {
+        businessId: business.id,
+        day,
+        openTime: item.openTime || "09:00",
+        closeTime: item.closeTime || "19:00",
+        isOpen: item.isOpen ?? true,
+        ...(item.breakStart !== undefined ? { breakStart: item.breakStart } : {}),
+        ...(item.breakEnd !== undefined ? { breakEnd: item.breakEnd } : {}),
+      },
+      update: {
+        openTime: item.openTime || "09:00",
+        closeTime: item.closeTime || "19:00",
+        isOpen: item.isOpen ?? true,
+        ...(item.breakStart !== undefined ? { breakStart: item.breakStart } : {}),
+        ...(item.breakEnd !== undefined ? { breakEnd: item.breakEnd } : {}),
+      },
+    });
+    results.push(record);
+  }
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath(`/book/${business.slug}`);
+  return results;
+}
+

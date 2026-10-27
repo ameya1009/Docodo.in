@@ -113,6 +113,83 @@ export async function createPublicBooking(rawInput: {
         // 4. Calculate end time from service duration.
         const endTime = calculateEndTime(data.startTime, service.duration);
 
+        // Multi-Provider Round-Robin Allocation:
+        // If data.staffId is not explicitly provided, query active staff members for that business.
+        // If staff members exist, allocate the booking to the staff member with the fewest bookings on that date.
+        let assignedStaffId = data.staffId || null;
+        if (!assignedStaffId) {
+          const activeStaff = await tx.staff.findMany({
+            where: {
+              businessId: data.businessId,
+              isActive: true,
+            },
+            select: { id: true },
+          });
+
+          if (activeStaff.length > 0) {
+            const staffIds = activeStaff.map((s) => s.id);
+            const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+
+            // Query existing slot bookings for active staff on this date to prioritize unconflicted providers
+            const slotBookings = await tx.booking.findMany({
+              where: {
+                businessId: data.businessId,
+                date: data.date,
+                staffId: { in: staffIds },
+                OR: [
+                  { status: { in: ["CONFIRMED", "NDR_HOLD"] } },
+                  { status: "PENDING", createdAt: { gte: fifteenMinutesAgo } },
+                ],
+              },
+              select: { staffId: true, startTime: true, endTime: true, status: true },
+            });
+
+            // Find providers who do NOT have a time conflict for this appointment slot
+            const unconflictedStaff = activeStaff.filter((s) => {
+              const providerBookings = slotBookings.filter((b) => b.staffId === s.id);
+              return !hasTimeSlotConflict(data.startTime, endTime, providerBookings);
+            });
+
+            // Candidate pool: prefer unconflicted staff; if all conflicted, fall back to all active staff
+            const candidates = unconflictedStaff.length > 0 ? unconflictedStaff : activeStaff;
+            const candidateIds = candidates.map((s) => s.id);
+
+            const staffBookings = await tx.booking.groupBy({
+              by: ["staffId"],
+              where: {
+                businessId: data.businessId,
+                date: data.date,
+                staffId: { in: candidateIds },
+                status: { in: ["CONFIRMED", "PENDING", "COMPLETED", "NDR_HOLD"] },
+              },
+              _count: { id: true },
+            });
+
+            const countMap = new Map<string, number>();
+            for (const s of candidates) {
+              countMap.set(s.id, 0);
+            }
+            for (const b of staffBookings) {
+              if (b.staffId) {
+                countMap.set(b.staffId, b._count.id);
+              }
+            }
+
+            let selectedStaffId = candidates[0].id;
+            let minCount = countMap.get(selectedStaffId) ?? 0;
+
+            for (const s of candidates) {
+              const count = countMap.get(s.id) ?? 0;
+              if (count < minCount) {
+                minCount = count;
+                selectedStaffId = s.id;
+              }
+            }
+
+            assignedStaffId = selectedStaffId;
+          }
+        }
+
         // 5. Check for conflicts inside the transaction (atomic read-check-write).
         const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
         const existingBookings = await tx.booking.findMany({
@@ -123,7 +200,7 @@ export async function createPublicBooking(rawInput: {
               { status: { in: ["CONFIRMED", "NDR_HOLD"] } },
               { status: "PENDING", createdAt: { gte: fifteenMinutesAgo } },
             ],
-            ...(data.staffId ? { staffId: data.staffId } : {}),
+            ...(assignedStaffId ? { staffId: assignedStaffId } : {}),
           },
           select: { startTime: true, endTime: true, status: true },
         });
@@ -178,7 +255,7 @@ export async function createPublicBooking(rawInput: {
           data: {
             businessId: data.businessId,
             serviceId: data.serviceId,
-            staffId: data.staffId || null,
+            staffId: assignedStaffId,
             customerId: customer?.id || null,
             customerName: data.customerName,
             customerPhone: data.customerPhone,
@@ -222,7 +299,7 @@ export async function createPublicBooking(rawInput: {
         id: booking.booking.id,
         businessId: data.businessId,
         serviceId: data.serviceId,
-        staffId: data.staffId || null,
+        staffId: booking.booking.staffId || null,
         customerId: booking.booking.customerId || null,
         customerName: data.customerName,
         customerPhone: data.customerPhone,
